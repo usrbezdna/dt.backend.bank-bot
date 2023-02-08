@@ -12,8 +12,27 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+import os
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Secrects from .env file. 
+# If you want to see examples - go and check .env.example
+env = environ.Env(
+    TLG_TOKEN=(str, ''),
+    DEBUG = (bool, True)
+)
+
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Telegram Bot API token
+TLG_TOKEN = env('TLG_TOKEN')
+
+# Setting up debug mode 
+DEBUG = env('DEBUG')
 
 
 # Quick-start development settings - unsuitable for production
@@ -22,11 +41,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-06&&*q-i#ym#au_ie$lqxwj^g)l7xy9mj=##5lbp5$+4g632gp"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
 
 # Application definition
 
@@ -37,6 +53,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "phonenumber_field",
+
     "app",
 ]
 
@@ -106,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Yekaterinburg"
 
 USE_I18N = True
 
