@@ -1,3 +1,6 @@
+# Specifies default port for django
+PORT=8000
+
 migrate:
 	python src/manage.py migrate $(if $m, api $m,)
 
@@ -12,7 +15,7 @@ collectstatic:
 	python src/manage.py collectstatic --no-input
 
 dev:
-	python src/manage.py runserver localhost:8000
+	python src/manage.py runserver localhost:$(PORT)
 
 command:
 	python src/manage.py ${c}
@@ -36,3 +39,7 @@ check_lint:
 	isort --check --diff .
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
+
+admin: 
+	python -m webbrowser -t "http://localhost:$(PORT)/admin" 
+	make dev
