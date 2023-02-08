@@ -7,7 +7,6 @@ class User(models.Model):
     ----------
     Based on original Telegram representation:
     https://core.telegram.org/bots/api#user    
-
     """
 
     tlg_id = models.IntegerField(primary_key=True)
