@@ -2,7 +2,6 @@ import logging
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.conf import settings
 from django.db import transaction
 
 from telegram import Update
@@ -14,7 +13,7 @@ from app.internal.models.user import User
 import json
 
 
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger('django.server') 
 
 class TelegramAPIView(APIView):
     """
