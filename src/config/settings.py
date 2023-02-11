@@ -10,22 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
-import os
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Secrects from .env file. 
-# If you want to see examples - go and check .env.example
+# Secrects and env. variables from .env file. 
+# If you want to see examples - consider checking .env.example
 env = environ.Env(
     TLG_TOKEN=(str, ''),
     DEBUG = (bool, True)
 )
-
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Telegram Bot API token
@@ -33,6 +32,15 @@ TLG_TOKEN = env('TLG_TOKEN')
 
 # Setting up debug mode 
 DEBUG = env('DEBUG')
+
+#                       NOTE:
+# I don't know whether or not it's a good practice 
+# to initialize webhook right here. But I consider 
+# it's better to have global variables just in one place
+from app.internal.bot import start_webhook_bot
+
+# Setting up Webhook Telegram Bot and Dispatcher
+TLG_BOT, TLG_DISPATCHER = start_webhook_bot()
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,7 +50,7 @@ DEBUG = env('DEBUG')
 SECRET_KEY = "django-insecure-06&&*q-i#ym#au_ie$lqxwj^g)l7xy9mj=##5lbp5$+4g632gp"
 
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", '.ngrok.io']
 
 # Application definition
 
@@ -54,6 +62,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "phonenumber_field",
+    "rest_framework",
 
     "app",
 ]
