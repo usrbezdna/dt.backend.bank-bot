@@ -33,15 +33,6 @@ TLG_TOKEN = env('TLG_TOKEN')
 # Setting up debug mode 
 DEBUG = env('DEBUG')
 
-#                       NOTE:
-# I don't know whether or not it's a good practice 
-# to initialize webhook right here. But I consider 
-# it's better to have global variables just in one place
-from app.internal.bot import start_webhook_bot
-
-# Setting up Webhook Telegram Bot and Dispatcher
-TLG_BOT, TLG_DISPATCHER = start_webhook_bot()
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
