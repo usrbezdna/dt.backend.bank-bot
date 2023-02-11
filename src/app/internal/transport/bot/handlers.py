@@ -33,11 +33,13 @@ def process_request(request) -> None:
     ----------
     :param request: request from Telegram user
     """
-    from app.apps import TLG_BOT, TLG_DISPATCHER
+    from django.apps import apps
     
+    config_ = apps.get_app_config('app')
+
     data = json.loads(request.body.decode())
-    update = Update.de_json(data, TLG_BOT)
-    TLG_DISPATCHER.process_update(update)
+    update = Update.de_json(data, config_.TLG_BOT)
+    config_.TLG_DISPATCHER.process_update(update)
 
 @transaction.atomic
 def start(update: Update, context: CallbackContext) -> None:
