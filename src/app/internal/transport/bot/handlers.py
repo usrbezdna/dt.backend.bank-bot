@@ -7,7 +7,6 @@ from django.db import transaction
 from phonenumbers.phonenumberutil import NumberParseException
 from phonenumber_field.phonenumber import PhoneNumber
 
-
 from telegram import Update
 from telegram.ext import  CallbackContext
 
@@ -17,6 +16,13 @@ from app.internal.services.user_service import (
     verified_phone_required
 )
 
+from .telegram_messages import (
+    get_unique_start_msg, 
+    get_success_phone_msg,
+    INVALID_PN_MSG,
+    ABSENT_PN_MSG,
+    NOT_INT_FORMAT_MSG
+)
 import json
 
 
@@ -40,7 +46,6 @@ def process_request(request) -> None:
     :param request: request from Telegram user
     """
     from django.apps import apps
-    
     config_ = apps.get_app_config('app')
 
     data = json.loads(request.body.decode())
@@ -69,11 +74,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
     tlg_user.save()
     logger.info(f'User {user_data.username} was successfully saved to DB')
-
-    update.message.reply_text(f'Hi {user_data.username}!\n'
-    'Thanks for choosing this Banking Bot. He doesn\'t have '
-    'much functions just yet, but this will be changed in '
-    'future updates')
+    update.message.reply_text(get_unique_start_msg(user_data.username))
 
 @transaction.atomic
 def set_phone(update: Update, context: CallbackContext) -> None:
@@ -98,23 +99,18 @@ def set_phone(update: Update, context: CallbackContext) -> None:
 
                 user_from_db.save()
                 logger.info(f'Updated phone number for user {user_data.id}')
-                update.message.reply_text(f'Successfully updated your phone number: {parsed_number}')
+                update.message.reply_text(get_success_phone_msg(parsed_number))
 
             except NumberParseException as e:
                 logger.info('User did not provide a valid phone number')
+                update.message.reply_text(INVALID_PN_MSG)
 
-                update.message.reply_text('It doesn\'t look like ' 
-                'a valid phone number. Try again, please!')
             finally:
                 return
 
-        update.message.reply_text('Don\'t forget to specify '
-        'phone number with an international country code. Such as: '
-        '+432111123456 or +7911123456')
+        update.message.reply_text(NOT_INT_FORMAT_MSG)
         return
-
-    update.message.reply_text('It seems like you forgot to '
-    'specify the phone number :(')
+    update.message.reply_text(ABSENT_PN_MSG)
 
 
 @transaction.atomic
