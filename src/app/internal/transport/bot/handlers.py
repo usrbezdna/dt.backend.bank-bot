@@ -4,11 +4,18 @@ from rest_framework.views import APIView
 
 from django.db import transaction
 
+from phonenumbers.phonenumberutil import NumberParseException
+from phonenumber_field.phonenumber import PhoneNumber
+
+
 from telegram import Update
-from telegram.ext import (
-    CallbackContext
-)
+from telegram.ext import  CallbackContext
+
 from app.internal.models.user import User
+from app.internal.services.user_service import (
+    get_user_from_db,
+    verified_phone_required
+)
 
 import json
 
@@ -67,3 +74,61 @@ def start(update: Update, context: CallbackContext) -> None:
     'Thanks for choosing this Banking Bot. He doesn\'t have '
     'much functions just yet, but this will be changed in '
     'future updates')
+
+@transaction.atomic
+def set_phone(update: Update, context: CallbackContext) -> None:
+    """
+    Handler for /set_phone command.
+    Supports phone validation and user existence checking.
+    ----------
+    :param update: recieved Update object 
+    :param context: context object passed to the callback
+    """
+    user_data = update.effective_user
+    command_data = update.message.text.split(' ')
+
+    if len(command_data) == 2:
+        user_from_db = get_user_from_db(user_data.id)
+        phone_number = command_data[1]
+    
+        if phone_number.startswith("+"):
+            try:
+                parsed_number = PhoneNumber.from_string(phone_number)
+                user_from_db.phone_number = parsed_number
+
+                user_from_db.save()
+                logger.info(f'Updated phone number for user {user_data.id}')
+                update.message.reply_text(f'Successfully updated your phone number: {parsed_number}')
+
+            except NumberParseException as e:
+                logger.info('User did not provide a valid phone number')
+
+                update.message.reply_text('It doesn\'t look like ' 
+                'a valid phone number. Try again, please!')
+            finally:
+                return
+
+        update.message.reply_text('Don\'t forget to specify '
+        'phone number with an international country code. Such as: '
+        '+432111123456 or +7911123456')
+        return
+
+    update.message.reply_text('It seems like you forgot to '
+    'specify the phone number :(')
+
+
+@transaction.atomic
+@verified_phone_required
+def me(update: Update, context: CallbackContext) -> None:
+    """
+    Hander for /me command.
+    Returns full information about Telegram user.
+    ----------
+    :param update: recieved Update object 
+    :param context: context object passed to the callback
+    """
+    user_id = update.effective_user.id
+    user_from_db = get_user_from_db(user_id)
+
+    update.message.reply_text('Here is some info about you:\n\n'
+    f'{str(user_from_db)}')

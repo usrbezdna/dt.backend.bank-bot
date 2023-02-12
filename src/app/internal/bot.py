@@ -2,7 +2,7 @@ from django.conf import settings
 
 from .ngrok_parser import parse_public_url
 
-from .transport.bot.handlers import start
+from .transport.bot.handlers import start, set_phone, me
 
 from telegram import Bot
 from typing import Tuple
@@ -34,6 +34,9 @@ def setup_dispatcher_handlers(dispatcher : Dispatcher) -> None:
     :param dispatcher: Telegram Bot dispatcher 
     """
     dispatcher.add_handler(CommandHandler('start', start))
+
+    dispatcher.add_handler(CommandHandler('set_phone', set_phone))
+    dispatcher.add_handler(CommandHandler('me', me))
 
 def set_bot_webhook(bot : Bot) -> None:
     """
