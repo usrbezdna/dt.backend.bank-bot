@@ -1,14 +1,11 @@
-from django.conf import settings
-
-from .ngrok_parser import parse_public_url
-
-from .transport.bot.handlers import start, set_phone, me
-
-from telegram import Bot
 from typing import Tuple
 
-from telegram.ext import (Dispatcher, CommandHandler)
+from django.conf import settings
+from telegram import Bot
+from telegram.ext import CommandHandler, Dispatcher
 
+from .ngrok_parser import parse_public_url
+from .transport.bot.handlers import me, set_phone, start
 
 
 def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
@@ -16,7 +13,7 @@ def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
     This function creates a new instance of Telegram Bot
     and corresponding Dispatcher
     ----------
-    :return: new instance of Tlg Bot and Dispatcher 
+    :return: new instance of Tlg Bot and Dispatcher
     """
     bot = Bot(settings.TLG_TOKEN)
     dispatcher = Dispatcher(bot, None, workers=2)
@@ -26,19 +23,21 @@ def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
 
     return (bot, dispatcher)
 
-def setup_dispatcher_handlers(dispatcher : Dispatcher) -> None:
+
+def setup_dispatcher_handlers(dispatcher: Dispatcher) -> None:
     """
-    Creates handlers for specified dispatcher. 
+    Creates handlers for specified dispatcher.
     Each handler represents a single telegram command.
     ----------
-    :param dispatcher: Telegram Bot dispatcher 
+    :param dispatcher: Telegram Bot dispatcher
     """
-    dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler("start", start))
 
-    dispatcher.add_handler(CommandHandler('set_phone', set_phone))
-    dispatcher.add_handler(CommandHandler('me', me))
+    dispatcher.add_handler(CommandHandler("set_phone", set_phone))
+    dispatcher.add_handler(CommandHandler("me", me))
 
-def set_bot_webhook(bot : Bot) -> None:
+
+def set_bot_webhook(bot: Bot) -> None:
     """
     Sets a webhook to recieve incoming Telegram updates.
 

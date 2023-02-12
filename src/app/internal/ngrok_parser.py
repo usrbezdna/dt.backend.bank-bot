@@ -1,8 +1,10 @@
-import requests
+import logging
 import sys
 
-import logging
-logger = logging.getLogger('django.server') 
+import requests
+
+logger = logging.getLogger("django.server")
+
 
 def parse_public_url():
     """
@@ -12,8 +14,8 @@ def parse_public_url():
     :raises NewConnectionError: if Ngrok instance is not up and running
     """
     try:
-        response = requests.get('http://localhost:4040/api/tunnels/', timeout=0.5)
-        return response.json().get('tunnels')[0].get('public_url')
+        response = requests.get("http://localhost:4040/api/tunnels/", timeout=0.5)
+        return response.json().get("tunnels")[0].get("public_url")
     except Exception as e:
-        logger.error(f'It looks like you haven\'t started ngrok instance and it caused a Connection Error:\n\n{e}')
+        logger.error(f"It looks like you haven't started ngrok instance and it caused a Connection Error:\n\n{e}")
         sys.exit(1)

@@ -8,4 +8,5 @@ class AdminUser(AbstractUser):
         """
         DB User Metadata
         """
+
         verbose_name = "DB User"
