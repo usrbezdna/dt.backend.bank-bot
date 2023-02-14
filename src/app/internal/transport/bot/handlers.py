@@ -10,7 +10,12 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from app.internal.models.user import User
-from app.internal.services.user_service import get_user_from_db, verified_phone_required
+from app.internal.services.user_service import (
+    get_user_from_db, 
+    verified_phone_required,
+    save_user_to_db,
+    update_user_phone_number
+)
 
 from .telegram_messages import (
     ABSENT_PN_MSG,
@@ -50,7 +55,6 @@ def process_request(request) -> None:
     config_.TLG_DISPATCHER.process_update(update)
 
 
-@transaction.atomic
 def start(update: Update, context: CallbackContext) -> None:
     """
     Handler for /start command.
@@ -70,12 +74,10 @@ def start(update: Update, context: CallbackContext) -> None:
         phone_number="",
     )
 
-    tlg_user.save()
-    logger.info(f"User {user_data.username} was successfully saved to DB")
+    save_user_to_db(tlg_user)
     update.message.reply_text(get_unique_start_msg(user_data.username))
 
 
-@transaction.atomic
 def set_phone(update: Update, context: CallbackContext) -> None:
     """
     Handler for /set_phone command.
@@ -94,10 +96,8 @@ def set_phone(update: Update, context: CallbackContext) -> None:
         if phone_number.startswith("+"):
             try:
                 parsed_number = PhoneNumber.from_string(phone_number)
-                user_from_db.phone_number = parsed_number
-
-                user_from_db.save()
-                logger.info(f"Updated phone number for user {user_data.id}")
+                
+                update_user_phone_number(user_from_db, parsed_number)
                 update.message.reply_text(get_success_phone_msg(parsed_number))
 
             except NumberParseException:
@@ -112,7 +112,6 @@ def set_phone(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(ABSENT_PN_MSG)
 
 
-@transaction.atomic
 @verified_phone_required
 def me(update: Update, context: CallbackContext) -> None:
     """
