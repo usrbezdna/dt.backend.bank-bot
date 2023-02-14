@@ -11,10 +11,10 @@ from telegram.ext import CallbackContext
 
 from app.internal.models.user import User
 from app.internal.services.user_service import (
-    get_user_from_db, 
-    verified_phone_required,
+    get_user_from_db,
     save_user_to_db,
-    update_user_phone_number
+    update_user_phone_number,
+    verified_phone_required,
 )
 
 from .telegram_messages import (
@@ -96,7 +96,7 @@ def set_phone(update: Update, context: CallbackContext) -> None:
         if phone_number.startswith("+"):
             try:
                 parsed_number = PhoneNumber.from_string(phone_number)
-                
+
                 update_user_phone_number(user_from_db, parsed_number)
                 update.message.reply_text(get_success_phone_msg(parsed_number))
 

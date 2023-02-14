@@ -23,10 +23,11 @@ def get_user_from_db(tlg_id: int) -> Optional[User]:
         return user_option[0]
     return None
 
-def save_user_to_db(user : User) -> None:
+
+def save_user_to_db(user: User) -> None:
     """
     Receives Telegram user and saves it in DB.
-    (Might be modified in the future to run some 
+    (Might be modified in the future to run some
     checks before saving)
     ----------
     :param user: Telegram user object
@@ -34,7 +35,8 @@ def save_user_to_db(user : User) -> None:
     user.save()
     logger.info(f"User {user.username} was successfully saved to DB")
 
-def update_user_phone_number(user: User, new_phone_number : str) -> None:
+
+def update_user_phone_number(user: User, new_phone_number: str) -> None:
     """
     Updates phone number for a specific User.
     ----------
