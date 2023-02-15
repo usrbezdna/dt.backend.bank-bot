@@ -16,6 +16,7 @@ python-telegram-bot = '~=13.14'
 phonenumbers = "~=8.13.5"
 djangorestframework = "~=3.14.0"
 requests = "*"
+django-phonenumber-field = "*"
 
 [requires]
 python_version = "3.10"

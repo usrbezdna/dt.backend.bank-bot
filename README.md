@@ -83,8 +83,17 @@ Or if you're willing to open admin panel directly:
  make admin
 ```
 
+After starting the server, you could open your browser and make some requests:<br>
+```
+localhost:8000/api/me/1077392747/
+
+localhost:8000/api/me/0010101010/
+
+localhost:8000/admin/
+```
+
 ## Workflow Scheme
 
 (Subject to change!)
 
-![Workflow](/img/workflow-scheme.png)
+![Workflow](/img/workflow.png)
