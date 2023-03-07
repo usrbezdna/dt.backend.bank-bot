@@ -10,8 +10,17 @@ NOT_INT_FORMAT_MSG = (
     + "+432111123456 or +7911123456"
 )
 
+HELP_MSG = (
+    "Hi, I am yet another banking bot!\n"
+    + "Here is the list of commands I support:\n\n"
+    + "/start - prints started message, adds you to DB\n"
+    + "/set_phone - sets your phone number in an international format\n"
+    + "/me - returns known info about your account (verified phone req.)\n"
+)
 
-def get_unique_start_msg(username: str) -> str:
+
+
+def get_unique_start_msg(username):
     """
     Creates unique start message for each user.
     :param username: Telegram User username
@@ -24,7 +33,7 @@ def get_unique_start_msg(username: str) -> str:
     )
 
 
-def get_success_phone_msg(phone_number) -> str:
+def get_success_phone_msg(phone_number):
     """
     Returns message with valid phone number.
     :param phone_number: Telegram User parsed and validated number

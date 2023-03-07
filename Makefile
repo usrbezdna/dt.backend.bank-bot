@@ -8,8 +8,8 @@ endif
 
 # Exporting environmental variables from .env file
 # We'll then use ${PORT} in our make targets
-ifneq (,$(wildcard ./src/.env))
-    include ./src/.env
+ifneq (,$(wildcard .env))
+    include .env
     export
 endif
 
@@ -76,5 +76,5 @@ check_lint:
 # Starts dev server and opens admin panel in browser
 .PHONY: admin
 admin: 
-	python -m webbrowser -t "http://localhost:${PORT}/admin" 
+	python -m webbrowser -t "http://localhost:${PORT}/admin/" 
 	make dev

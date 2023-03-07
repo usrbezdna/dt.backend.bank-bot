@@ -5,10 +5,15 @@ from telegram import Bot
 from telegram.ext import CommandHandler, Dispatcher
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import me, set_phone, start
+from .transport.bot.handlers import (
+    me, 
+    set_phone, 
+    start,
+    get_help
+)
 
 
-def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
+def start_webhook_bot():
     """
     This function creates a new instance of Telegram Bot
     and corresponding Dispatcher
@@ -24,7 +29,7 @@ def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
     return (bot, dispatcher)
 
 
-def setup_dispatcher_handlers(dispatcher: Dispatcher) -> None:
+def setup_dispatcher_handlers(dispatcher):
     """
     Creates handlers for specified dispatcher.
     Each handler represents a single telegram command.
@@ -35,9 +40,11 @@ def setup_dispatcher_handlers(dispatcher: Dispatcher) -> None:
 
     dispatcher.add_handler(CommandHandler("set_phone", set_phone))
     dispatcher.add_handler(CommandHandler("me", me))
+    
+    dispatcher.add_handler(CommandHandler("help", get_help))
 
 
-def set_bot_webhook(bot: Bot) -> None:
+def set_bot_webhook(bot):
     """
     Sets a webhook to recieve incoming Telegram updates.
 

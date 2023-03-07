@@ -1,16 +1,12 @@
 import logging
-from functools import wraps
+
 from typing import Optional
-
-from telegram import Update
-from telegram.ext import CallbackContext
-
 from app.models import User
 
 logger = logging.getLogger("django.server")
 
 
-def get_user_from_db(tlg_id: int) -> Optional[User]:
+def get_user_from_db(tlg_id):
     """
     Returns Telegram user from Database or None
     (if this user doesn't exist)
@@ -24,7 +20,7 @@ def get_user_from_db(tlg_id: int) -> Optional[User]:
     return None
 
 
-def save_user_to_db(user: User) -> None:
+def save_user_to_db(user):
     """
     Receives Telegram user and saves it in DB.
     (Might be modified in the future to run some
@@ -36,7 +32,7 @@ def save_user_to_db(user: User) -> None:
     logger.info(f"User {user.username} was successfully saved to DB")
 
 
-def update_user_phone_number(user: User, new_phone_number: str) -> None:
+def update_user_phone_number(user, new_phone_number):
     """
     Updates phone number for a specific User.
     ----------
@@ -47,22 +43,3 @@ def update_user_phone_number(user: User, new_phone_number: str) -> None:
     user.phone_number = new_phone_number
     user.save()
     logger.info(f"Updated phone number for user {user.username}")
-
-
-def verified_phone_required(func):
-    """
-    This decorator function restricts access to all other Telegram commands
-    (except /start and /set_phone) unless user has a verified phone number.
-    ----------
-    :param func: some function that acts like a command handler
-    """
-
-    @wraps(func)
-    def wrapper(update: Update, context: CallbackContext):
-        if get_user_from_db(update.effective_user.id).hasPhoneNumber():
-            func(update, context)
-        else:
-            logger.info(f"User {update.effective_user.username} don't have access to this function: {func.__name__}")
-            update.message.reply_text("You don't have a verified phone number!")
-
-    return wrapper

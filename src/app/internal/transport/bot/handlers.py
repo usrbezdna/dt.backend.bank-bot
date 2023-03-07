@@ -13,11 +13,15 @@ from app.internal.models.user import User
 from app.internal.services.user_service import (
     get_user_from_db,
     save_user_to_db,
-    update_user_phone_number,
-    verified_phone_required,
+    update_user_phone_number
+)
+
+from app.internal.services.telegram_service import (
+    verified_phone_required
 )
 
 from .telegram_messages import (
+    HELP_MSG,
     ABSENT_PN_MSG,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
@@ -39,7 +43,7 @@ class TelegramAPIView(APIView):
         return Response()
 
 
-def process_request(request) -> None:
+def process_request(request):
     """
     Function for processing requests.
     Actually it receives them and sends to Dispacther.
@@ -55,7 +59,7 @@ def process_request(request) -> None:
     config_.TLG_DISPATCHER.process_update(update)
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update, context):
     """
     Handler for /start command.
     (Handlers usually take 2 arguments: update and context).
@@ -78,7 +82,18 @@ def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(get_unique_start_msg(user_data.username))
 
 
-def set_phone(update: Update, context: CallbackContext) -> None:
+def get_help(update, context):
+    """
+    Handler for /help command.
+    Returns some info about currently supported commands.
+    ----------
+    :param update: recieved Update object
+    :param context: context object passed to the callback
+    """
+    update.message.reply_text(HELP_MSG)
+
+
+def set_phone(update, context):
     """
     Handler for /set_phone command.
     Supports phone validation and user existence checking.
@@ -113,7 +128,7 @@ def set_phone(update: Update, context: CallbackContext) -> None:
 
 
 @verified_phone_required
-def me(update: Update, context: CallbackContext) -> None:
+def me(update, context):
     """
     Hander for /me command.
     Returns full information about Telegram user.
