@@ -1,10 +1,10 @@
 import asyncio
 import logging
 
+from asgiref.sync import sync_to_async
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from asgiref.sync import sync_to_async
 
 from app.internal.services.user_service import get_user_from_db
 
@@ -19,6 +19,7 @@ class WebAPIView(APIView):
     View, serving API endpoint /api/me/{some_tlg_id}/.
     Allows user to get info about himself.
     """
+
     def get(self, request, tlg_id):
         logger.info("Got new GET request on /api/me endpoint!")
 

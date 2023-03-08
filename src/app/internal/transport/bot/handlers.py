@@ -10,19 +10,12 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from app.internal.models.user import User
-from app.internal.services.user_service import (
-    get_user_from_db,
-    save_user_to_db,
-    update_user_phone_number
-)
-
-from app.internal.services.telegram_service import (
-    verified_phone_required
-)
+from app.internal.services.telegram_service import verified_phone_required
+from app.internal.services.user_service import get_user_from_db, save_user_to_db, update_user_phone_number
 
 from .telegram_messages import (
-    HELP_MSG,
     ABSENT_PN_MSG,
+    HELP_MSG,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
     get_success_phone_msg,
@@ -42,7 +35,7 @@ async def start(update, context):
 
     """
     user_data = update.effective_user
-    chat_id=update.effective_chat.id
+    chat_id = update.effective_chat.id
 
     tlg_user = User(
         tlg_id=user_data.id,
@@ -64,10 +57,7 @@ async def get_help(update, context):
     :param update: recieved Update object
     :param context: context object passed to the callback
     """
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=HELP_MSG
-    )
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
 
 
 async def set_phone(update, context):
@@ -79,7 +69,7 @@ async def set_phone(update, context):
     :param context: context object passed to the callback
     """
     user_data = update.effective_user
-    chat_id=update.effective_chat.id
+    chat_id = update.effective_chat.id
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 2:
@@ -117,6 +107,5 @@ async def me(update, context):
     user_from_db = await get_user_from_db(user_id)
 
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text="Here is some info about you:\n\n" f"{str(user_from_db)}"
+        chat_id=update.effective_chat.id, text="Here is some info about you:\n\n" f"{str(user_from_db)}"
     )

@@ -64,6 +64,11 @@ piplock:
 	pipenv install
 	sudo chown -R ${USER} Pipfile.lock
 
+# Running autopep8
+.PHONY: autopep8
+autopep8:
+	autopep8 --in-place --aggressive --aggressive -r src	
+
 # Running code linters
 .PHONY: lint
 lint:

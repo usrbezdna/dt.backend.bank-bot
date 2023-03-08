@@ -19,7 +19,6 @@ HELP_MSG = (
 )
 
 
-
 def get_unique_start_msg(username):
     """
     Creates unique start message for each user.

@@ -3,20 +3,15 @@ from typing import Tuple
 
 from django.conf import settings
 from telegram import Bot
-from telegram.ext import ApplicationBuilder, CommandHandler, AIORateLimiter 
+from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import (
-    me, 
-    set_phone, 
-    start,
-    get_help
-)
+from .transport.bot.handlers import get_help, me, set_phone, start
 
 
 def start_webhook_bot():
     """
-    This function starts a new instance of 
+    This function starts a new instance of
     Telegram Bot Application with webhook.
     """
     application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
@@ -50,11 +45,7 @@ def set_bot_webhook(application):
     """
     url = parse_public_url()
 
-    print('Ready!')
+    print("Ready!")
     application.run_webhook(
-            listen='0.0.0.0',
-            port=settings.PORT,
-            webhook_url=f'{url}',
-            close_loop = False,
-            drop_pending_updates=True
+        listen="0.0.0.0", port=settings.PORT, webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
     )

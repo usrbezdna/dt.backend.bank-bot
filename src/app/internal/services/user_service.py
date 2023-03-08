@@ -1,10 +1,12 @@
 import logging
-
 from typing import Optional
-from app.models import User
+
 from asgiref.sync import sync_to_async
 
+from app.models import User
+
 logger = logging.getLogger("django.server")
+
 
 @sync_to_async
 def get_user_from_db(tlg_id):

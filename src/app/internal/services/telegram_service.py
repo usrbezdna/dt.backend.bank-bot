@@ -1,12 +1,13 @@
-from functools import wraps
 import logging
+from functools import wraps
 
 from telegram import Update
 from telegram.ext import CallbackContext
+
 from .user_service import get_user_from_db
 
-
 logger = logging.getLogger("django.server")
+
 
 def verified_phone_required(func):
     """
@@ -25,7 +26,7 @@ def verified_phone_required(func):
         else:
             logger.info(f"User {update.effective_user.username} don't have access to this function: {func.__name__}")
             await context.bot.send_message(
-                chat_id=update.effective_chat.id,  
-                text="You don't have a verified phone number!"
+                chat_id=update.effective_chat.id, text="You don't have a verified phone number!"
             )
+
     return wrapper
