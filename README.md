@@ -5,7 +5,6 @@
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
-- [Concept](#concept)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Workflow scheme](#workflow-scheme)
@@ -25,12 +24,6 @@ First of all, make sure you've already completed this steps:
 - Optionally installed `make` on your Windows machine. 
 <br> Btw, the easiest way to do that is Chocolatey: `choco install make`  </br>
 
-
-## Concept
-Before you start copy-pasting commands in your terminal, I want to clarify my general idea. In my opinion, there is no point in running either separate Django Webserver, or a single Telegram Bot. Because we don't want to receive requests just from Telegram users or just from those who use Web browser. We would like to get updates from <b>all our users</b>.
-
-So I've decided not to implement Telegram bot as a Django BaseCommand and not to start it in a polling mode. <br>
-Instead, it relies on Webhooks - and you <b><i>have to run Ngrok before using</b></i> `runserver`!  
 
 ## Installation
 
@@ -78,9 +71,15 @@ Now you can finally start the Django Webserver:
 ```bash
  make dev
 ```
+
 Or if you're willing to open admin panel directly:
 ```bash
  make admin
+```
+
+Webhook bot starts with this command:
+```bash
+ make webhook
 ```
 
 After starting the server, you could open your browser and make some requests:<br>
@@ -94,6 +93,6 @@ localhost:8000/admin/
 
 ## Workflow Scheme
 
-(Subject to change!)
+(Outdated, will be changed in future updates!)
 
 ![Workflow](/img/workflow.png)

@@ -2,10 +2,11 @@ import logging
 
 from typing import Optional
 from app.models import User
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger("django.server")
 
-
+@sync_to_async
 def get_user_from_db(tlg_id):
     """
     Returns Telegram user from Database or None
@@ -20,6 +21,7 @@ def get_user_from_db(tlg_id):
     return None
 
 
+@sync_to_async
 def save_user_to_db(user):
     """
     Receives Telegram user and saves it in DB.
@@ -32,6 +34,7 @@ def save_user_to_db(user):
     logger.info(f"User {user.username} was successfully saved to DB")
 
 
+@sync_to_async
 def update_user_phone_number(user, new_phone_number):
     """
     Updates phone number for a specific User.

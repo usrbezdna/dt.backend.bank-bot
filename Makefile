@@ -39,6 +39,11 @@ collectstatic:
 dev:
 	python src/manage.py runserver localhost:${PORT}
 
+# Starting a webhook Telegram Bot
+.PHONY: webhook
+webhook:
+	python src/manage.py webhook
+
 # Executing manage.py commands in simplified manner 
 .PHONY: command
 command:

@@ -37,6 +37,8 @@ DEBUG = env("DEBUG")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
+# Webhook HTTP server port
+PORT = env("PORT")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
 
