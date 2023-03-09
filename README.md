@@ -56,39 +56,23 @@ pipenv install
 
 ## Usage
 
-So, [like I said](#concept), you have to start Ngrok before starting the Django Webserver.
-And make sure you're running Ngrok on the same port as it specified in .env file. This example assumes that you haven't changed the default configuration: `PORT=8000` 
-
+Starting with Docker Compose:
 ```bash
- ngrok http 8000
+make docker_run
 ```
 
-Just wait until you see that session status is Online: 
-
-![Ngrok-example](/img/ngrok-example.png)
-
-Now you can finally start the Django Webserver:
+And in order to stop just run:
 ```bash
- make dev
-```
-
-Or if you're willing to open admin panel directly:
-```bash
- make admin
-```
-
-Webhook bot starts with this command:
-```bash
- make webhook
+make docker_stop
 ```
 
 After starting the server, you could open your browser and make some requests:<br>
 ```
-localhost:8000/api/me/1077392747/
+localhost:8080/api/me/1077392747/
 
-localhost:8000/api/me/0010101010/
+localhost:8080/api/me/0010101010/
 
-localhost:8000/admin/
+localhost:8080/admin/
 ```
 
 ## Workflow Scheme

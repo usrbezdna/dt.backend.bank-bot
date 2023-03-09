@@ -2,8 +2,10 @@
 ifeq ($(OS), Windows_NT)
 SHELL := powershell.exe
 .SHELLFLAGS := -NoProfile
+PYTHON := python
 else
 SHELL := bash
+PYTHON := python3
 endif
 
 # Exporting environmental variables from .env file
@@ -16,53 +18,68 @@ endif
 # Applying migrations to database
 .PHONY: migrate
 migrate:
-	python src/manage.py migrate $(if $m, api $m,)
+	$(PYTHON) src/manage.py migrate $(if $m, api $m,) 2>&1
 
 # Creating new migrations
 .PHONY: makemigrations
 makemigrations:
-	python src/manage.py makemigrations
+	$(PYTHON) src/manage.py makemigrations
 	sudo chown -R ${USER} src/app/migrations/
 
 # Creating new superuser account
 .PHONY: createsuperuser
 createsuperuser:
-	python src/manage.py createsuperuser
+	$(PYTHON) src/manage.py createsuperuser
 
 # Collecting static files into a single location
 .PHONY: collectstatic
 collectstatic:
-	python src/manage.py collectstatic --no-input
+	$(PYTHON) src/manage.py collectstatic --no-input
 
 # Starting a development server on port from .env
 .PHONY: dev
 dev:
-	python src/manage.py runserver localhost:${PORT}
+	$(PYTHON) src/manage.py runserver 0.0.0.0:${DJANGO_PORT}
+
+
+# Starting Telegram Bot in polling mode
+.PHONY: polling
+polling:
+	$(PYTHON) src/manage.py polling
+
 
 # Starting a webhook Telegram Bot
 .PHONY: webhook
 webhook:
-	python src/manage.py webhook
+	ngrok config add-authtoken ${NGROK_TOKEN}
+	ngrok http ${WEBHOOK_PORT} > /dev/null 2>&1 &
+	$(PYTHON) src/manage.py webhook
+	kill %1
 
 # Executing manage.py commands in simplified manner 
 .PHONY: command
 command:
-	python src/manage.py ${c}
+	$(PYTHON) src/manage.py ${c}
 
-# Starting a python interpreter
+# Starting a $(PYTHON) interpreter
 .PHONY: shell
 shell:
-	python src/manage.py shell
+	$(PYTHON) src/manage.py shell
 
 .PHONY: debug
 debug:
-	python src/manage.py debug
+	$(PYTHON) src/manage.py debug
 
 # Installing dependencies with pipenv 
 .PHONY: piplock
 piplock:
 	pipenv install
 	sudo chown -R ${USER} Pipfile.lock
+
+# Flushing DB
+.PHONY: flush
+flush:
+	$(PYTHON) src/manage.py flush --no-input 2>&1
 
 # Running autopep8
 .PHONY: autopep8
@@ -86,5 +103,20 @@ check_lint:
 # Starts dev server and opens admin panel in browser
 .PHONY: admin
 admin: 
-	python -m webbrowser -t "http://localhost:${PORT}/admin/" 
+	$(PYTHON) -m webbrowser -t "http://localhost:${DJANGO_PORT}/admin/" 
 	make dev
+
+
+# Starts DB and Bot Application
+.PHONY: docker_run
+docker_run: 
+	docker-compose up -d
+
+.PHONY: docker_run_build
+docker_run_build: 
+	docker-compose up -d --build
+
+# Shuts down DB and Bot Application
+.PHONY: docker_stop
+docker_stop: 
+	docker-compose down

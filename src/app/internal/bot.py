@@ -1,12 +1,35 @@
-import asyncio
-from typing import Tuple
+import logging
 
 from django.conf import settings
-from telegram import Bot
 from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
 from .transport.bot.handlers import get_help, me, set_phone, start
+
+logger = logging.getLogger("django.server")
+
+
+def get_bot_application():
+    """
+    This function creates default
+    Telegram Bot Application and sets up
+    command handlers.
+    :return: Bot Application instance
+    """
+    application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
+    setup_application_handlers(application)
+
+    return application
+
+
+def start_polling_bot():
+    """
+    Starts a new instanse of Telegram Bot
+    Application in polling mode
+    """
+    application = get_bot_application()
+    logger.info("Started")
+    application.run_polling()
 
 
 def start_webhook_bot():
@@ -14,9 +37,8 @@ def start_webhook_bot():
     This function starts a new instance of
     Telegram Bot Application with webhook.
     """
-    application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
+    application = get_bot_application()
 
-    setup_application_handlers(application)
     set_bot_webhook(application)
 
 
@@ -45,7 +67,7 @@ def set_bot_webhook(application):
     """
     url = parse_public_url()
 
-    print("Ready!")
+    logger.info("Started")
     application.run_webhook(
-        listen="0.0.0.0", port=settings.PORT, webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
+        listen="0.0.0.0", port=settings.WEBHOOK_PORT, webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
     )

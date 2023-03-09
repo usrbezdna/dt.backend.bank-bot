@@ -21,6 +21,12 @@ def verified_phone_required(func):
     async def wrapper(update: Update, context: CallbackContext):
         user = await get_user_from_db(update.effective_user.id)
 
+        if not user:
+            logger.info(f"User {update.effective_user.username} not found in DB")
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id, text='Type /start at first and verify you phone number'
+            )
+
         if user.hasPhoneNumber():
             await func(update, context)
         else:

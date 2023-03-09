@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+
+  django_app:
+    build: .
+    container_name: django-bot-app
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+    volumes:
+      - ./src/:/backend/src/.
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine3.17
+    container_name: postgres_db
+    env_file: 
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+      - POSTGRES_DB=hello_django_dev
+
+    healthcheck:
+      test: "pg_isready -q -h db"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    
+
+volumes:
+  postgres_data:
