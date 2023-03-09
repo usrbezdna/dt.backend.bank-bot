@@ -1,20 +1,17 @@
-import json
 import logging
 
-from django.db import transaction
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from telegram import Update
-from telegram.ext import CallbackContext
 
 from app.internal.models.user import User
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import get_user_from_db, save_user_to_db, update_user_phone_number
 
+from app.internal.services.payment_service import get_card_value, get_account_value
+
 from .telegram_messages import (
     ABSENT_PN_MSG,
+    ABSENT_ID_NUMBER,
     HELP_MSG,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
@@ -109,3 +106,39 @@ async def me(update, context):
     await context.bot.send_message(
         chat_id=update.effective_chat.id, text="Here is some info about you:\n\n" f"{str(user_from_db)}"
     )
+
+@verified_phone_required
+async def check_payable(update, context):
+    """
+    Handler for /check_card command
+    Returns remaining value on specified card or 
+    error message if card is absent. 
+    ----------
+    :param update: recieved Update object
+    :param context: context object passed to the callback
+    """
+    chat_id = update.effective_chat.id
+    command_data = update.message.text.split(" ")
+
+    if len(command_data) == 2:
+        option_value = None
+        uniq_id = str(command_data[1])
+
+        if command_data[0] == '/check_card':
+            option_value = await get_card_value(uniq_id)
+        else:
+            option_value = await get_account_value(uniq_id)
+
+        if option_value:
+            await context.bot.send_message (
+            chat_id=update.effective_chat.id, text=f"This card / account balance is {option_value}"
+        )
+        else:
+            await context.bot.send_message (
+            chat_id=update.effective_chat.id, text=f"Unable to find balance for this card / account"
+        )
+        return
+            
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
+
+    

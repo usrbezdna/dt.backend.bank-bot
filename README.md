@@ -15,8 +15,8 @@ First of all, make sure you've already completed this steps:
 <br> Yep, it's time to upgrade your lovely 3.9 :)</br>
 
 
-- Installed and configured [Ngrok](https://dashboard.ngrok.com/get-started/setup) on your system. 
-<br>This part is essential by now, cause we are going to run Django server on a local machine, but we can't get updates on it directly from Telegram Webhook. So, we'll use Ngrok as a Proxy between global an local nets; </br>
+- Installed and configured [Ngrok](https://dashboard.ngrok.com/get-started/setup) on your system (optional part). 
+<br>This part is already optional. You can run webhook bot on a local machine, but can't get updates on it directly from Telegram Webhook. But using Ngrok as a Proxy between global an local nets could help; </br>
 
 - Installed pipenv: `pip install pipenv`.
 <br>
@@ -59,6 +59,12 @@ pipenv install
 Starting with Docker Compose:
 ```bash
 make docker_run
+```
+It will automatically create superuser for test purposes
+with credentials (you can use them in admin panel):
+```
+login: testadmin
+pass: testpass
 ```
 
 And in order to stop just run:

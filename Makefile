@@ -100,21 +100,16 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
-# Starts dev server and opens admin panel in browser
-.PHONY: admin
-admin: 
-	$(PYTHON) -m webbrowser -t "http://localhost:${DJANGO_PORT}/admin/" 
-	make dev
+# Creates superuser inside the container
+.PHONY: superuser
+superuser:
+	$(PYTHON) src/manage.py createsuperuser --no-input
 
 
 # Starts DB and Bot Application
 .PHONY: docker_run
 docker_run: 
-	docker-compose up -d
-
-.PHONY: docker_run_build
-docker_run_build: 
-	docker-compose up -d --build
+	docker-compose up -d --build django_app
 
 # Shuts down DB and Bot Application
 .PHONY: docker_stop

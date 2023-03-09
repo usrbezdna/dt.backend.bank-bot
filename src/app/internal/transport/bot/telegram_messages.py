@@ -3,6 +3,7 @@
 
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
+ABSENT_ID_NUMBER = 'You should specify unique card / account id! '
 
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "
@@ -16,6 +17,7 @@ HELP_MSG = (
     + "/start - prints started message, adds you to DB\n"
     + "/set_phone - sets your phone number in an international format\n"
     + "/me - returns known info about your account (verified phone req.)\n"
+    + "/check_card and /check_account - returns balance of specified card or account\n"
 )
 
 
