@@ -4,6 +4,8 @@ services:
 
   django_app:
     build: .
+    env_file: 
+      - .env.docker
     container_name: django-bot-app
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
@@ -31,6 +33,9 @@ services:
       interval: 3s
       timeout: 5s
       retries: 5
+
+    ports:
+      - "5432:5432"
     
 
 volumes:

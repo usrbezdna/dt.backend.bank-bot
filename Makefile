@@ -17,7 +17,7 @@ endif
 
 # Applying migrations to database
 .PHONY: migrate
-migrate:
+migrate: start_db
 	$(PYTHON) src/manage.py migrate $(if $m, api $m,) 2>&1
 
 # Creating new migrations
@@ -28,7 +28,7 @@ makemigrations:
 
 # Creating new superuser account
 .PHONY: createsuperuser
-createsuperuser:
+createsuperuser: start_db
 	$(PYTHON) src/manage.py createsuperuser
 
 # Collecting static files into a single location
@@ -38,19 +38,19 @@ collectstatic:
 
 # Starting a development server on port from .env
 .PHONY: dev
-dev:
+dev: start_db
 	$(PYTHON) src/manage.py runserver 0.0.0.0:${DJANGO_PORT}
 
 
 # Starting Telegram Bot in polling mode
 .PHONY: polling
-polling:
+polling: start_db
 	$(PYTHON) src/manage.py polling
 
 
 # Starting a webhook Telegram Bot
 .PHONY: webhook
-webhook:
+webhook: start_db
 	ngrok config add-authtoken ${NGROK_TOKEN}
 	ngrok http ${WEBHOOK_PORT} > /dev/null 2>&1 &
 	$(PYTHON) src/manage.py webhook
@@ -65,10 +65,6 @@ command:
 .PHONY: shell
 shell:
 	$(PYTHON) src/manage.py shell
-
-.PHONY: debug
-debug:
-	$(PYTHON) src/manage.py debug
 
 # Installing dependencies with pipenv 
 .PHONY: piplock
@@ -100,13 +96,13 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
-# Creates superuser inside the container
-.PHONY: superuser
-superuser:
-	$(PYTHON) src/manage.py createsuperuser --no-input
 
+# Starts DB in container
+.PHONY: start_db
+start_db:
+	docker-compose up -d db
 
-# Starts DB and Bot Application
+# Starts DB and Bot Application inside Docker
 .PHONY: docker_run
 docker_run: 
 	docker-compose up -d --build django_app

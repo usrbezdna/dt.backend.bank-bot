@@ -26,12 +26,12 @@ RUN pip install pipenv --no-cache-dir && \
 FROM base as runtime
 
 COPY --from=pipenv-dep /backend/req.txt ./req.txt
-COPY Makefile shell .env ./
+COPY shell ./
 
 RUN chmod +x docker-entry.sh && \
-    apk add --no-cache make bash  && \
+    apk add --no-cache bash  && \
     pip install --no-cache-dir -r ./req.txt
 
 COPY src src
 
-CMD [ "sh", "docker-entry.sh" ]
+CMD [ "bash", "docker-entry.sh" ]

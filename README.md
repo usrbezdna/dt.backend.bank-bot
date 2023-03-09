@@ -56,7 +56,8 @@ pipenv install
 
 ## Usage
 
-Starting with Docker Compose:
+#### (1) Starting with Docker Compose:
+
 ```bash
 make docker_run
 ```
@@ -80,6 +81,25 @@ localhost:8080/api/me/0010101010/
 
 localhost:8080/admin/
 ```
+
+#### (2) Starting frontend
+This will start Django HTTP server with admin panel.
+```bash
+make dev
+```
+
+#### (2) Start bot: polling mode.
+This will start Django HTTP server with admin panel.
+```bash
+make polling
+```
+
+#### (4) Start bot: webhook mode. (Uses Ngrok!)
+In this case command below starts Telegram bot with webhook. 
+```bash
+make webhook
+```
+
 
 ## Workflow Scheme
 
