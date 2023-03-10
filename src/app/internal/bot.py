@@ -1,50 +1,78 @@
-from typing import Tuple
+import logging
 
 from django.conf import settings
-from telegram import Bot
-from telegram.ext import CommandHandler, Dispatcher
+from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import me, set_phone, start
+from .transport.bot.handlers import (
+    get_help, me, set_phone, start, check_payable
+)
+
+logger = logging.getLogger("django.server")
 
 
-def start_webhook_bot() -> Tuple[Bot, Dispatcher]:
+def get_bot_application():
     """
-    This function creates a new instance of Telegram Bot
-    and corresponding Dispatcher
+    This function creates default
+    Telegram Bot Application and sets up
+    command handlers.
+    :return: Bot Application instance
+    """
+    application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
+    setup_application_handlers(application)
+
+    return application
+
+
+def start_polling_bot():
+    """
+    Starts a new instanse of Telegram Bot
+    Application in polling mode
+    """
+    application = get_bot_application()
+    logger.info("Started")
+    application.run_polling()
+
+
+def start_webhook_bot():
+    """
+    This function starts a new instance of
+    Telegram Bot Application with webhook.
+    """
+    application = get_bot_application()
+
+    set_bot_webhook(application)
+
+
+def setup_application_handlers(application):
+    """
+    Creates handlers for specified Bot Application.
+    Each handler represents a single Telegram command.
     ----------
-    :return: new instance of Tlg Bot and Dispatcher
+    :param application: Bot Application instance
     """
-    bot = Bot(settings.TLG_TOKEN)
-    dispatcher = Dispatcher(bot, None, workers=2)
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", get_help))
 
-    setup_dispatcher_handlers(dispatcher)
-    set_bot_webhook(bot)
+    application.add_handler(CommandHandler("set_phone", set_phone))
+    application.add_handler(CommandHandler("me", me))
 
-    return (bot, dispatcher)
-
-
-def setup_dispatcher_handlers(dispatcher: Dispatcher) -> None:
-    """
-    Creates handlers for specified dispatcher.
-    Each handler represents a single telegram command.
-    ----------
-    :param dispatcher: Telegram Bot dispatcher
-    """
-    dispatcher.add_handler(CommandHandler("start", start))
-
-    dispatcher.add_handler(CommandHandler("set_phone", set_phone))
-    dispatcher.add_handler(CommandHandler("me", me))
+    application.add_handler(CommandHandler("check_card", check_payable))
+    application.add_handler(CommandHandler("check_account", check_payable))
 
 
-def set_bot_webhook(bot: Bot) -> None:
+def set_bot_webhook(application):
     """
     Sets a webhook to recieve incoming Telegram updates.
 
     Since we don't have an available IP in global net, we have to
     use Ngrok as a Proxy to recieve HTTPS POST requests from Telegram.
     ----------
-    :param bot: Telegram Bot instance
+    :param application: Bot Application instance
     """
     url = parse_public_url()
-    bot.set_webhook(url=f"{url}/api/telegram")
+
+    logger.info("Started")
+    application.run_webhook(
+        listen="0.0.0.0", port=settings.WEBHOOK_PORT, webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
+    )

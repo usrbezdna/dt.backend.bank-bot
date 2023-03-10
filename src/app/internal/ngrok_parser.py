@@ -14,7 +14,7 @@ def parse_public_url():
     :raises NewConnectionError: if Ngrok instance is not up and running
     """
     try:
-        response = requests.get("http://localhost:4040/api/tunnels/", timeout=0.1)
+        response = requests.get("http://localhost:4040/api/tunnels/")
         return response.json().get("tunnels")[0].get("public_url")
     except Exception as e:
         logger.error(f"It looks like you haven't started ngrok instance and it caused a Connection Error:\n\n{e}")

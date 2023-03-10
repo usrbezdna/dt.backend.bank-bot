@@ -5,7 +5,6 @@
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
-- [Concept](#concept)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Workflow scheme](#workflow-scheme)
@@ -16,8 +15,8 @@ First of all, make sure you've already completed this steps:
 <br> Yep, it's time to upgrade your lovely 3.9 :)</br>
 
 
-- Installed and configured [Ngrok](https://dashboard.ngrok.com/get-started/setup) on your system. 
-<br>This part is essential by now, cause we are going to run Django server on a local machine, but we can't get updates on it directly from Telegram Webhook. So, we'll use Ngrok as a Proxy between global an local nets; </br>
+- Installed and configured [Ngrok](https://dashboard.ngrok.com/get-started/setup) on your system (optional part). 
+<br>This part is already optional. You can run webhook bot on a local machine, but can't get updates on it directly from Telegram Webhook. But using Ngrok as a Proxy between global an local nets could help; </br>
 
 - Installed pipenv: `pip install pipenv`.
 <br>
@@ -25,12 +24,6 @@ First of all, make sure you've already completed this steps:
 - Optionally installed `make` on your Windows machine. 
 <br> Btw, the easiest way to do that is Chocolatey: `choco install make`  </br>
 
-
-## Concept
-Before you start copy-pasting commands in your terminal, I want to clarify my general idea. In my opinion, there is no point in running either separate Django Webserver, or a single Telegram Bot. Because we don't want to receive requests just from Telegram users or just from those who use Web browser. We would like to get updates from <b>all our users</b>.
-
-So I've decided not to implement Telegram bot as a Django BaseCommand and not to start it in a polling mode. <br>
-Instead, it relies on Webhooks - and you <b><i>have to run Ngrok before using</b></i> `runserver`!  
 
 ## Installation
 
@@ -63,37 +56,53 @@ pipenv install
 
 ## Usage
 
-So, [like I said](#concept), you have to start Ngrok before starting the Django Webserver.
-And make sure you're running Ngrok on the same port as it specified in .env file. This example assumes that you haven't changed the default configuration: `PORT=8000` 
+#### (1) Starting with Docker Compose:
 
 ```bash
- ngrok http 8000
+make docker_run
+```
+It will automatically create superuser for test purposes
+with credentials (you can use them in admin panel):
+```
+login: testadmin
+pass: testpass
 ```
 
-Just wait until you see that session status is Online: 
-
-![Ngrok-example](/img/ngrok-example.png)
-
-Now you can finally start the Django Webserver:
+And in order to stop just run:
 ```bash
- make dev
-```
-Or if you're willing to open admin panel directly:
-```bash
- make admin
+make docker_stop
 ```
 
 After starting the server, you could open your browser and make some requests:<br>
 ```
-localhost:8000/api/me/1077392747/
+localhost:8080/api/me/1077392747/
 
-localhost:8000/api/me/0010101010/
+localhost:8080/api/me/0010101010/
 
-localhost:8000/admin/
+localhost:8080/admin/
 ```
+
+#### (2) Starting frontend
+This will start Django HTTP server with admin panel.
+```bash
+make dev
+```
+
+#### (2) Start bot: polling mode.
+This will start Django HTTP server with admin panel.
+```bash
+make polling
+```
+
+#### (4) Start bot: webhook mode. (Uses Ngrok!)
+In this case command below starts Telegram bot with webhook. 
+```bash
+make webhook
+```
+
 
 ## Workflow Scheme
 
-(Subject to change!)
+(Outdated, will be changed in future updates!)
 
 ![Workflow](/img/workflow.png)

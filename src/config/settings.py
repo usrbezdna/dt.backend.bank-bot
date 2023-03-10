@@ -22,7 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Secrects and env. variables from .env file.
 # If you want to see examples - consider checking .env.example
 env = environ.Env(TLG_TOKEN=(str, ""), DEBUG=(bool, True))
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+environ.Env.read_env(os.path.join(os.path.split(BASE_DIR)[0], ".env"))
+
 
 # Telegram Bot API token
 TLG_TOKEN = env("TLG_TOKEN")
@@ -30,15 +31,16 @@ TLG_TOKEN = env("TLG_TOKEN")
 # Setting up debug mode
 DEBUG = env("DEBUG")
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-06&&*q-i#ym#au_ie$lqxwj^g)l7xy9mj=##5lbp5$+4g632gp"
+SECRET_KEY = env("SECRET_KEY")
 
+# Webhook HTTP server port
+WEBHOOK_PORT = env("WEBHOOK_PORT")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".ngrok.io"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
 
 # Application definition
 
@@ -90,8 +92,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": os.environ.get("SQL_ENGINE"),
+        "NAME": os.environ.get("SQL_DATABASE"),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
 

@@ -1,5 +1,7 @@
+import asyncio
 import logging
 
+from asgiref.sync import sync_to_async
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,14 +16,14 @@ logger = logging.getLogger("django.server")
 
 class WebAPIView(APIView):
     """
-    View, serving API endpoint /me/{some_tlg_id}/.
+    View, serving API endpoint /api/me/{some_tlg_id}/.
     Allows user to get info about himself.
     """
 
     def get(self, request, tlg_id):
         logger.info("Got new GET request on /api/me endpoint!")
 
-        user_from_db = get_user_from_db(tlg_id)
+        user_from_db = asyncio.run(get_user_from_db(tlg_id))
         if user_from_db:
             if user_from_db.hasPhoneNumber():
                 serialized = TelegramUserSerializer(user_from_db)

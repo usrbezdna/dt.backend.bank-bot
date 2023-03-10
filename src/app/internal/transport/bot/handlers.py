@@ -1,24 +1,18 @@
-import json
 import logging
 
-from django.db import transaction
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from telegram import Update
-from telegram.ext import CallbackContext
 
 from app.internal.models.user import User
-from app.internal.services.user_service import (
-    get_user_from_db,
-    save_user_to_db,
-    update_user_phone_number,
-    verified_phone_required,
-)
+from app.internal.services.telegram_service import verified_phone_required
+from app.internal.services.user_service import get_user_from_db, save_user_to_db, update_user_phone_number
+
+from app.internal.services.payment_service import get_card_from_db, get_account_from_db
 
 from .telegram_messages import (
     ABSENT_PN_MSG,
+    ABSENT_ID_NUMBER,
+    HELP_MSG,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
     get_success_phone_msg,
@@ -28,34 +22,7 @@ from .telegram_messages import (
 logger = logging.getLogger("django.server")
 
 
-class TelegramAPIView(APIView):
-    """
-    View for incoming Telegram updates received through webhook.
-    """
-
-    def post(self, request):
-        logger.info("Got new POST request from Telegram")
-        process_request(request)
-        return Response()
-
-
-def process_request(request) -> None:
-    """
-    Function for processing requests.
-    Actually it receives them and sends to Dispacther.
-    ----------
-    :param request: request from Telegram user
-    """
-    from django.apps import apps
-
-    config_ = apps.get_app_config("app")
-
-    data = json.loads(request.body.decode())
-    update = Update.de_json(data, config_.TLG_BOT)
-    config_.TLG_DISPATCHER.process_update(update)
-
-
-def start(update: Update, context: CallbackContext) -> None:
+async def start(update, context):
     """
     Handler for /start command.
     (Handlers usually take 2 arguments: update and context).
@@ -65,6 +32,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
     """
     user_data = update.effective_user
+    chat_id = update.effective_chat.id
 
     tlg_user = User(
         tlg_id=user_data.id,
@@ -74,11 +42,22 @@ def start(update: Update, context: CallbackContext) -> None:
         phone_number="",
     )
 
-    save_user_to_db(tlg_user)
-    update.message.reply_text(get_unique_start_msg(user_data.username))
+    await save_user_to_db(tlg_user)
+    await context.bot.send_message(chat_id=chat_id, text=get_unique_start_msg(user_data.username))
 
 
-def set_phone(update: Update, context: CallbackContext) -> None:
+async def get_help(update, context):
+    """
+    Handler for /help command.
+    Returns some info about currently supported commands.
+    ----------
+    :param update: recieved Update object
+    :param context: context object passed to the callback
+    """
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
+
+
+async def set_phone(update, context):
     """
     Handler for /set_phone command.
     Supports phone validation and user existence checking.
@@ -87,33 +66,33 @@ def set_phone(update: Update, context: CallbackContext) -> None:
     :param context: context object passed to the callback
     """
     user_data = update.effective_user
+    chat_id = update.effective_chat.id
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 2:
-        user_from_db = get_user_from_db(user_data.id)
+        user_from_db = await get_user_from_db(user_data.id)
         phone_number = command_data[1]
 
         if phone_number.startswith("+"):
             try:
                 parsed_number = PhoneNumber.from_string(phone_number)
 
-                update_user_phone_number(user_from_db, parsed_number)
-                update.message.reply_text(get_success_phone_msg(parsed_number))
+                await update_user_phone_number(user_from_db, parsed_number)
+                await context.bot.send_message(chat_id=chat_id, text=get_success_phone_msg(parsed_number))
 
             except NumberParseException:
                 logger.info("User did not provide a valid phone number")
-                update.message.reply_text(INVALID_PN_MSG)
-
+                await context.bot.send_message(chat_id=chat_id, text=INVALID_PN_MSG)
             finally:
                 return
 
-        update.message.reply_text(NOT_INT_FORMAT_MSG)
+        await context.bot.send_message(chat_id=chat_id, text=NOT_INT_FORMAT_MSG)
         return
-    update.message.reply_text(ABSENT_PN_MSG)
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_PN_MSG)
 
 
 @verified_phone_required
-def me(update: Update, context: CallbackContext) -> None:
+async def me(update, context):
     """
     Hander for /me command.
     Returns full information about Telegram user.
@@ -122,6 +101,45 @@ def me(update: Update, context: CallbackContext) -> None:
     :param context: context object passed to the callback
     """
     user_id = update.effective_user.id
-    user_from_db = get_user_from_db(user_id)
+    user_from_db = await get_user_from_db(user_id)
 
-    update.message.reply_text("Here is some info about you:\n\n" f"{str(user_from_db)}")
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id, text="Here is some info about you:\n\n" f"{str(user_from_db)}"
+    )
+
+@verified_phone_required
+async def check_payable(update, context):
+    """
+    Handler for /check_card command
+    Returns remaining value on specified card or 
+    error message if card is absent. 
+    ----------
+    :param update: recieved Update object
+    :param context: context object passed to the callback
+    """
+    chat_id = update.effective_chat.id
+    command_data = update.message.text.split(" ")
+
+    if len(command_data) == 2:
+        obj_option = None
+        uniq_id = str(command_data[1])
+
+        if command_data[0] == '/check_card':
+            obj_option = await get_card_from_db(uniq_id)
+        else:
+            obj_option = await get_account_from_db(uniq_id)
+
+        if obj_option:
+            await context.bot.send_message (
+            chat_id=update.effective_chat.id, text=f"This card / account balance is {obj_option.value}"
+        )
+        else:
+            logger.info(f'Card / account with ID {uniq_id} not found in DB')
+            await context.bot.send_message (
+            chat_id=update.effective_chat.id, text=f"Unable to find balance for this card / account"
+        )
+        return
+                
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
+
+    

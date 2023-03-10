@@ -4,5 +4,6 @@ media/
 local_settings.py
 __pycache__
 *.pyc
-/src/.env
+.env
+.env.docker
 .idea
