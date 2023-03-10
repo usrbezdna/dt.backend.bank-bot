@@ -17,7 +17,7 @@ endif
 
 # Applying migrations to database
 .PHONY: migrate
-migrate: start_db
+migrate:
 	$(PYTHON) src/manage.py migrate $(if $m, api $m,) 2>&1
 
 # Creating new migrations
@@ -53,6 +53,7 @@ polling: start_db
 webhook: start_db
 	ngrok config add-authtoken ${NGROK_TOKEN}
 	ngrok http ${WEBHOOK_PORT} > /dev/null 2>&1 &
+	sleep 3
 	$(PYTHON) src/manage.py webhook
 	kill %1
 
@@ -96,11 +97,11 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
-
 # Starts DB in container
 .PHONY: start_db
 start_db:
 	docker-compose up -d db
+	make migrate
 
 # Starts DB and Bot Application inside Docker
 .PHONY: docker_run

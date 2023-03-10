@@ -7,7 +7,7 @@ from app.internal.models.user import User
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import get_user_from_db, save_user_to_db, update_user_phone_number
 
-from app.internal.services.payment_service import get_card_value, get_account_value
+from app.internal.services.payment_service import get_card_from_db, get_account_from_db
 
 from .telegram_messages import (
     ABSENT_PN_MSG,
@@ -121,24 +121,25 @@ async def check_payable(update, context):
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 2:
-        option_value = None
+        obj_option = None
         uniq_id = str(command_data[1])
 
         if command_data[0] == '/check_card':
-            option_value = await get_card_value(uniq_id)
+            obj_option = await get_card_from_db(uniq_id)
         else:
-            option_value = await get_account_value(uniq_id)
+            obj_option = await get_account_from_db(uniq_id)
 
-        if option_value:
+        if obj_option:
             await context.bot.send_message (
-            chat_id=update.effective_chat.id, text=f"This card / account balance is {option_value}"
+            chat_id=update.effective_chat.id, text=f"This card / account balance is {obj_option.value}"
         )
         else:
+            logger.info(f'Card / account with ID {uniq_id} not found in DB')
             await context.bot.send_message (
             chat_id=update.effective_chat.id, text=f"Unable to find balance for this card / account"
         )
         return
-            
+                
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
 
     

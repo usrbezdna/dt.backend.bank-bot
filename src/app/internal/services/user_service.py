@@ -16,9 +16,10 @@ def get_user_from_db(tlg_id):
     :param tlg_id: Telegram user ID
     :return: Telegram User | None
     """
-    user_option = User.objects.filter(tlg_id=tlg_id)
-    if user_option.exists():
-        return user_option[0]
+    user_option = User.objects.filter(tlg_id=tlg_id).first()
+    if user_option:
+        return user_option
+    logger.info(f"User with ID {tlg_id} not found in DB")
     return None
 
 
