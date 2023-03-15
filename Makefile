@@ -57,15 +57,6 @@ webhook: start_db
 	$(PYTHON) src/manage.py webhook
 	kill %1
 
-# Executing manage.py commands in simplified manner 
-.PHONY: command
-command:
-	$(PYTHON) src/manage.py ${c}
-
-# Starting a $(PYTHON) interpreter
-.PHONY: shell
-shell:
-	$(PYTHON) src/manage.py shell
 
 # Installing dependencies with pipenv 
 .PHONY: piplock
@@ -103,12 +94,45 @@ start_db:
 	docker-compose up -d db
 	make migrate
 
+
+# ------------- Docker Section -------------
+
 # Starts DB and Bot Application inside Docker
 .PHONY: docker_run
 docker_run: 
-	docker-compose up -d --build django_app
+	docker compose up -d
 
 # Shuts down DB and Bot Application
 .PHONY: docker_stop
 docker_stop: 
-	docker-compose down
+	docker compose down
+
+.PHONY: docker_build
+docker_build:
+	docker compose build django_app
+
+
+# ------------- Terraform Section -------------
+
+.PHONY: remote_plan
+remote_plan:
+	terraform -chdir=yc-terraform-testserverplan
+
+.PHONY: remote_destroy
+remote_destroy:
+	terraform -chdir=yc-terraform-testserver apply -destroy -auto-approve
+
+.PHONY: remote_apply
+remote_apply:
+	terraform -chdir=yc-terraform-testserver apply -auto-approve
+
+
+
+.PHONY: runner_destroy
+runner_destroy:
+	terraform -chdir=yc-terraform-gitlab-runner apply -destroy -auto-approve
+
+
+.PHONY: runner_apply
+runner_apply:
+	terraform -chdir=yc-terraform-gitlab-runner apply -auto-approve
