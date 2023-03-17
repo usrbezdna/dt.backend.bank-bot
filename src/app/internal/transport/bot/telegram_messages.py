@@ -3,7 +3,7 @@
 
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
-ABSENT_ID_NUMBER = 'You should specify unique card / account id! '
+ABSENT_ID_NUMBER = "You should specify unique card / account id! "
 
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "

@@ -1,0 +1,10 @@
+#cloud-config
+ssh_pwauth: no
+users:
+  - name: bezdna-remote
+    groups: sudo,docker,adm
+    lock_passwd:  true
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+     - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC51Y7YPiiWE7BYD11OWOv71HDKO6QCENufr9uuLOXgaSr9IAjOpbzx+6YA1GbzxwZb626VvUMeUY7Hbvm09kE82TPlx9vica/zAK5jQmUndhy41/71iA/pKRMNy0jkbXAfGf/6ZlR4R3vLnBg00gEAB34H3u+0adbS7OvrbnVkAu/wPzdZ+IGIDN47eCnA7Dm5lrgsGQ9sOuwlhDlY2WKKTxT0tPk8NS495eIfRkTRdoU99esaSSxTNKdmT17T1aoa7Xxw2aW2F5b8/QeUh6Khv2NpfYnwmPsSZBCrV//tKV3yyUfQUU0uLr0mw2ILWmDO13p+nFJEhfqQL3+fWB7togFWCSfv1bb7Of0h/NvdwlQAHJ+16J5uUs+rpP1kweqF08sY2Dq4KgEkIYmOi3cpY66ZOUY9kUrGaFvxUde25C3dmCWN0C73bHNIquBXTxWKUZ6g1vrjo1B4GZfbT4Okm5QlSJ03DbowwkaTwlNbPQa6330DenTEUmGI3tWvxsk= bezdna@DESKTOP-9KSCOJH

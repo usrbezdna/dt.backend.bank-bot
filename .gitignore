@@ -6,4 +6,7 @@ __pycache__
 *.pyc
 .env
 .env.docker
+.env.runner
 .idea
+yc-terraform-testserver/.terraform
+yc-terraform-gitlab-runner/.terraform

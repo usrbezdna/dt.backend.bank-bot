@@ -26,12 +26,18 @@ RUN pip install pipenv --no-cache-dir && \
 FROM base as runtime
 
 COPY --from=pipenv-dep /backend/req.txt ./req.txt
-COPY shell ./
+COPY shell/docker/ ./
 
-RUN chmod +x docker-entry.sh && \
-    apk add --no-cache bash  && \
-    pip install --no-cache-dir -r ./req.txt
+# Installing deps and creating non-privileged user with corresponding group
+RUN apk add --no-cache bash && \
+    pip install --no-cache-dir -r ./req.txt && \
+    \
+    addgroup -Sg 1337 django && \
+    adduser -DHG django -u 1337 -s /bin/bash django
 
 COPY src src
+RUN  chown -R 1337:1337 /backend
 
+# Starting container as a django user instead of root
+USER django
 CMD [ "bash", "docker-entry.sh" ]

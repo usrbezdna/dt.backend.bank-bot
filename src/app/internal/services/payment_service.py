@@ -1,10 +1,11 @@
-
-from asgiref.sync import sync_to_async
 import logging
 
-from app.models import Card, Account
+from asgiref.sync import sync_to_async
+
+from app.models import Account, Card
 
 logger = logging.getLogger("django.server")
+
 
 @sync_to_async
 def get_card_from_db(uniq_id):

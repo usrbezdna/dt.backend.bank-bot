@@ -23,7 +23,7 @@ def verified_phone_required(func):
 
         if not user:
             await context.bot.send_message(
-                chat_id=update.effective_chat.id, text='Type /start at first and verify you phone number'
+                chat_id=update.effective_chat.id, text="Type /start at first and verify you phone number"
             )
             return
 

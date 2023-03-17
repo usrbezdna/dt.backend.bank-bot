@@ -4,14 +4,13 @@ from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
 
 from app.internal.models.user import User
+from app.internal.services.payment_service import get_account_from_db, get_card_from_db
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import get_user_from_db, save_user_to_db, update_user_phone_number
 
-from app.internal.services.payment_service import get_card_from_db, get_account_from_db
-
 from .telegram_messages import (
-    ABSENT_PN_MSG,
     ABSENT_ID_NUMBER,
+    ABSENT_PN_MSG,
     HELP_MSG,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
@@ -107,12 +106,13 @@ async def me(update, context):
         chat_id=update.effective_chat.id, text="Here is some info about you:\n\n" f"{str(user_from_db)}"
     )
 
+
 @verified_phone_required
 async def check_payable(update, context):
     """
     Handler for /check_card command
-    Returns remaining value on specified card or 
-    error message if card is absent. 
+    Returns remaining value on specified card or
+    error message if card is absent.
     ----------
     :param update: recieved Update object
     :param context: context object passed to the callback
@@ -124,22 +124,20 @@ async def check_payable(update, context):
         obj_option = None
         uniq_id = str(command_data[1])
 
-        if command_data[0] == '/check_card':
+        if command_data[0] == "/check_card":
             obj_option = await get_card_from_db(uniq_id)
         else:
             obj_option = await get_account_from_db(uniq_id)
 
         if obj_option:
-            await context.bot.send_message (
-            chat_id=update.effective_chat.id, text=f"This card / account balance is {obj_option.value}"
-        )
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id, text=f"This card / account balance is {obj_option.value}"
+            )
         else:
-            logger.info(f'Card / account with ID {uniq_id} not found in DB')
-            await context.bot.send_message (
-            chat_id=update.effective_chat.id, text=f"Unable to find balance for this card / account"
-        )
+            logger.info(f"Card / account with ID {uniq_id} not found in DB")
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id, text="Unable to find balance for this card / account"
+            )
         return
-                
-    await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
 
-    
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
