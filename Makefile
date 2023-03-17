@@ -97,19 +97,32 @@ start_db:
 
 # ------------- Docker Section -------------
 
+
+###############  Local usage  ###############
+
 # Starts DB and Bot Application inside Docker
 .PHONY: docker_run
 docker_run: 
-	docker compose up -d
+	docker compose --file docker-compose-local.yml up -d
 
 # Shuts down DB and Bot Application
 .PHONY: docker_stop
 docker_stop: 
-	docker compose down
+	docker compose --file docker-compose-local.yml down
 
 .PHONY: docker_build
 docker_build:
-	docker compose build django_app
+	docker compose --file docker-compose-local.yml build django_app
+
+
+###############  Remote usage  ###############
+.PHONY: docker_remote_run
+docker_remote_run: 
+	docker compose --env-file .env.docker --file docker-compose-server.yml up -d
+
+.PHONY: docker_remote_stop
+docker_remote_stop:
+	docker compose --env-file .env.docker --file docker-compose-server.yml stop
 
 
 # ------------- Terraform Section -------------

@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+
+  django_app:
+    image: registry.gitlab.com/toobusynow/dt.backend.bank-bot:dev
+    env_file: 
+      - .env.docker
+    container_name: django-bot-app
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine3.17
+    container_name: postgres_db
+    env_file: 
+      - .env.docker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${SQL_USER}
+      - POSTGRES_PASSWORD=${SQL_PASSWORD}
+      - POSTGRES_DB=${SQL_DATABASE}
+
+    healthcheck:
+      test: "pg_isready -q -h db"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+    ports:
+      - "5432:5432"
+    
+
+volumes:
+  postgres_data:
