@@ -30,7 +30,7 @@ def verified_phone_required(func):
         if user.hasPhoneNumber():
             await func(update, context)
         else:
-            logger.info(f"User {update.effective_user.username} don't have access to this function: {func.__name__}")
+            logger.info(f"User with {update.effective_user.id} ID don't have access to this function: {func.__name__}")
             await context.bot.send_message(
                 chat_id=update.effective_chat.id, text="You don't have a verified phone number!"
             )

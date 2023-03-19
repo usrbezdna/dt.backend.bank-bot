@@ -35,14 +35,14 @@ async def start(update, context):
 
     tlg_user = User(
         tlg_id=user_data.id,
-        username=user_data.username,
+        username=user_data.username if user_data.username else "",
         first_name=user_data.first_name,
         last_name=user_data.last_name if user_data.last_name else "",
         phone_number="",
     )
 
     await save_user_to_db(tlg_user)
-    await context.bot.send_message(chat_id=chat_id, text=get_unique_start_msg(user_data.username))
+    await context.bot.send_message(chat_id=chat_id, text=get_unique_start_msg(user_data.first_name))
 
 
 async def get_help(update, context):

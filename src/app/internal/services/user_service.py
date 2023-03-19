@@ -33,7 +33,7 @@ def save_user_to_db(user):
     :param user: Telegram user object
     """
     user.save()
-    logger.info(f"User {user.username} was successfully saved to DB")
+    logger.info(f"User with {user.tlg_id} ID was successfully saved to DB")
 
 
 @sync_to_async
@@ -47,4 +47,4 @@ def update_user_phone_number(user, new_phone_number):
 
     user.phone_number = new_phone_number
     user.save()
-    logger.info(f"Updated phone number for user {user.username}")
+    logger.info(f"Updated phone number for user with {user.tlg_id} ID")

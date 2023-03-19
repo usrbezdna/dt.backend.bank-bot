@@ -21,13 +21,13 @@ HELP_MSG = (
 )
 
 
-def get_unique_start_msg(username):
+def get_unique_start_msg(first_name):
     """
     Creates unique start message for each user.
-    :param username: Telegram User username
+    :param first_name: Telegram User first name
     """
     return (
-        f"Hi {username}!\n"
+        f"Hi {first_name}!\n"
         "Thanks for choosing this Banking Bot. He doesn't have "
         "much functions just yet, but this will be changed in "
         "future updates"

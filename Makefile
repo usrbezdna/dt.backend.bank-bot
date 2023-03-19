@@ -51,11 +51,7 @@ polling: start_db
 # Starting a webhook Telegram Bot
 .PHONY: webhook
 webhook: start_db
-	ngrok config add-authtoken ${NGROK_TOKEN}
-	ngrok http ${WEBHOOK_PORT} > /dev/null 2>&1 &
-	sleep 3
 	$(PYTHON) src/manage.py webhook
-	kill %1
 
 
 # Installing dependencies with pipenv 
@@ -95,24 +91,16 @@ start_db:
 	make migrate
 
 
-# ------------- Docker Section -------------
-
-
 ###############  Local usage  ###############
-
 # Starts DB and Bot Application inside Docker
 .PHONY: docker_run
 docker_run: 
-	docker compose --file docker-compose-local.yml up -d
+	docker compose --file docker-compose-local.yml up -d --build django_app
 
 # Shuts down DB and Bot Application
 .PHONY: docker_stop
 docker_stop: 
 	docker compose --file docker-compose-local.yml down
-
-.PHONY: docker_build
-docker_build:
-	docker compose --file docker-compose-local.yml build django_app
 
 
 ###############  Remote usage  ###############
@@ -125,22 +113,7 @@ docker_remote_stop:
 	docker compose --env-file .env.docker --file docker-compose-server.yml stop
 
 
-# ------------- Terraform Section -------------
-
-.PHONY: remote_plan
-remote_plan:
-	terraform -chdir=yc-terraform-testserverplan
-
-.PHONY: remote_destroy
-remote_destroy:
-	terraform -chdir=yc-terraform-testserver apply -destroy -auto-approve
-
-.PHONY: remote_apply
-remote_apply:
-	terraform -chdir=yc-terraform-testserver apply -auto-approve
-
-
-
+############### Terraform Section  ###############
 .PHONY: runner_destroy
 runner_destroy:
 	terraform -chdir=yc-terraform-gitlab-runner apply -destroy -auto-approve
