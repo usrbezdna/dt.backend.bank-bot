@@ -1,70 +1,132 @@
-variables:
-  IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+include: 
+  - local: 'gitlab-templates/anchors.yml'
+
 
 stages:
-  - lint_checks
-  - build
+  - bridge
+  - get_ip
+
   - deploy
+  - destroy
+  
 
-check_lint:
-  only:
-    - dev
-  stage: lint_checks
+infra:
+  stage: bridge
 
-  image: python:3.10.10-slim-buster
+  trigger:
+    include: gitlab-templates/deploy-testserver.yml
+    strategy: depend
+
+
+code:
+  stage: bridge
+
+  trigger:
+    include: gitlab-templates/build-and-test-code.yml
+    strategy: depend
+
+
+get_ip:
   before_script:
-    - apt-get update && apt-get install make
-    - pip3 install flake8 black isort 
+    - apk add --update curl bash jq unzip
+
+  stage: get_ip
+  tags: 
+    - infra
 
   script:
-    - make lint check_lint
+    - echo Running Some Deploy Scripts
+    - >
+        response_pipeline=$(curl --header "PRIVATE-TOKEN: $GITLAB_TF_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/bridges")
+    - >
+        INFRA_CHILD_ID=$(echo $response_pipeline | jq '.[] | select(.name == "infra") | .downstream_pipeline.id')
 
-build_image:
-  only:
-    - dev
-  stage: build
-  image: docker:23.0.1
+    - echo $INFRA_CHILD_ID
 
-  services:
-    - name: docker:23.0.1-dind
+    - >
+        APPLY_JOB_ID=$(curl --header "PRIVATE-TOKEN: $GITLAB_TF_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$INFRA_CHILD_ID/jobs" | jq '.[] | select(.name == "apply") | .id')
+      
+    - echo $APPLY_JOB_ID
 
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY 
+    - 'curl -L --output artifacts.zip --header "PRIVATE-TOKEN: $GITLAB_TF_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/$APPLY_JOB_ID/artifacts"'
 
-  script:
-    - docker build -t $IMAGE_NAME .
-    - docker push $IMAGE_NAME
+    - unzip artifacts.zip
+
+  artifacts:
+    paths:
+      - ip.txt
+    expire_in: 1h
 
 
 deploy:
-  only:
-    - dev
   stage: deploy
-  when: manual
+  tags:
+    - deploy
+
+
+  variables:
+    TAG_LATEST : $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
 
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
+    
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
 
-    - chmod 400 "$RUNNER_ID_RSA"
-    - ssh-add "$RUNNER_ID_RSA"
-   
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
+  - chmod 400 "$RUNNER_ID_RSA"
+  - ssh-add "$RUNNER_ID_RSA"
+  
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
 
-    - cp $DOT_ENV_DOCKER .env.docker
+  - cp $DOT_ENV_DOCKER .env.docker
+
+  # Changing IP in ALLOWED_HOSTS 
+  - export IP=$(cat ip.txt)
+  - sed -i 's/ALLOWED_HOSTS=.*/ALLOWED_HOSTS='$IP'/' .env.docker
+
+  # Changing Image in DockerCompose.yml
+  - >
+    sed -i 's#image: registry.*#image: '$TAG_LATEST'#' docker-compose-server.yml
+
+  - cat docker-compose-server.yml
 
   script:
-    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker Makefile docker-compose-server.yml $DEPLOYER_NAME@$REMOTE_ADDRESS:/home/$DEPLOYER_NAME
+    - ping -W 1 -c 1 $IP
+    - echo OK! Machine is online
 
-    - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no $DEPLOYER_NAME@$REMOTE_ADDRESS "
+    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
+
+    - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-        docker pull $IMAGE_NAME &&
+        docker pull $TAG_LATEST &&
 
-        make docker_remote_stop || true &&
+        make docker_remote_stop | true &&
         make docker_remote_run
       "
+
+    - echo Deployment is finished now!
+
+  dependencies:
+    - get_ip
+
+destroy:
+  stage: destroy
+  tags:
+    - destroy
+
+  image: 
+    name: hashicorp/terraform:light
+    entrypoint:
+    - /usr/bin/env
+    - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+  variables:
+    GITLAB_TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_COMMIT_REF_NAME}_state
+
+  script:
+    - !reference [.Run-Gitlab-TF-Configuration, script]
+    - !reference [.Run-Yandex-Cloud-Configuration, script]
+
+    - terraform apply -destroy -auto-approve
+
+  when: manual
