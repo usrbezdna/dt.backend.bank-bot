@@ -44,7 +44,7 @@ echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
 http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
 
-sudo apt update && sudo apt intall nginx -y
+sudo apt update && sudo apt install nginx -y
 
 echo -e "\e[1;32mNginx is successfully installed!\e[0m"
 echo -e "\e[1;32mConfiguration is now finished!\e[0m"
