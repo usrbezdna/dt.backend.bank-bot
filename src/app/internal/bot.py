@@ -1,12 +1,25 @@
 import logging
 
 from django.conf import settings
-from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
+
+from telegram.ext import (
+    AIORateLimiter, ApplicationBuilder, 
+    CommandHandler, ConversationHandler,
+    MessageHandler, filters,
+)
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import check_payable, get_help, me, set_phone, start
+from .transport.bot.handlers import (
+    check_payable, 
+    get_help, me, 
+    set_phone, start, 
+    list_fav, add_fav, del_fav,
+    create_account, add_acc_id,
+    ConversationStates, cancel
+)
 
 logger = logging.getLogger("django.server")
+
 
 
 def get_bot_application():
@@ -17,7 +30,9 @@ def get_bot_application():
     :return: Bot Application instance
     """
     application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
+
     setup_application_handlers(application)
+    setup_conversation_handlers(application)
 
     return application
 
@@ -44,7 +59,7 @@ def start_webhook_bot():
 
 def setup_application_handlers(application):
     """
-    Creates handlers for specified Bot Application.
+    Creates command handlers for specified Bot Application.
     Each handler represents a single Telegram command.
     ----------
     :param application: Bot Application instance
@@ -55,8 +70,30 @@ def setup_application_handlers(application):
     application.add_handler(CommandHandler("set_phone", set_phone))
     application.add_handler(CommandHandler("me", me))
 
+    application.add_handler(CommandHandler("list_fav", list_fav))
+    application.add_handler(CommandHandler("add_fav", add_fav))
+    application.add_handler(CommandHandler("del_fav", del_fav))
+    
+
     application.add_handler(CommandHandler("check_card", check_payable))
     application.add_handler(CommandHandler("check_account", check_payable))
+
+
+def setup_conversation_handlers(application):
+    
+    create_acc_handler = ConversationHandler(
+        entry_points=[CommandHandler('create_account', create_account)],
+
+        states={
+            ConversationStates.ACC_ID: [
+                MessageHandler(filters.ALL, add_acc_id)
+            ]
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    application.add_handler(create_acc_handler)
+
 
 
 def set_bot_webhook(application):

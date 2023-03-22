@@ -4,7 +4,7 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from .user_service import get_user_from_db
+from .user_service import get_user_by_id
 
 logger = logging.getLogger("django.server")
 
@@ -19,7 +19,7 @@ def verified_phone_required(func):
 
     @wraps(func)
     async def wrapper(update: Update, context: CallbackContext):
-        user = await get_user_from_db(update.effective_user.id)
+        user = await get_user_by_id(update.effective_user.id)
 
         if not user:
             await context.bot.send_message(

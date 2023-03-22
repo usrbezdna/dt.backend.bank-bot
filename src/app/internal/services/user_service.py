@@ -8,9 +8,9 @@ logger = logging.getLogger("django.server")
 
 
 @sync_to_async
-def get_user_from_db(tlg_id):
+def get_user_by_id(tlg_id):
     """
-    Returns Telegram user from Database or None
+    Returns Telegram user by ID from Database or None
     (if this user doesn't exist)
     ----------
     :param tlg_id: Telegram user ID
@@ -22,6 +22,19 @@ def get_user_from_db(tlg_id):
     logger.info(f"User with ID {tlg_id} not found in DB")
     return None
 
+@sync_to_async
+def get_user_by_username(username):
+    """
+    Returns Tg user by username from DB or None.
+    ----------
+    :param username: Telegram user username
+    :return: Telegram User | None
+    """
+    user_option = User.objects.filter(username=username).first()
+    if user_option:
+        return user_option
+    logger.info(f"User with username {username} not found in DB")
+    return None
 
 @sync_to_async
 def save_user_to_db(user):

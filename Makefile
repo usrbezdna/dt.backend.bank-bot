@@ -87,7 +87,7 @@ check_lint:
 # Starts DB in container
 .PHONY: start_db
 start_db:
-	docker-compose up -d db
+	docker-compose --file docker-compose-local.yml up -d db
 	make migrate
 
 

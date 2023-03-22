@@ -5,6 +5,20 @@ INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 ABSENT_ID_NUMBER = "You should specify unique card / account id! "
 
+ABSENT_FAV_MSG = ("Couldn't find any users in your favourites.\n" 
+    + "Don't forget to add them at first with /add_fav command"
+)
+
+ABSENT_ARG_FAV_MSG = ("It's necessary to mention the username or Telegram ID of this favourite user!"
+    + " Here is an example: \"/add_fav @someUser\" or\n \"/del_fav 1077393018\"")
+
+ABSENT_FAV_USER = 'There is no user in DB with such username / Telegram ID.\nCan\'t add it as your favourite.'
+
+ABSENT_OLD_FAV_USER = ('This user can\'t be found in DB (user with provided username / ' 
+    + 'Telegram ID doesn\'t exist). Can\'t delete it from your favourites!')
+
+NOT_VALID_ID_MSG = 'Invalid Telegram ID.' 
+
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "
     + "phone number with an international country code. Such as: "
@@ -40,3 +54,19 @@ def get_success_phone_msg(phone_number):
     :param phone_number: Telegram User parsed and validated number
     """
     return f"Successfully updated your phone number: {phone_number}"
+
+
+def get_success_for_new_fav(fav_user):
+    """
+    Returns message with success for favourites addition. 
+    :param fav_user: Telegram User object that acts as a new favourite.
+    """
+    return f"User {fav_user.first_name} with ID: {fav_user.tlg_id} added to your favourites!"
+
+
+def get_success_for_deleted_fav(fav_user):
+    """
+    Return message about successful deletion of fav_user from favourites.
+    :param fav_user: Telegram User object that was deleted from favourites.
+    """
+    return f"User {fav_user.first_name} with ID: {fav_user.tlg_id} was deleted from your favourites!"
