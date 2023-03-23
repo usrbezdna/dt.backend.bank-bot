@@ -20,9 +20,9 @@ class Account(models.Model):
         ("RUB", "Russian ruble"),
     ]
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-
     uniq_id = models.CharField(primary_key=True, max_length=40)
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     party = models.CharField(max_length=3, choices=PERSON_CHOICES)
 
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES)

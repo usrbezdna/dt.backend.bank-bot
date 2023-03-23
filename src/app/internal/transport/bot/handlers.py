@@ -1,17 +1,15 @@
-import enum
 import logging
 
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
 
+from asgiref.sync import sync_to_async
 from app.internal.models.user import User
-from app.internal.services.payment_service import get_account_from_db, get_card_from_db
-from app.internal.services.telegram_service import verified_phone_required
-
-
-from telegram.ext import (
-    ConversationHandler
+from app.internal.services.payment_service import (
+    get_account_from_db, get_card_from_db, get_account_value_from_card
 )
+
+from app.internal.services.telegram_service import verified_phone_required
 
 
 from app.internal.services.favourites_service import (
@@ -23,24 +21,16 @@ from app.internal.services.favourites_service import (
 )
 
 from app.internal.services.user_service import (
-    get_user_by_id,  get_user_by_username, 
-    save_user_to_db, update_user_phone_number
+    get_user_by_id,  save_user_to_db, update_user_phone_number
 )
+from app.internal.models.card import Card
 
 from .telegram_messages import (
     ABSENT_ID_NUMBER, ABSENT_PN_MSG, HELP_MSG, ABSENT_ARG_FAV_MSG,
     INVALID_PN_MSG, NOT_INT_FORMAT_MSG, ABSENT_FAV_MSG, ABSENT_FAV_USER,
-    ABSENT_OLD_FAV_USER, NOT_VALID_ID_MSG, 
-    get_success_phone_msg, get_unique_start_msg, get_success_for_new_fav,
+    ABSENT_OLD_FAV_USER, get_success_phone_msg, get_unique_start_msg, get_success_for_new_fav,
     get_success_for_deleted_fav
 )
-
-
-class ConversationStates(enum.Enum):
-    ACC_ID = 1
-    ACC_PARTY = 2
-    ACC_CURR = 3
-    ACC_VALUE = 4
 
 
 logger = logging.getLogger("django.server")
@@ -145,23 +135,34 @@ async def check_payable(update, context):
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 2:
-        obj_option = None
-        uniq_id = str(command_data[1])
 
-        if command_data[0] == "/check_card":
+        argument, uniq_id = command_data[0], command_data[1]
+        obj_option = None
+
+        if argument == "/check_card":
             obj_option = await get_card_from_db(uniq_id)
         else:
             obj_option = await get_account_from_db(uniq_id)
 
-        if obj_option:
+
+        if obj_option and argument == "/check_card":
+            value = await get_account_value_from_card(uniq_id)
+
             await context.bot.send_message(
-                chat_id=update.effective_chat.id, text=f"This card / account balance is {obj_option.value}"
+                chat_id=chat_id, text=f"This card balance is {value}"
             )
+
+        elif obj_option:
+            await context.bot.send_message(
+                chat_id=chat_id, text=f"This account balance is {obj_option.value}"
+            )
+            
         else:
             logger.info(f"Card / account with ID {uniq_id} not found in DB")
             await context.bot.send_message(
                 chat_id=update.effective_chat.id, text="Unable to find balance for this card / account"
             )
+
         return
 
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
@@ -274,31 +275,3 @@ async def del_fav(update, context):
         await context.bot.send_message(chat_id=chat_id, text=ABSENT_OLD_FAV_USER)
         return
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
-
-
-@verified_phone_required
-async def create_account(update, context):
-    """
-    Entry point function for Account creation handler
-    ----------
-    :param update: recieved Update object
-    :param context: context object passed to the callback
-    """
-    await update.message.reply_text('Okay, now you in account creation mode.')
-
-    return ConversationStates.ACC_ID
-
-
-async def add_acc_id(update, context):
-    text = update.message.text
-
-    context.user_data["acc_id"] = text
-
-    return ConversationHandler.END
-
-async def cancel(update, context):
-    user = update.message.from_user
-
-    logger.info("User %s canceled the conversation.", user.first_name)
-
-    return ConversationHandler.END

@@ -32,6 +32,7 @@ HELP_MSG = (
     + "/set_phone - sets your phone number in an international format\n"
     + "/me - returns known info about your account (verified phone req.)\n"
     + "/check_card and /check_account - returns balance of specified card or account\n"
+    + "/list_fav; /add_fav and /del_fav - commands for management of your favourites\n"
 )
 
 

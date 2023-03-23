@@ -4,8 +4,7 @@ from django.conf import settings
 
 from telegram.ext import (
     AIORateLimiter, ApplicationBuilder, 
-    CommandHandler, ConversationHandler,
-    MessageHandler, filters,
+    CommandHandler,
 )
 
 from .ngrok_parser import parse_public_url
@@ -13,9 +12,7 @@ from .transport.bot.handlers import (
     check_payable, 
     get_help, me, 
     set_phone, start, 
-    list_fav, add_fav, del_fav,
-    create_account, add_acc_id,
-    ConversationStates, cancel
+    list_fav, add_fav, del_fav
 )
 
 logger = logging.getLogger("django.server")
@@ -32,7 +29,6 @@ def get_bot_application():
     application = ApplicationBuilder().token(settings.TLG_TOKEN).rate_limiter(AIORateLimiter()).build()
 
     setup_application_handlers(application)
-    setup_conversation_handlers(application)
 
     return application
 
@@ -77,23 +73,6 @@ def setup_application_handlers(application):
 
     application.add_handler(CommandHandler("check_card", check_payable))
     application.add_handler(CommandHandler("check_account", check_payable))
-
-
-def setup_conversation_handlers(application):
-    
-    create_acc_handler = ConversationHandler(
-        entry_points=[CommandHandler('create_account', create_account)],
-
-        states={
-            ConversationStates.ACC_ID: [
-                MessageHandler(filters.ALL, add_acc_id)
-            ]
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-    )
-
-    application.add_handler(create_acc_handler)
-
 
 
 def set_bot_webhook(application):

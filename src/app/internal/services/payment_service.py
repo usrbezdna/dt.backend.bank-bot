@@ -23,3 +23,11 @@ def get_account_from_db(uniq_id):
     :param uniq_id: uniq_id of this account
     """
     return Account.objects.filter(uniq_id=uniq_id).first()
+
+@sync_to_async
+def get_account_value_from_card(uniq_id):
+    """
+    Returns value of corresponding account for specified card.
+    :param uniq_id: uniq_id of this card
+    """
+    return Card.objects.get(uniq_id=uniq_id).corresponding_account.value
