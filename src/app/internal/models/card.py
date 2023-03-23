@@ -1,5 +1,7 @@
 from django.db import models
+
 from .account import Account
+
 
 class Card(models.Model):
     """
@@ -16,5 +18,6 @@ class Card(models.Model):
         """
         Card metadata
         """
+
         verbose_name = "Card"
         db_table = "payment_cards"

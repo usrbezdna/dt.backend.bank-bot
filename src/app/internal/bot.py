@@ -1,23 +1,12 @@
 import logging
 
 from django.conf import settings
-
-from telegram.ext import (
-    AIORateLimiter, ApplicationBuilder, 
-    CommandHandler,
-)
+from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import (
-    check_payable, 
-    get_help, me, 
-    set_phone, start, 
-    list_fav, add_fav, del_fav,
-    send_to
-)
+from .transport.bot.handlers import add_fav, check_payable, del_fav, get_help, list_fav, me, send_to, set_phone, start
 
 logger = logging.getLogger("django.server")
-
 
 
 def get_bot_application():
@@ -70,7 +59,6 @@ def setup_application_handlers(application):
     application.add_handler(CommandHandler("list_fav", list_fav))
     application.add_handler(CommandHandler("add_fav", add_fav))
     application.add_handler(CommandHandler("del_fav", del_fav))
-    
 
     application.add_handler(CommandHandler("check_card", check_payable))
     application.add_handler(CommandHandler("check_account", check_payable))

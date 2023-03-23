@@ -2,14 +2,13 @@ import logging
 
 from asgiref.sync import sync_to_async
 
+from app.internal.transport.bot.telegram_messages import RSP_USER_WITH_NO_ACC, RSP_USER_WITH_NO_CARDS
 from app.models import Account, Card
+
 from .favourites_service import try_get_another_user
 
-from app.internal.transport.bot.telegram_messages import (
-    RSP_USER_WITH_NO_ACC, RSP_USER_WITH_NO_CARDS
-)
-
 logger = logging.getLogger("django.server")
+
 
 @sync_to_async
 def get_card_from_db(uniq_id):
@@ -28,6 +27,7 @@ def get_account_from_db(uniq_id):
     """
     return Account.objects.filter(uniq_id=uniq_id).first()
 
+
 @sync_to_async
 def get_account_from_card(uniq_id):
     """
@@ -45,13 +45,15 @@ def get_owner_from_account(uniq_id):
     """
     return Account.objects.get(uniq_id=uniq_id).owner
 
+
 @sync_to_async
 def get_user_payment_account(user):
     """
-    Returns Payment Account or None for this Telegram User 
+    Returns Payment Account or None for this Telegram User
     :param user: Telegram User object
     """
     return Account.objects.filter(owner=user).first()
+
 
 @sync_to_async
 def get_card_for_account(account):
@@ -75,7 +77,6 @@ async def account_has_any_cards(context, chat_id, account):
     return None
 
 
-
 async def try_get_recipient_card(context, chat_id, arg_user):
     """
     This function tries to get the recipient card for the transaction.
@@ -90,7 +91,7 @@ async def try_get_recipient_card(context, chat_id, arg_user):
     recipient_user_opt, arg_error = await try_get_another_user(context, chat_id, arg_user)
     if arg_error:
         return (None, True)
-    
+
     if recipient_user_opt:
         account = await get_user_payment_account(recipient_user_opt)
 
@@ -101,19 +102,15 @@ async def try_get_recipient_card(context, chat_id, arg_user):
         await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_ACC)
         return (None, False)
 
-
     recipient_account_opt = await get_account_from_db(arg_user)
 
     if recipient_account_opt:
         card_option = await account_has_any_cards(context, chat_id, recipient_account_opt)
         return (card_option, False)
-    
 
     recipient_card_opt = await get_card_from_db(arg_user)
 
     if recipient_card_opt:
         return (recipient_card_opt, False)
-    
 
     return (None, False)
-

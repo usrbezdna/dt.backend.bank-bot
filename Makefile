@@ -51,7 +51,11 @@ polling: start_db
 # Starting a webhook Telegram Bot
 .PHONY: webhook
 webhook: start_db
+	ngrok config add-authtoken ${NGROK_TOKEN}
+	ngrok http ${WEBHOOK_PORT} > /dev/null 2>&1 &
+	sleep 3
 	$(PYTHON) src/manage.py webhook
+	kill %1
 
 
 # Installing dependencies with pipenv 

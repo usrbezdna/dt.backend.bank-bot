@@ -1,8 +1,9 @@
 import logging
+
 from asgiref.sync import sync_to_async
 
-from app.models import Favourite
 from app.internal.transport.bot.telegram_messages import NOT_VALID_ID_MSG
+from app.models import Favourite
 
 from .user_service import get_user_by_id, get_user_by_username
 
@@ -19,6 +20,7 @@ def get_fav_obj(tlg_id):
     """
     return Favourite.objects.filter(tlg_id=tlg_id).first()
 
+
 @sync_to_async
 def get_list_of_favourites(tlg_id):
     """
@@ -28,6 +30,7 @@ def get_list_of_favourites(tlg_id):
 
     """
     return Favourite.objects.get(tlg_id=tlg_id).favourites.all()
+
 
 @sync_to_async
 def add_fav_to_user(tlg_id_of_owner, new_fav_user):
@@ -40,19 +43,20 @@ def add_fav_to_user(tlg_id_of_owner, new_fav_user):
 
     """
     Favourite.objects.get_or_create(tlg_id=tlg_id_of_owner)[0].favourites.add(new_fav_user)
-    logger.info(f'User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}')
+    logger.info(f"User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}")
+
 
 @sync_to_async
 def del_fav_from_user(tlg_id_of_owner, fav_user):
     """
-    Deletes fav_user User object from the list of 
+    Deletes fav_user User object from the list of
     favourites for user with ID tlg_id_of_owner
     ----------
     :param tlg_id_of_owner: Telegram ID of list owner.
     :param fav_user: user that will be deleted from favourites
     """
     Favourite.objects.get(tlg_id=tlg_id_of_owner).favourites.remove(fav_user)
-    logger.info(f'User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}')
+    logger.info(f"User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}")
 
 
 async def try_get_another_user(context, chat_id, argument):
@@ -67,15 +71,15 @@ async def try_get_another_user(context, chat_id, argument):
     :return: Tuple with another User obj and error argument flag
 
     """
-    if argument.startswith('@'):
+    if argument.startswith("@"):
         another_user_option = await get_user_by_username(argument[1:])
 
     elif not argument.isdigit() or int(argument) < 0:
         await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
         return (None, True)
-    
+
     else:
-        another_user_option = await get_user_by_id(argument) 
+        another_user_option = await get_user_by_id(argument)
 
     return (another_user_option, False)
 
@@ -94,7 +98,7 @@ async def prevent_ops_with_themself(context, chat_id, user_id, another_user):
 
     """
     if another_user.tlg_id == user_id:
-        await context.bot.send_message(chat_id=chat_id, text='You can\'t do addition/deletion of themself!')
+        await context.bot.send_message(chat_id=chat_id, text="You can't do addition/deletion of themself!")
         return True
     return False
 
@@ -111,14 +115,17 @@ async def prevent_second_time_add(context, chat_id, user_id, another_user):
 
     :return: error flag
     """
-    if await get_fav_obj(tlg_id=user_id) and await (await get_list_of_favourites(tlg_id=user_id)).acontains(another_user):
-        await context.bot.send_message(chat_id=chat_id, text='You have already added this user to your favourites.')
+    if await get_fav_obj(tlg_id=user_id) and await (await get_list_of_favourites(tlg_id=user_id)).acontains(
+        another_user
+    ):
+        await context.bot.send_message(chat_id=chat_id, text="You have already added this user to your favourites.")
         return True
     return False
 
+
 async def ensure_user_in_fav(context, chat_id, user_id, another_user):
     """
-    Ensures that favourites for user with ID <user_id> 
+    Ensures that favourites for user with ID <user_id>
     actually includes another_user.
     ----------
     :param context: context object
@@ -129,7 +136,9 @@ async def ensure_user_in_fav(context, chat_id, user_id, another_user):
 
     :return: error flag
     """
-    if await get_fav_obj(tlg_id=user_id) and await (await get_list_of_favourites(tlg_id=user_id)).acontains(another_user):
+    if await get_fav_obj(tlg_id=user_id) and await (await get_list_of_favourites(tlg_id=user_id)).acontains(
+        another_user
+    ):
         return False
-    await context.bot.send_message(chat_id=chat_id, text='Your favourites list doesn\'t include this user.')
+    await context.bot.send_message(chat_id=chat_id, text="Your favourites list doesn't include this user.")
     return True

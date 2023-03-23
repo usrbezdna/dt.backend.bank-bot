@@ -22,6 +22,7 @@ def get_user_by_id(tlg_id):
     logger.info(f"User with ID {tlg_id} not found in DB")
     return None
 
+
 @sync_to_async
 def get_user_by_username(username):
     """
@@ -35,6 +36,7 @@ def get_user_by_username(username):
         return user_option
     logger.info(f"User with username {username} not found in DB")
     return None
+
 
 @sync_to_async
 def save_user_to_db(user):

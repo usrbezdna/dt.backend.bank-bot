@@ -1,10 +1,12 @@
 from django.db import models
+
 from .user import User
+
 
 class Account(models.Model):
     """
     Account model.
-    
+
     """
 
     PERSON_CHOICES = [
