@@ -17,7 +17,18 @@ ABSENT_FAV_USER = 'There is no user in DB with such username / Telegram ID.\nCan
 ABSENT_OLD_FAV_USER = ('This user can\'t be found in DB (user with provided username / ' 
     + 'Telegram ID doesn\'t exist). Can\'t delete it from your favourites!')
 
-NOT_VALID_ID_MSG = 'Invalid Telegram ID.' 
+
+SEND_TO_ARGS = ('Use this command with 2 following arguments: <reciever> and <value>.\n\n'
++ 'Reciever could be specified in a form of Telegram ID / Card ID or Account ID, but don\'t '
++ 'forget to add him in your favourites at first!\n\n'
++ 'Here is an example: /send_to @usrBezdna 500')
+
+NOT_VALID_ID_MSG = 'Invalid ID.' 
+
+RSP_NOT_FOUND = ('Recipient card not found. Make sure you are using correct Telegram ID / Card ID or Account ID.')
+
+RSP_USER_WITH_NO_ACC = 'This recipient user doesn\'t have payment account.'
+RSP_USER_WITH_NO_CARDS = 'Recipient user doesn\'t have any linked card for his payment account'
 
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "

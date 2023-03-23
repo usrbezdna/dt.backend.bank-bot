@@ -57,7 +57,7 @@ def del_fav_from_user(tlg_id_of_owner, fav_user):
 
 async def try_get_another_user(context, chat_id, argument):
     """
-    This function tries to get new favourite user by username or Telegram ID.
+    This function tries to get user by username or Telegram ID.
     Returns Tuple with (another_user_option, arg_error_flag)
     ----------
     :param context: context object
@@ -73,6 +73,7 @@ async def try_get_another_user(context, chat_id, argument):
     elif not argument.isdigit() or int(argument) < 0:
         await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
         return (None, True)
+    
     else:
         another_user_option = await get_user_by_id(argument) 
 
