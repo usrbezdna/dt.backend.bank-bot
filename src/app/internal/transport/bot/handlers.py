@@ -3,6 +3,9 @@ import logging
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
 
+
+from asgiref.sync import sync_to_async
+
 from app.internal.models.user import User
 from app.internal.services.favourites_service import (
     add_fav_to_user,
@@ -21,6 +24,7 @@ from app.internal.services.payment_service import (
     get_card_from_db,
     get_user_payment_account,
     try_get_recipient_card,
+    get_owner_from_account
 )
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import (
@@ -316,9 +320,31 @@ async def send_to(update, context):
         if arg_error:
             return
 
+       
         if card_opt:
-            print("OK", arg_value)
+            if arg_value.isdigit() and int(arg_value) > 0: 
+                value = int(arg_value)
+                if sending_payment_account.value - value >= 0:
 
+                    recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
+
+                    sending_payment_account.value -= value
+                    recipient_payment_account.value += value
+
+                    await sync_to_async(sending_payment_account.save)()
+                    await sync_to_async(recipient_payment_account.save)()
+
+                    recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
+
+                    await context.bot.send_message(chat_id=chat_id, 
+                    text=f'OK! Transaction is finished. Transfered {value} to user {recipient.first_name}{recipient.last_name}')
+
+                    return
+
+                await context.bot.send_message(chat_id=chat_id, text='Insufficient balance!')
+                return
+
+            await context.bot.send_message(chat_id=chat_id, text='Transfering value should be a positive number')
             return
 
         return
