@@ -2,9 +2,7 @@ version: "3.9"
 
 services:
   django_app_with_gunicorn:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
+    image: registry.gitlab.com/toobusynow/dt.backend.bank-bot/dev:lates
 
     env_file: 
       - .env.docker.server
