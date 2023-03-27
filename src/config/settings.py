@@ -41,7 +41,7 @@ SECRET_KEY = env("SECRET_KEY")
 WEBHOOK_PORT = env("WEBHOOK_PORT")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
-CSRF_TRUSTED_ORIGINS = [f"http://{host}:1337" for host in  ALLOWED_HOSTS]
+CSRF_TRUSTED_ORIGINS = [f"http://{host}:1337" for host in ALLOWED_HOSTS]
 
 # Application definition
 

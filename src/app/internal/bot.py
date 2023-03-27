@@ -4,12 +4,7 @@ from django.conf import settings
 from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
-
-from .transport.bot.handlers import (
-    add_fav, check_payable, del_fav, 
-    get_help, list_fav, me, set_phone, 
-    start, send_to
-)
+from .transport.bot.handlers import add_fav, check_payable, del_fav, get_help, list_fav, me, send_to, set_phone, start
 
 logger = logging.getLogger("django.server")
 

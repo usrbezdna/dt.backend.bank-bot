@@ -21,7 +21,7 @@ ABSENT_OLD_FAV_USER = (
     + "Telegram ID doesn't exist). Can't delete it from your favourites!"
 )
 
-INCR_TX_VALUE = 'Transfering value should be a positive number'
+INCR_TX_VALUE = "Transfering value should be a positive number"
 
 NOT_VALID_ID_MSG = "Invalid ID."
 
@@ -29,7 +29,7 @@ RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram I
 RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
 RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked cards for his payment account"
 
-CARD_NOT_FOUND = 'There is no card with such ID in DB'
+CARD_NOT_FOUND = "There is no card with such ID in DB"
 
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "
@@ -85,8 +85,6 @@ def get_success_for_deleted_fav(fav_user):
     return f"User {fav_user.first_name} with ID: {fav_user.tlg_id} was deleted from your favourites!"
 
 
-
-
 SEND_TO_ACC_ARGS = (
     "Use this command with 2 following arguments: <Payment Account ID> and <Value>.\n\n"
     + "Don't forget to add recipient Telegram User to favourites at first!"
@@ -118,7 +116,7 @@ def get_message_for_send_command(arg_command):
             return SEND_TO_ACC_ARGS
         case "/send_to_card":
             return SEND_TO_CARD_ARGS
-        
+
 
 def get_successful_transfer_message(recipient, value):
     """
@@ -126,4 +124,4 @@ def get_successful_transfer_message(recipient, value):
     :param recipient: recipient payment Account
     :value: transferring value
     """
-    return f'OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}'
+    return f"OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}"

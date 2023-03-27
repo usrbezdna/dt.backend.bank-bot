@@ -4,15 +4,19 @@ from asgiref.sync import sync_to_async
 from django.db import DatabaseError, transaction
 
 from app.internal.transport.bot.telegram_messages import (
-    RSP_USER_WITH_NO_ACC, RSP_USER_WITH_NO_CARDS, RSP_NOT_FOUND,
-    NOT_VALID_ID_MSG, CARD_NOT_FOUND   
+    CARD_NOT_FOUND,
+    NOT_VALID_ID_MSG,
+    RSP_NOT_FOUND,
+    RSP_USER_WITH_NO_ACC,
+    RSP_USER_WITH_NO_CARDS,
 )
-
 from app.models import Account, Card
+
 from .favourites_service import try_get_another_user
 from .user_service import get_user_by_id
 
 logger = logging.getLogger("django.server")
+
 
 @sync_to_async
 def get_card_from_db(uniq_id):
@@ -84,6 +88,7 @@ async def id_is_valid(context, chat_id, identifier):
     await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
     return False
 
+
 async def account_has_any_cards(context, chat_id, account):
     """
     Checks whether or not this account has any linked cards.
@@ -101,9 +106,10 @@ async def account_has_any_cards(context, chat_id, account):
     await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_CARDS)
     return (None, True)
 
+
 async def check_bank_requisites_for_sender(context, chat_id, user_id):
     """
-    Checks whether this sending account has any Cards and Payment account. 
+    Checks whether this sending account has any Cards and Payment account.
     Returns Payment Account (or None) and sending_requisites_error flag
     ----------
     :param context: context object
@@ -116,8 +122,8 @@ async def check_bank_requisites_for_sender(context, chat_id, user_id):
 
     if not sending_payment_account or not sending_card:
         await context.bot.send_message(
-                chat_id=chat_id, text="You should have Payment account and at least one Card for making transactions!"
-            )
+            chat_id=chat_id, text="You should have Payment account and at least one Card for making transactions!"
+        )
         return (None, True)
     return (sending_payment_account, False)
 
@@ -149,31 +155,32 @@ async def try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command):
 
                 await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_ACC)
                 return (None, True)
-            
+
             await context.bot.send_message(chat_it=chat_id, text=RSP_NOT_FOUND)
             return (None, True)
-        
+
         case "/send_to_account":
             if await id_is_valid(context, chat_id, arg_user_or_id):
                 account_opt = await get_account_from_db(arg_user_or_id)
 
                 if account_opt:
                     card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
-                    return (card_option, no_cards_error) 
+                    return (card_option, no_cards_error)
             return (None, True)
-            
+
         case "/send_to_card":
             if await id_is_valid(context, chat_id, arg_user_or_id):
                 card_opt = await get_card_from_db(arg_user_or_id)
 
                 if card_opt:
                     return (card_opt, False)
-                
+
                 await context.bot.send_message(chat_id=chat_id, text=CARD_NOT_FOUND)
                 return (None, True)
-            
+
             return (None, True)
     return (None, True)
+
 
 @sync_to_async
 def transfer_to(sender_acc, recipient_acc, value):
@@ -197,7 +204,7 @@ def transfer_to(sender_acc, recipient_acc, value):
             success_flag = True
 
     except DatabaseError as err:
-        logger.error(f'Error during transfer_to call:\n{err}')
-     
+        logger.error(f"Error during transfer_to call:\n{err}")
+
     finally:
         return success_flag
