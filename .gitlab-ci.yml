@@ -82,7 +82,7 @@ deploy:
 
   # Changing IP in ALLOWED_HOSTS 
   - export IP=$(cat ip.txt)
-  - sed -i 's/ALLOWED_HOSTS=.*/ALLOWED_HOSTS='$IP'/' .env.docker
+  - sed -i 's/ALLOWED_HOSTS=.*/ALLOWED_HOSTS='$IP'/' .env.docker.server
 
   # Changing Image in DockerCompose.yml
   - >
