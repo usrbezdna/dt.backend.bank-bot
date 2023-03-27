@@ -40,7 +40,7 @@ SECRET_KEY = env("SECRET_KEY")
 # Webhook HTTP server port
 WEBHOOK_PORT = env("WEBHOOK_PORT")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bezdna.backend23.2tapp.cc"] + [env("ALLOWED_HOSTS")]
 CSRF_TRUSTED_ORIGINS = [f"http://{host}:1337" for host in ALLOWED_HOSTS]
 
 # Application definition
