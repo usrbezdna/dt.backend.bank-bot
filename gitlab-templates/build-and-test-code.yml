@@ -40,7 +40,7 @@ build:
 
   script:
     - docker pull $TAG_LATEST || true 
-    - DOCKER_BUILDKIT=1 docker build --cache-from $TAG_LATEST --build-arg BUILDKIT_INLINE_CACHE=1 -t $TAG_COMMIT -t $TAG_LATEST -f Dockerfile.server
+    - DOCKER_BUILDKIT=1 docker build --cache-from $TAG_LATEST --build-arg BUILDKIT_INLINE_CACHE=1 -t $TAG_COMMIT -t $TAG_LATEST -f Dockerfile.server .
 
     - docker push $TAG_COMMIT
     - docker push $TAG_LATEST
