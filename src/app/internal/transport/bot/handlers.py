@@ -1,55 +1,39 @@
 import logging
 
-from phonenumber_field.phonenumber import PhoneNumber
-from phonenumbers.phonenumberutil import NumberParseException
-
-
 from asgiref.sync import sync_to_async
 
+from phonenumber_field.phonenumber import PhoneNumber
+from phonenumbers.phonenumberutil import NumberParseException
 from app.internal.models.user import User
-from app.internal.services.favourites_service import (
-    add_fav_to_user,
-    del_fav_from_user,
-    ensure_user_in_fav,
-    get_fav_obj,
-    get_list_of_favourites,
-    prevent_ops_with_themself,
-    prevent_second_time_add,
-    try_get_another_user,
-)
-from app.internal.services.payment_service import (
-    get_account_from_card,
-    get_account_from_db,
-    get_card_for_account,
-    get_card_from_db,
-    get_user_payment_account,
-    try_get_recipient_card,
-    get_owner_from_account
-)
+
 from app.internal.services.telegram_service import verified_phone_required
+
 from app.internal.services.user_service import (
-    get_user_by_id,
-    get_user_by_username,
-    save_user_to_db,
+    get_user_by_id, save_user_to_db,
     update_user_phone_number,
 )
 
+from app.internal.services.favourites_service import (
+    add_fav_to_user, del_fav_from_user,
+    ensure_user_in_fav, get_list_of_favourites,
+    prevent_ops_with_themself, prevent_second_time_add,
+    try_get_another_user,
+)
+
+from app.internal.services.payment_service import (
+    get_account_from_card, get_account_from_db,
+    get_card_from_db, try_get_recipient_card, transfer_to,
+    get_owner_from_account, check_bank_requisites_for_sender, 
+)
+
 from .telegram_messages import (
-    ABSENT_ARG_FAV_MSG,
-    ABSENT_FAV_MSG,
-    ABSENT_FAV_USER,
-    ABSENT_ID_NUMBER,
-    ABSENT_OLD_FAV_USER,
-    ABSENT_PN_MSG,
-    HELP_MSG,
-    INVALID_PN_MSG,
-    NOT_INT_FORMAT_MSG,
-    RSP_NOT_FOUND,
-    SEND_TO_ARGS,
-    get_success_for_deleted_fav,
-    get_success_for_new_fav,
-    get_success_phone_msg,
-    get_unique_start_msg,
+    ABSENT_ARG_FAV_MSG, ABSENT_FAV_MSG, ABSENT_FAV_USER,
+    ABSENT_ID_NUMBER, ABSENT_OLD_FAV_USER, ABSENT_PN_MSG,
+    HELP_MSG, INVALID_PN_MSG, NOT_INT_FORMAT_MSG, INCR_TX_VALUE,
+
+    get_success_for_deleted_fav, get_success_for_new_fav,
+    get_success_phone_msg,  get_unique_start_msg,
+    get_message_for_send_command, get_successful_transfer_message
 )
 
 logger = logging.getLogger("django.server")
@@ -199,10 +183,10 @@ async def list_fav(update, context):
 
     user_id, chat_id = update.effective_user.id, update.effective_chat.id
 
-    if await get_fav_obj(user_id) and await (await get_list_of_favourites(tlg_id=user_id)).acount() > 0:
-        favs = await get_list_of_favourites(tlg_id=user_id)
+    favs_list_option = await get_list_of_favourites(tlg_id=user_id)
 
-        async for fav_user in favs[:users_limit]:
+    if favs_list_option:
+        for fav_user in favs_list_option[:users_limit]:
 
             res_msg += f"Name: {fav_user.first_name} {fav_user.last_name}," + f" ID: {fav_user.tlg_id}, Phone: "
             res_msg += f"{fav_user.phone_number}\n" if fav_user.hasPhoneNumber() else "None\n"
@@ -236,10 +220,12 @@ async def add_fav(update, context):
 
         if another_user_option:
 
-            error_op = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option)
-            error_sec = await prevent_second_time_add(context, chat_id, user_id, another_user_option)
+            error_ops = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
+            if error_ops:
+                return
 
-            if error_op or error_sec:
+            error_sec = await prevent_second_time_add(context, chat_id, user_id, another_user_option)
+            if error_sec:
                 return
 
             await add_fav_to_user(user_id, another_user_option)
@@ -272,7 +258,7 @@ async def del_fav(update, context):
 
         if another_user_option:
 
-            error_op = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option)
+            error_op = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
             if error_op:
                 return
 
@@ -282,18 +268,18 @@ async def del_fav(update, context):
 
             await del_fav_from_user(user_id, another_user_option)
             await context.bot.send_message(chat_id=chat_id, text=get_success_for_deleted_fav(another_user_option))
-
             return
 
         await context.bot.send_message(chat_id=chat_id, text=ABSENT_OLD_FAV_USER)
         return
+
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
 
 
 @verified_phone_required
 async def send_to(update, context):
     """
-    Handler for /send_to command.
+    Universal handler for all /send_to_{recip} commands. 
     Allows transactions between Users.
     ----------
     :param update: recieved Update object
@@ -303,49 +289,44 @@ async def send_to(update, context):
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 3:
+        arg_command, arg_user_or_id, arg_value = command_data
 
-        arg_user, arg_value = command_data[1], command_data[2]
+        if not arg_value.isdigit() or int(arg_value) <= 0: 
+            await context.bot.send_message(chat_id=chat_id, text=INCR_TX_VALUE)
+            return
+        
+        value = int(arg_value)
 
-        sending_user = await get_user_by_id(user_id)
-        sending_payment_account = await get_user_payment_account(sending_user)
-        sending_card = await get_card_for_account(sending_payment_account)
-
-        if not sending_payment_account or not sending_card:
-            await context.bot.send_message(
-                chat_id=chat_id, text="You should have payment account and at least one card for making transactions!"
-            )
+        sending_payment_account, requisites_error = await check_bank_requisites_for_sender(context, chat_id, user_id)
+        if requisites_error:
             return
 
-        card_opt, arg_error = await try_get_recipient_card(context, chat_id, arg_user)
-        if arg_error:
+        card_opt, error = await try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command)
+        if error:
             return
 
-       
         if card_opt:
-            if arg_value.isdigit() and int(arg_value) > 0: 
-                value = int(arg_value)
-                if sending_payment_account.value - value >= 0:
+            if sending_payment_account.value - value >= 0:
 
-                    recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
-
-                    sending_payment_account.value -= value
-                    recipient_payment_account.value += value
-
-                    await sync_to_async(sending_payment_account.save)()
-                    await sync_to_async(recipient_payment_account.save)()
-
-                    recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
-
-                    await context.bot.send_message(chat_id=chat_id, 
-                    text=f'OK! Transaction is finished. Transfered {value} to user {recipient.first_name}{recipient.last_name}')
-
+                recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
+                if recipient_payment_account == sending_payment_account:
+                    await context.bot.send_message(chat_id=chat_id, text='Self-transfer is not supported')
                     return
 
-                await context.bot.send_message(chat_id=chat_id, text='Insufficient balance!')
+                success_flag = await transfer_to(sending_payment_account, recipient_payment_account, value)
+
+                if success_flag:
+                    recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
+                    await context.bot.send_message(chat_id=chat_id, text=get_successful_transfer_message(recipient, value))
+                    return
+                
+                await context.bot.send_message(chat_id=chat_id, text='Some error occured during transfer!')
                 return
-
-            await context.bot.send_message(chat_id=chat_id, text='Transfering value should be a positive number')
+            
+            await context.bot.send_message(chat_id=chat_id, text='Insufficient balance!')
             return
-
+        
+        await context.bot.send_message(chat_id=chat_id, text='Can\'t find Card for recipient')
         return
-    await context.bot.send_message(chat_id=chat_id, text=SEND_TO_ARGS)
+    
+    await context.bot.send_message(chat_id=chat_id, text=get_message_for_send_command(command_data[0]))

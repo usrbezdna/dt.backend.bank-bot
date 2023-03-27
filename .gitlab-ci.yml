@@ -78,7 +78,7 @@ deploy:
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
 
-  - cp $DOT_ENV_DOCKER .env.docker
+  - cp $DOT_ENV_DOCKER_SERVER .env.docker.server
 
   # Changing IP in ALLOWED_HOSTS 
   - export IP=$(cat ip.txt)
@@ -88,13 +88,11 @@ deploy:
   - >
     sed -i 's#image: registry.*#image: '$TAG_LATEST'#' docker-compose-server.yml
 
-  - cat docker-compose-server.yml
-
   script:
     - ping -W 1 -c 1 $IP
     - echo OK! Machine is online
 
-    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
+    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
 
     - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&

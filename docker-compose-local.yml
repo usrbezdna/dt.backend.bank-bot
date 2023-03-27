@@ -3,9 +3,11 @@ version: "3.9"
 services:
 
   django_app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     env_file: 
-      - .env.docker
+      - .env.docker.local
     container_name: django-bot-app
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
@@ -18,7 +20,7 @@ services:
     image: postgres:15-alpine3.17
     container_name: postgres_db
     env_file: 
-      - .env.docker
+      - .env.docker.local
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:

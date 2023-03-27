@@ -110,11 +110,11 @@ docker_stop:
 ###############  Remote usage  ###############
 .PHONY: docker_remote_run
 docker_remote_run: 
-	docker compose --env-file .env.docker --file docker-compose-server.yml up -d
+	docker compose --env-file .env.docker.server --file docker-compose-server.yml up -d
 
 .PHONY: docker_remote_stop
 docker_remote_stop:
-	docker compose --env-file .env.docker --file docker-compose-server.yml stop
+	docker compose --env-file .env.docker.server --file docker-compose-server.yml stop
 
 
 ############### Terraform Section  ###############

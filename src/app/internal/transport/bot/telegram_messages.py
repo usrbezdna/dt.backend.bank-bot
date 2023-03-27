@@ -21,20 +21,15 @@ ABSENT_OLD_FAV_USER = (
     + "Telegram ID doesn't exist). Can't delete it from your favourites!"
 )
 
-
-SEND_TO_ARGS = (
-    "Use this command with 2 following arguments: <reciever> and <value>.\n\n"
-    + "Reciever could be specified in a form of Telegram ID / Card ID or Account ID, but don't "
-    + "forget to add him in your favourites at first!\n\n"
-    + "Here is an example: /send_to @usrBezdna 500"
-)
+INCR_TX_VALUE = 'Transfering value should be a positive number'
 
 NOT_VALID_ID_MSG = "Invalid ID."
 
-RSP_NOT_FOUND = "Recipient card not found. Make sure you are using correct Telegram ID / Card ID or Account ID."
+RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram ID / username"
+RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
+RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked cards for his payment account"
 
-RSP_USER_WITH_NO_ACC = "This recipient user doesn't have payment account."
-RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked card for his payment account"
+CARD_NOT_FOUND = 'There is no card with such ID in DB'
 
 NOT_INT_FORMAT_MSG = (
     "Don't forget to specify "
@@ -88,3 +83,47 @@ def get_success_for_deleted_fav(fav_user):
     :param fav_user: Telegram User object that was deleted from favourites.
     """
     return f"User {fav_user.first_name} with ID: {fav_user.tlg_id} was deleted from your favourites!"
+
+
+
+
+SEND_TO_ACC_ARGS = (
+    "Use this command with 2 following arguments: <Payment Account ID> and <Value>.\n\n"
+    + "Don't forget to add recipient Telegram User to favourites at first!"
+    + "Usage example: /send_to_account 51241421 450"
+)
+
+SEND_TO_CARD_ARGS = (
+    "Use this command with 2 following arguments: <Card ID> and <Value>.\n\n"
+    + "Don't forget to add recipient Telegram User to favourites at first!"
+    + "Usage example: /send_to_card 3214122 150"
+)
+
+SEND_TO_USER_ARGS = (
+    "Use this command with 2 following arguments: <Recipient Telegram ID / username> and <Value>.\n\n"
+    + "Don't forget to add recipient Telegram User to favourites at first!"
+    + "Usage example: /send_to_user @usrBezdna 100"
+)
+
+
+def get_message_for_send_command(arg_command):
+    """
+    Returns uniq message for each type of send_to command.
+    :param arg_command: first command argument with command name.
+    """
+    match arg_command:
+        case "/send_to_user":
+            return SEND_TO_USER_ARGS
+        case "/send_to_account":
+            return SEND_TO_ACC_ARGS
+        case "/send_to_card":
+            return SEND_TO_CARD_ARGS
+        
+
+def get_successful_transfer_message(recipient, value):
+    """
+    Return message for successful transfer.
+    :param recipient: recipient payment Account
+    :value: transferring value
+    """
+    return f'OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}'

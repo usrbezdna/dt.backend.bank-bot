@@ -4,8 +4,12 @@ media/
 local_settings.py
 __pycache__
 *.pyc
+
 .env
-.env.docker
+
+.env.docker.local
+.env.docker.server
+
 .env.runner
 .idea
 yc-terraform-testserver/.terraform

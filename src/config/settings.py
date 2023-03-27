@@ -41,6 +41,7 @@ SECRET_KEY = env("SECRET_KEY")
 WEBHOOK_PORT = env("WEBHOOK_PORT")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
+CSRF_TRUSTED_ORIGINS = [f"http://{host}:1337" for host in  ALLOWED_HOSTS]
 
 # Application definition
 
@@ -171,6 +172,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

@@ -4,7 +4,12 @@ from django.conf import settings
 from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_public_url
-from .transport.bot.handlers import add_fav, check_payable, del_fav, get_help, list_fav, me, send_to, set_phone, start
+
+from .transport.bot.handlers import (
+    add_fav, check_payable, del_fav, 
+    get_help, list_fav, me, set_phone, 
+    start, send_to
+)
 
 logger = logging.getLogger("django.server")
 
@@ -63,7 +68,9 @@ def setup_application_handlers(application):
     application.add_handler(CommandHandler("check_card", check_payable))
     application.add_handler(CommandHandler("check_account", check_payable))
 
-    application.add_handler(CommandHandler("send_to", send_to))
+    application.add_handler(CommandHandler("send_to_user", send_to))
+    application.add_handler(CommandHandler("send_to_account", send_to))
+    application.add_handler(CommandHandler("send_to_card", send_to))
 
 
 def set_bot_webhook(application):

@@ -1,14 +1,20 @@
 version: "3.9"
 
 services:
+  django_app_with_gunicorn:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
 
-  django_app:
-    image: registry.gitlab.com/toobusynow/dt.backend.bank-bot:dev
     env_file: 
-      - .env.docker
-    container_name: django-bot-app
-    ports:
-      - "${DJANGO_PORT}:${DJANGO_PORT}"
+      - .env.docker.server
+    container_name: django_gunicorn
+
+    expose:
+      - ${DJANGO_PORT}
+
+    volumes:
+      - static_volume:/backend/static/
 
     depends_on:
       db:
@@ -17,10 +23,12 @@ services:
   db:
     image: postgres:15-alpine3.17
     container_name: postgres_db
+
     env_file: 
-      - .env.docker
+      - .env.docker.server
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+
     environment:
       - POSTGRES_USER=${SQL_USER}
       - POSTGRES_PASSWORD=${SQL_PASSWORD}
@@ -34,7 +42,18 @@ services:
 
     ports:
       - "5432:5432"
-    
 
+  nginx:
+    build: ./nginx-static
+    container_name: nginx_static
+    ports:
+      - 1337:80
+    depends_on:
+      - django_app_with_gunicorn
+      
+    volumes:
+      - static_volume:/backend/static/
+    
 volumes:
   postgres_data:
+  static_volume:
