@@ -93,6 +93,7 @@ deploy:
     - echo OK! Machine is online
 
     - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
+    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r nginx-static gitlab@IP:/home/gitlab/nginx-static
 
     - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
