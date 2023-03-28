@@ -85,5 +85,5 @@ def set_bot_webhook(application):
 
     logger.info("Started")
     application.run_webhook(
-        listen="0.0.0.0", port=settings.WEBHOOK_PORT, webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
+        listen="0.0.0.0", port=settings.WEBHOOK_PORT, url_path='webhook', webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
     )
