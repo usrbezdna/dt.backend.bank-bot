@@ -88,12 +88,13 @@ deploy:
   - >
     sed -i 's#image: registry.*#image: '$TAG_LATEST'#' docker-compose-server.yml
 
+  - sudo apk add rsync
+
   script:
     - ping -W 1 -c 1 $IP
     - echo OK! Machine is online
 
-    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
-    - scp -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -prq nginx-static gitlab@$IP:/home/gitlab/nginx-static
+    - rsync -avz nginx .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
 
     - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&

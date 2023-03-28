@@ -43,8 +43,8 @@ services:
       - "5432:5432"
 
   nginx:
-    build: ./nginx-static
-    container_name: nginx_static
+    build: ./nginx
+    container_name: nginx
     ports:
       - 1337:80
     depends_on:
