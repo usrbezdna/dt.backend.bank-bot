@@ -10,6 +10,7 @@ services:
 
     expose:
       - ${DJANGO_PORT}
+      - ${WEBHOOK_PORT}
 
     volumes:
       - static_volume:/backend/static/

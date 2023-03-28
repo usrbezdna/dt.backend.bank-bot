@@ -18,5 +18,5 @@ gunicorn --bind 0.0.0.0:$DJANGO_PORT --workers=4 --chdir src config.wsgi:applica
 
 
 # Starting bot in polling mode 
-echo -e "\e[1;34mStarting Telegram Bot in polling mode\e[0m"
+echo -e "\e[1;34mStarting Telegram Bot in webhook mode\e[0m"
 python src/manage.py webhook
