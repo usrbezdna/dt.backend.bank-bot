@@ -6,7 +6,7 @@ import requests
 logger = logging.getLogger("django.server")
 
 
-def parse_public_url():
+def parse_ngrok_url():
     """
     This function parses default Ngrok API Page and returns public_url.
     ----------

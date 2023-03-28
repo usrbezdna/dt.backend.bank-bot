@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
-from .ngrok_parser import parse_public_url
+from .ngrok_parser import parse_ngrok_url
 from .transport.bot.handlers import add_fav, check_payable, del_fav, get_help, list_fav, me, send_to, set_phone, start
 
 logger = logging.getLogger("django.server")
@@ -71,13 +71,17 @@ def setup_application_handlers(application):
 def set_bot_webhook(application):
     """
     Sets a webhook to recieve incoming Telegram updates.
+    Tries to use WEBHOOK_URL from .env file.
 
-    Since we don't have an available IP in global net, we have to
+    If we don't have an available IP in global net, we have to
     use Ngrok as a Proxy to recieve HTTPS POST requests from Telegram.
     ----------
     :param application: Bot Application instance
     """
-    url = parse_public_url()
+
+    url = settings.WEBHOOK_URL
+    if not url:
+        url = parse_ngrok_url()
 
     logger.info("Started")
     application.run_webhook(

@@ -39,6 +39,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 # Webhook HTTP server port
 WEBHOOK_PORT = env("WEBHOOK_PORT")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bezdna.backend23.2tapp.cc"] + [env("ALLOWED_HOSTS")]
 
