@@ -72,12 +72,11 @@ deploy:
   - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
 
-  - chmod 400 "$RUNNER_ID_RSA"
-  - ssh-add "$RUNNER_ID_RSA"
-  
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
+  - cp $RUNNER_ID_RSA gitlab
+  - chmod 400 gitlab
 
+  - ssh-add gitlab
+  
   - cp $DOT_ENV_DOCKER_SERVER .env.docker.server
 
   # Changing IP in ALLOWED_HOSTS 
