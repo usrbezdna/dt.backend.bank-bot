@@ -88,7 +88,7 @@ deploy:
   - >
     sed -i 's#image: registry.*#image: '$TAG_LATEST'#' docker-compose-server.yml
 
-  - sudo apk add rsync
+  - apk add rsync
 
   script:
     - ping -W 1 -c 1 $IP
