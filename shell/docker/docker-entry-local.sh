@@ -2,7 +2,7 @@
 
 # Making migrations
 echo -e "\e[1;34mApplying migrations...\e[0m"
-python src/manage.py migrate
+python src/manage.py migrate --no-input
 
 # Creating test admin user
 echo -e "\e[1;34mCreating Django superuser...\e[0m"

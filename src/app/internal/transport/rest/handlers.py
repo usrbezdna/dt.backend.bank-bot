@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.internal.services.user_service import get_user_from_db
+from app.internal.services.user_service import get_user_by_id
 
 from .content_messages import NO_PHONE_VERIFICATION, USER_NOT_FOUND
 from .serializers import TelegramUserSerializer
@@ -23,7 +23,7 @@ class WebAPIView(APIView):
     def get(self, request, tlg_id):
         logger.info("Got new GET request on /api/me endpoint!")
 
-        user_from_db = asyncio.run(get_user_from_db(tlg_id))
+        user_from_db = asyncio.run(get_user_by_id(tlg_id))
         if user_from_db:
             if user_from_db.hasPhoneNumber():
                 serialized = TelegramUserSerializer(user_from_db)

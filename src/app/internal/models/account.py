@@ -1,11 +1,12 @@
 from django.db import models
 
-from .payable import Payable
+from .user import User
 
 
-class Account(Payable):
+class Account(models.Model):
     """
-    Account model, inherits from abstract Payable.
+    Account model.
+
     """
 
     PERSON_CHOICES = [
@@ -13,7 +14,21 @@ class Account(Payable):
         ("ENT", "Entity"),
     ]
 
+    CURRENCY_CHOICES = [
+        ("USD", "United States dollar"),
+        ("EUR", "Euro"),
+        ("GBP", "British pound"),
+        ("TRY", "Turkish lira"),
+        ("RUB", "Russian ruble"),
+    ]
+
+    uniq_id = models.CharField(primary_key=True, max_length=40)
+
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
     party = models.CharField(max_length=3, choices=PERSON_CHOICES)
+
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES)
+    value = models.DecimalField(max_digits=19, decimal_places=2)
 
     class Meta:
         """

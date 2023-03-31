@@ -1,0 +1,35 @@
+###########################################
+#  Installs Yandex Cloud CLI and creates  #
+#       profile for service account       #
+###########################################
+
+.Run-Yandex-Cloud-Configuration: &Run-Yandex-Cloud-Configuration
+  script:
+    - curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -n
+    - alias yc='/root/yandex-cloud/bin/yc'
+
+    - yc config profile create gitlab
+    - yc config set token $YC_OAUTH_TOKEN
+
+    - yc config profile create gitlab-profile --folder-id $YC_FOLDER_ID --cloud-id $YC_CLOUD_ID
+    - yc config set service-account-key $YC_SERVICE_ACC_KEY
+
+    - yc config list
+    - export YC_TOKEN=$(yc iam create-token)
+
+
+############################################
+#     Runs Terraform init with Gitlab      #   
+#  as an http backend for tf.state files   #     
+############################################
+
+.Run-Gitlab-TF-Configuration: &Run-Gitlab-TF-Configuration
+  script:
+    - apk add --update curl bash
+
+    - cp $DOT_TERRAFORMRC ~/.terraformrc
+    - cp $RUNNER_ID_RSA ~/gitlab_id_rsa
+
+    - cd yc-terraform-testserver
+
+    - terraform init -backend-config="address=${GITLAB_TF_ADDRESS}" -backend-config="lock_address=${GITLAB_TF_ADDRESS}/lock" -backend-config="unlock_address=${GITLAB_TF_ADDRESS}/lock" -backend-config="username=tooBusyNow" -backend-config="password=${GITLAB_TF_TOKEN}" -backend-config="lock_method=POST" -backend-config="unlock_method=DELETE" -backend-config="retry_wait_min=5"

@@ -1,0 +1,48 @@
+include:
+  - local: 'gitlab-templates/anchors.yml'
+
+stages:
+  - validate
+  - apply
+
+image: 
+  name: hashicorp/terraform:light
+  entrypoint:
+  - /usr/bin/env
+  - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+variables:
+  GITLAB_TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_COMMIT_REF_NAME}_state
+
+before_script:
+  - !reference [.Run-Gitlab-TF-Configuration, script]
+
+
+validate:
+  stage: validate
+  tags:
+    - infra
+  script:
+    - terraform validate
+    - terraform fmt -check=true
+
+apply:
+  stage: apply
+  tags:
+    - infra
+  script:
+    - !reference [.Run-Yandex-Cloud-Configuration, script]
+
+    - export TF_VAR_address_name=$CI_COMMIT_REF_NAME-addr
+    - export TF_VAR_vm_name=$CI_COMMIT_REF_NAME-vm
+
+    - terraform apply -auto-approve
+
+    - instance_ip=$(terraform output connection_ip)
+    - echo $instance_ip | tr -d '"' >> ../ip.txt
+
+  artifacts:
+    paths:
+      - ip.txt
+    expire_in: 300 seconds
+    

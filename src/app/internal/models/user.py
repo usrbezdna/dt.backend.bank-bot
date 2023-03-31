@@ -40,9 +40,10 @@ class User(models.Model):
         """
         user_as_a_str = (
             f"Your Telegram ID: {self.tlg_id}\n"
-            f"Username: {self.username}\n"
-            f"Phone number: {self.phone_number}\n"
             f"First name: {self.first_name}\n"
+            f"Phone number: {self.phone_number}\n"
         )
-        user_as_a_str += f"Last name: {self.last_name}\n" if self.last_name else "\nYou don't have a last name"
+
+        user_as_a_str += f"Last name: {self.last_name}\n" if self.last_name else "You don't have a last name\n"
+        user_as_a_str += f"Username: {self.username}\n" if self.username else "Can't find your username\n"
         return user_as_a_str

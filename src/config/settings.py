@@ -39,8 +39,14 @@ SECRET_KEY = env("SECRET_KEY")
 
 # Webhook HTTP server port
 WEBHOOK_PORT = env("WEBHOOK_PORT")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [env("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bezdna.backend23.2tapp.cc"] + [env("ALLOWED_HOSTS")]
+
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    CSRF_TRUSTED_ORIGINS.extend([f"http://{host}", f"https://{host}"])
+
 
 # Application definition
 
@@ -171,6 +177,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
