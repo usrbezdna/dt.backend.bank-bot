@@ -8,7 +8,7 @@ logger = logging.getLogger("django.server")
 
 
 @sync_to_async
-def get_user_by_id(tlg_id):
+def get_user_by_id(tlg_id): 
     """
     Returns Telegram user by ID from Database or None
     (if this user doesn't exist)

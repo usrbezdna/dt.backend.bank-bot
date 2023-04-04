@@ -1,0 +1,6 @@
+[run]
+omit = 
+    ./src/manage.py
+    ./src/config/wsgi.py
+    ./src/app/migrations/*
+    *__init__*
