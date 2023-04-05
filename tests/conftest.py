@@ -2,10 +2,14 @@ import datetime
 import pytest 
 
 from unittest.mock import AsyncMock
+from src.app.internal.services.user_service import save_user_to_db
+
 from telegram import Chat, Message, Update, User, MessageEntity
 from telegram.ext import ApplicationBuilder
 
 from src.app.internal.bot import setup_application_handlers
+
+
 
 @pytest.fixture
 def bot_application(mocked_context):
@@ -20,6 +24,13 @@ def bot_application(mocked_context):
 
 
 @pytest.fixture
+async def save_user(telegram_user):
+    await save_user_to_db(telegram_user)
+    return telegram_user
+ 
+
+
+@pytest.fixture
 def mocked_context():
 
     mocked_context = AsyncMock()
@@ -31,10 +42,10 @@ def mocked_context():
 @pytest.fixture
 def telegram_user():
     return User(
-        id=123, 
+        id=123,
         is_bot=False,
-        first_name='foo', 
-        last_name='bar', 
+        first_name='foo',
+        last_name='bar',
         username='foobar'
     )
 

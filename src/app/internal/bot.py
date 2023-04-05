@@ -52,7 +52,6 @@ def setup_application_handlers(application):
     """
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", get_help))
-
     application.add_handler(CommandHandler("set_phone", set_phone))
     application.add_handler(CommandHandler("me", me))
 

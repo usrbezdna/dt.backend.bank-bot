@@ -17,7 +17,6 @@ async def test_smoke(bot_application, get_update_for_command, telegram_user, tel
         - Test User was successfully saved to DB
         - Telegram User recieved the unique start message
     """
-   
 
     await bot_application.initialize()
     await bot_application.start()
@@ -33,7 +32,6 @@ async def test_smoke(bot_application, get_update_for_command, telegram_user, tel
         chat_id=telegram_chat.id, 
         text=get_unique_start_msg(telegram_user.first_name)
     )
-
 
     assert await User.objects.acount() == 1
     assert await User.objects.filter(tlg_id=telegram_user.id).afirst()
