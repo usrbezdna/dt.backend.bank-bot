@@ -63,3 +63,19 @@ def update_user_phone_number(user, new_phone_number):
     user.phone_number = new_phone_number
     user.save()
     logger.info(f"Updated phone number for user with {user.tlg_id} ID")
+
+
+def create_user_model_for_telegram(user):
+    """
+    This function recieves user in a form of Effective Telegram User 
+    and creates a new model based on provided info.
+    ----------
+    :param user: Telegram user object
+    """
+    return User(
+        tlg_id=user.id,
+        username=user.username if user.username else "",
+        first_name=user.first_name,
+        last_name=user.last_name if user.last_name else "",
+        phone_number="",
+    )

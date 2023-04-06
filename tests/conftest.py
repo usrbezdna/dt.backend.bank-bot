@@ -2,14 +2,13 @@ import datetime
 import pytest 
 
 from unittest.mock import AsyncMock
-from src.app.internal.services.user_service import save_user_to_db
+from src.app.internal.services.user_service import create_user_model_for_telegram
 
 from telegram import Chat, Message, Update, User, MessageEntity
 from telegram.ext import ApplicationBuilder
 
 from src.app.internal.bot import setup_application_handlers
-
-
+from src.app.models import User as UserModel
 
 @pytest.fixture
 def bot_application(mocked_context):
@@ -24,15 +23,24 @@ def bot_application(mocked_context):
 
 
 @pytest.fixture
-async def save_user(telegram_user):
-    await save_user_to_db(telegram_user)
+def already_saved_user(telegram_user):
+    user_model = create_user_model_for_telegram(telegram_user)
+    user_model.save()
+
     return telegram_user
  
+@pytest.fixture
+def already_verified_user(already_saved_user):
+    
+    user_model = UserModel.objects.filter(tlg_id=already_saved_user.id).first()
+    user_model.phone_number = '+12345'
+    user_model.save()
+
+    return already_saved_user
 
 
 @pytest.fixture
 def mocked_context():
-
     mocked_context = AsyncMock()
     mocked_context.bot.username = 'testbot'
 
@@ -71,6 +79,16 @@ def get_update_for_command(get_message_with_text, mocked_context):
         return custom_update
     return inner
 
+@pytest.fixture
+def get_list_with_updates(get_update_for_command):
+    def inner(list_with_commands):
+        updates_list = []
+        for command in list_with_commands:
+            updates_list.append(get_update_for_command(command))
+        
+        return updates_list
+    return inner
+
 
 @pytest.fixture
 def get_message_with_text(telegram_user, telegram_chat, mocked_context):
@@ -88,5 +106,3 @@ def get_message_with_text(telegram_user, telegram_chat, mocked_context):
         custom_message._bot = mocked_context.bot
         return custom_message
     return inner
-
-

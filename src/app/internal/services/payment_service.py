@@ -72,6 +72,34 @@ def get_first_card_for_account(account):
     return Card.objects.filter(corresponding_account=account).first()
 
 
+@sync_to_async
+def transfer_to(sender_acc, recipient_acc, value):
+    """
+    Transfers value from first_payment_account to second_payment_account.
+    Returns success flag
+    ----------
+    :param first_payment_acc, second_payment_acc: payment Accounts
+    :value: transferring value
+    """
+    success_flag = False
+    try:
+        with transaction.atomic():
+
+            sender_acc.value -= value
+            recipient_acc.value += value
+
+            sender_acc.save()
+            recipient_acc.save()
+
+            success_flag = True
+
+    except DatabaseError as err:
+        logger.error(f"Error during transfer_to call:\n{err}")
+
+    finally:
+        return success_flag
+
+
 async def id_is_valid(context, chat_id, identifier):
     """
     Ensures that provided identifier is a positive number.
@@ -142,69 +170,85 @@ async def try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command):
     match arg_command:
 
         case "/send_to_user":
-            recipient_user_opt, arg_error = await try_get_another_user(context, chat_id, arg_user_or_id)
-            if arg_error:
-                return (None, True)
-
-            if recipient_user_opt:
-                account_opt = await get_user_payment_account(recipient_user_opt)
-
-                if account_opt:
-                    card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
-                    return (card_option, no_cards_error)
-
-                await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_ACC)
-                return (None, True)
-
-            await context.bot.send_message(chat_it=chat_id, text=RSP_NOT_FOUND)
-            return (None, True)
+            return await handle_case_with_send_to_user(context, chat_id, arg_user_or_id)
 
         case "/send_to_account":
-            if await id_is_valid(context, chat_id, arg_user_or_id):
-                account_opt = await get_account_from_db(arg_user_or_id)
-
-                if account_opt:
-                    card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
-                    return (card_option, no_cards_error)
-            return (None, True)
+            return await handle_case_with_send_to_account(context, chat_id, arg_user_or_id)
 
         case "/send_to_card":
-            if await id_is_valid(context, chat_id, arg_user_or_id):
-                card_opt = await get_card_from_db(arg_user_or_id)
-
-                if card_opt:
-                    return (card_opt, False)
-
-                await context.bot.send_message(chat_id=chat_id, text=CARD_NOT_FOUND)
-                return (None, True)
-
-            return (None, True)
+            return await handle_case_with_send_to_card(context, chat_id, arg_user_or_id)
+        
     return (None, True)
 
 
-@sync_to_async
-def transfer_to(sender_acc, recipient_acc, value):
+async def handle_case_with_send_to_user(context, chat_id, arg_user_or_id):
     """
-    Transfers value from first_payment_account to second_payment_account.
-    Returns success flag
+    Tries to get recipient card for send_to_user case 
+    (Sender have specified another Telegram User as a recipient)
     ----------
-    :param first_payment_acc, second_payment_acc: payment Accounts
-    :value: transferring value
+    :param context: context object
+    :param chat_id: Telegram Chat ID
+    :param arg_user_or_id: Recipient Telegram username (or ID)
+
+    :return: Tuple with Card object and error flag
     """
-    success_flag = False
-    try:
-        with transaction.atomic():
 
-            sender_acc.value -= value
-            recipient_acc.value += value
+    recipient_user_opt, arg_error = await try_get_another_user(context, chat_id, arg_user_or_id)
+    if arg_error:
+        return (None, True)
 
-            sender_acc.save()
-            recipient_acc.save()
+    if recipient_user_opt:
+        account_opt = await get_user_payment_account(recipient_user_opt)
 
-            success_flag = True
+        if account_opt:
+            card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
+            return (card_option, no_cards_error)
 
-    except DatabaseError as err:
-        logger.error(f"Error during transfer_to call:\n{err}")
+        await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_ACC)
+        return (None, True)
 
-    finally:
-        return success_flag
+    await context.bot.send_message(chat_it=chat_id, text=RSP_NOT_FOUND)
+    return (None, True)
+
+
+async def handle_case_with_send_to_account(context, chat_id, account_id):
+    """
+    Tries to get recipient card for send_to_account case
+    (Sender have specified recipient Account ID) 
+    ----------
+    :param context: context object
+    :param chat_id: Telegram Chat ID
+    :param account_id: Recipient Payment Account uniq ID
+
+    :return: Tuple with Card object and error flag
+    """
+    if await id_is_valid(context, chat_id, account_id):
+        account_opt = await get_account_from_db(account_id)
+
+        if account_opt:
+            card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
+            return (card_option, no_cards_error)
+    return (None, True)
+
+
+async def handle_case_with_send_to_card(context, chat_id, card_id):
+    """
+    Tries to get recipient card for send_to_card case
+    (Sender have specified recipient Card ID) 
+    ----------
+    :param context: context object
+    :param chat_id: Telegram Chat ID
+    :param card_id: Recipient Card ID 
+
+    :return: Tuple with Card object and error flag
+    """
+    if await id_is_valid(context, chat_id, card_id):
+        card_opt = await get_card_from_db(card_id)
+
+        if card_opt:
+            return (card_opt, False)
+
+        await context.bot.send_message(chat_id=chat_id, text=CARD_NOT_FOUND)
+        return (None, True)
+
+    return (None, True)

@@ -21,12 +21,12 @@ def test_absent_user(client, web_api_url):
 
 @pytest.mark.unit
 @pytest.mark.django_db(transaction=True)
-def test_user_without_verified_phone(client, web_api_url, user_without_verified_pn):
+def test_user_without_verified_phone(client, web_api_url, user_model_without_verified_pn):
     """
     Test case with User without the verified phone number
     """
 
-    resticted_user = user_without_verified_pn(tlg_id=123)
+    resticted_user = user_model_without_verified_pn(tlg_id=123)
     resticted_user.save()
 
     url_for_user = web_api_url(tlg_id=123)
@@ -37,12 +37,12 @@ def test_user_without_verified_phone(client, web_api_url, user_without_verified_
 
 @pytest.mark.unit
 @pytest.mark.django_db(transaction=True)
-def test_user_with_verified_phone(client, web_api_url, user_with_verified_pn):
+def test_user_with_verified_phone(client, web_api_url, user_model_with_verified_pn):
     """
     Test case with User with verified phone number
     """
 
-    verified_user = user_with_verified_pn(tlg_id=123)
+    verified_user = user_model_with_verified_pn(tlg_id=123)
     verified_user.save()
 
     url_for_user = web_api_url(tlg_id=123)
