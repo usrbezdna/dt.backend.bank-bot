@@ -10,10 +10,10 @@ from app.internal.services.favourites_service import (
     del_fav_from_user,
     ensure_user_in_fav,
     get_list_of_favourites,
+    get_result_message_for_user_favourites,
     prevent_ops_with_themself,
     prevent_second_time_add,
     try_get_another_user,
-    get_result_message_for_user_favourites,
 )
 from app.internal.services.payment_service import (
     check_bank_requisites_for_sender,
@@ -26,8 +26,10 @@ from app.internal.services.payment_service import (
 )
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import (
-    get_user_by_id, save_user_to_db, 
-    update_user_phone_number, create_user_model_for_telegram
+    create_user_model_for_telegram,
+    get_user_by_id,
+    save_user_to_db,
+    update_user_phone_number,
 )
 
 from .telegram_messages import (
@@ -131,9 +133,7 @@ async def me(update, context):
     user_id = update.effective_user.id
     user_from_db = await get_user_by_id(user_id)
 
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id, text=get_info_for_me_handler(user_from_db)
-    )
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=get_info_for_me_handler(user_from_db))
 
 
 @verified_phone_required
@@ -173,9 +173,7 @@ async def check_payable(update, context):
 
         else:
             logger.info(f"Card / account with ID {uniq_id} not found in DB")
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id, text=BALANCE_NOT_FOUND
-            )
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=BALANCE_NOT_FOUND)
 
         return
 

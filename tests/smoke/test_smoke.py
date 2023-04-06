@@ -1,8 +1,9 @@
 import pytest
 
-from src.app.models import User
 from src.app.internal.transport.bot.handlers import start
 from src.app.internal.transport.bot.telegram_messages import get_unique_start_msg
+from src.app.models import User
+
 
 @pytest.mark.smoke
 @pytest.mark.asyncio
@@ -23,14 +24,12 @@ async def test_smoke(bot_application, get_update_for_command, telegram_user, tel
 
     assert bot_application.running
 
-    mocked_update = get_update_for_command('/start')
-    await bot_application.process_update(mocked_update) 
+    mocked_update = get_update_for_command("/start")
+    await bot_application.process_update(mocked_update)
     await bot_application.stop()
 
-
     mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, 
-        text=get_unique_start_msg(telegram_user.first_name)
+        chat_id=telegram_chat.id, text=get_unique_start_msg(telegram_user.first_name)
     )
 
     assert await User.objects.acount() == 1

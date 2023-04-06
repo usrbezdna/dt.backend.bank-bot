@@ -3,10 +3,11 @@ import logging
 from asgiref.sync import sync_to_async
 
 from app.internal.transport.bot.telegram_messages import (
-    NOT_VALID_ID_MSG, RESTRICT_SECOND_TIME_ADD, 
-    RESTRICT_SELF_OPS, USER_NOT_IN_FAV
+    NOT_VALID_ID_MSG,
+    RESTRICT_SECOND_TIME_ADD,
+    RESTRICT_SELF_OPS,
+    USER_NOT_IN_FAV,
 )
-
 from app.models import Favourite
 
 from .user_service import get_user_by_id, get_user_by_username
@@ -143,10 +144,10 @@ async def ensure_user_in_fav(context, chat_id, user_id, another_user):
 
 def get_result_message_for_user_favourites(favs_list, users_limit):
     """
-    Creates message with all favourites of a particular user  
+    Creates message with all favourites of a particular user
     ----------
     :param favs_list: list of favourite users
-    :param users_limit: allows us to limit number of users in result message 
+    :param users_limit: allows us to limit number of users in result message
     """
     res_msg = ""
     for fav_user in favs_list[:users_limit]:

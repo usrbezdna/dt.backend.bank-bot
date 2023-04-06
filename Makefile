@@ -68,7 +68,7 @@ flush:
 # Running autopep8
 .PHONY: autopep8
 autopep8:
-	autopep8 --in-place --aggressive --aggressive -r src	
+	autopep8 --in-place --aggressive --aggressive -r .	
 
 # Running code linters
 .PHONY: lint

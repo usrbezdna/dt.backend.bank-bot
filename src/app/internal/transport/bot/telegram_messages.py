@@ -36,6 +36,9 @@ RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram I
 RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
 RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked cards for his payment account"
 
+
+SENDER_RESTRICTION = "You should have Payment account and at least one Card for making transactions!"
+
 CARD_NOT_FOUND = "There is no card with such ID in DB"
 
 NOT_INT_FORMAT_MSG = (
@@ -116,7 +119,8 @@ def get_info_for_me_handler(user_from_db):
     Returns info for /me handler
     :param user_from_db: User object
     """
-    return (f"Here is some info about you:\n\n {str(user_from_db)}")
+    return f"Here is some info about you:\n\n {str(user_from_db)}"
+
 
 def get_message_for_send_command(arg_command):
     """
@@ -139,6 +143,7 @@ def get_successful_transfer_message(recipient, value):
     :value: transferring value
     """
     return f"OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}"
+
 
 def get_message_with_balance(account):
     """

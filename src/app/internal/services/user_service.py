@@ -8,7 +8,7 @@ logger = logging.getLogger("django.server")
 
 
 @sync_to_async
-def get_user_by_id(tlg_id): 
+def get_user_by_id(tlg_id):
     """
     Returns Telegram user by ID from Database or None
     (if this user doesn't exist)
@@ -67,7 +67,7 @@ def update_user_phone_number(user, new_phone_number):
 
 def create_user_model_for_telegram(user):
     """
-    This function recieves user in a form of Effective Telegram User 
+    This function recieves user in a form of Effective Telegram User
     and creates a new model based on provided info.
     ----------
     :param user: Telegram user object

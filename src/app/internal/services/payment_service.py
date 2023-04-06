@@ -9,6 +9,7 @@ from app.internal.transport.bot.telegram_messages import (
     RSP_NOT_FOUND,
     RSP_USER_WITH_NO_ACC,
     RSP_USER_WITH_NO_CARDS,
+    SENDER_RESTRICTION,
 )
 from app.models import Account, Card
 
@@ -149,9 +150,7 @@ async def check_bank_requisites_for_sender(context, chat_id, user_id):
     sending_card = await get_first_card_for_account(sending_payment_account)
 
     if not sending_payment_account or not sending_card:
-        await context.bot.send_message(
-            chat_id=chat_id, text="You should have Payment account and at least one Card for making transactions!"
-        )
+        await context.bot.send_message(chat_id=chat_id, text=SENDER_RESTRICTION)
         return (None, True)
     return (sending_payment_account, False)
 
@@ -177,13 +176,13 @@ async def try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command):
 
         case "/send_to_card":
             return await handle_case_with_send_to_card(context, chat_id, arg_user_or_id)
-        
+
     return (None, True)
 
 
 async def handle_case_with_send_to_user(context, chat_id, arg_user_or_id):
     """
-    Tries to get recipient card for send_to_user case 
+    Tries to get recipient card for send_to_user case
     (Sender have specified another Telegram User as a recipient)
     ----------
     :param context: context object
@@ -201,20 +200,20 @@ async def handle_case_with_send_to_user(context, chat_id, arg_user_or_id):
         account_opt = await get_user_payment_account(recipient_user_opt)
 
         if account_opt:
-            card_option, no_cards_error = await account_has_any_cards(context, chat_id, account_opt)
-            return (card_option, no_cards_error)
+            card_option, cards_error = await account_has_any_cards(context, chat_id, account_opt)
+            return (card_option, cards_error)
 
         await context.bot.send_message(chat_id=chat_id, text=RSP_USER_WITH_NO_ACC)
         return (None, True)
 
-    await context.bot.send_message(chat_it=chat_id, text=RSP_NOT_FOUND)
+    await context.bot.send_message(chat_id=chat_id, text=RSP_NOT_FOUND)
     return (None, True)
 
 
 async def handle_case_with_send_to_account(context, chat_id, account_id):
     """
     Tries to get recipient card for send_to_account case
-    (Sender have specified recipient Account ID) 
+    (Sender have specified recipient Account ID)
     ----------
     :param context: context object
     :param chat_id: Telegram Chat ID
@@ -234,11 +233,11 @@ async def handle_case_with_send_to_account(context, chat_id, account_id):
 async def handle_case_with_send_to_card(context, chat_id, card_id):
     """
     Tries to get recipient card for send_to_card case
-    (Sender have specified recipient Card ID) 
+    (Sender have specified recipient Card ID)
     ----------
     :param context: context object
     :param chat_id: Telegram Chat ID
-    :param card_id: Recipient Card ID 
+    :param card_id: Recipient Card ID
 
     :return: Tuple with Card object and error flag
     """
