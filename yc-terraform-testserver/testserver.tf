@@ -24,8 +24,8 @@ terraform {
 }
 
 # Latest Ubuntu 22.04 image
-data "yandex_compute_image" "ubuntu-2004-latest" {
-  family = "ubuntu-2004-lts"
+data "yandex_compute_image" "ubuntu-2204-latest" {
+  family = "ubuntu-2204-lts"
 }
 
 # Using the same subnet as specified in our zone
@@ -59,10 +59,10 @@ resource "yandex_compute_instance" "vm-instance" {
     memory        = 2
   }
 
-  # Boot disk with Ubuntu 20.04 LTS
+  # Boot disk with Ubuntu 22.04 LTS
   boot_disk {
     initialize_params {
-      image_id = data.yandex_compute_image.ubuntu-2004-latest.id
+      image_id = data.yandex_compute_image.ubuntu-2204-latest.id
       size     = var.boot_disk_size
     }
   }
@@ -91,8 +91,9 @@ resource "yandex_compute_instance" "vm-instance" {
 
   # Copies External Nginx Config
   provisioner "file" {
+    when   = create
     source      = "external-nginx.conf"
-    destination = "bezdna.backend23.2tapp.cc.conf"
+    destination = "/home/gitlab/bezdna.backend23.2tapp.cc.conf"
   }
 
   # And this Provisioner starts instance configuration script
