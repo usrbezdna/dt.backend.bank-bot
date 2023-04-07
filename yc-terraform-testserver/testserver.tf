@@ -91,7 +91,7 @@ resource "yandex_compute_instance" "vm-instance" {
 
   # Copies External Nginx Config
   provisioner "file" {
-    when   = create
+    when        = create
     source      = "external-nginx.conf"
     destination = "/home/gitlab/bezdna.backend23.2tapp.cc.conf"
   }
