@@ -6,6 +6,7 @@ from src.app.internal.services.user_service import get_user_by_id
 from src.app.internal.transport.bot.handlers import me, set_phone, start
 from src.app.internal.transport.bot.telegram_messages import (
     INVALID_PN_MSG,
+    ME_WITH_NO_USER,
     NO_VERIFIED_PN,
     NOT_INT_FORMAT_MSG,
     get_info_for_me_handler,
@@ -56,6 +57,18 @@ async def test_me_without_verified_phone(mocked_context, already_saved_user, tel
     await me(mocked_update, mocked_context)
 
     mocked_context.bot.send_message.assert_called_once_with(chat_id=telegram_chat.id, text=NO_VERIFIED_PN)
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+@pytest.mark.django_db(transaction=True)
+async def test_me_without_user(mocked_context, telegram_user, telegram_chat, get_update_for_command):
+    mocked_update = get_update_for_command("/me")
+
+    await me(mocked_update, mocked_context)
+    mocked_context.bot.send_message.assert_called_once_with(
+        chat_id=telegram_chat.id, text=ME_WITH_NO_USER
+    )
 
 
 @pytest.mark.asyncio

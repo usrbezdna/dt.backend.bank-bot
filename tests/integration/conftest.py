@@ -55,7 +55,7 @@ def new_user_with_account(user_model_without_verified_pn, account_with_owner_and
 @pytest.fixture
 def user_model_without_verified_pn():
     def inner(tlg_id):
-        return User(tlg_id=tlg_id, username="testuser", first_name="Still", last_name="Test", phone_number="")
+        return User(tlg_id=tlg_id, username="Testuser", first_name="Still", last_name="Test", phone_number="")
 
     return inner
 

@@ -9,6 +9,9 @@ INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 ABSENT_ID_NUMBER = "You should specify unique card / account id! "
 
+ME_WITH_NO_USER = "Type /start at first and verify you phone number" 
+
+
 ABSENT_FAV_MSG = (
     "Couldn't find any users in your favourites.\n" + "Don't forget to add them at first with /add_fav command"
 )
@@ -38,6 +41,9 @@ RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked cards for his p
 
 
 SENDER_RESTRICTION = "You should have Payment account and at least one Card for making transactions!"
+SELF_TRANSFER_ERROR = "Self-transfer is not supported"
+INSUF_BALANCE = "Insufficient balance!"
+ERROR_DURING_TRANSFER = "Some error occured during transfer!"
 
 CARD_NOT_FOUND = "There is no card with such ID in DB"
 

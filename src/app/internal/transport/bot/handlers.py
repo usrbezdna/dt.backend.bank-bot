@@ -40,11 +40,14 @@ from .telegram_messages import (
     ABSENT_OLD_FAV_USER,
     ABSENT_PN_MSG,
     BALANCE_NOT_FOUND,
+    ERROR_DURING_TRANSFER,
     HELP_MSG,
     INCR_TX_VALUE,
+    INSUF_BALANCE,
     INVALID_PN_MSG,
     NOT_INT_FORMAT_MSG,
     NOT_VALID_ID_MSG,
+    SELF_TRANSFER_ERROR,
     get_info_for_me_handler,
     get_message_for_send_command,
     get_message_with_balance,
@@ -314,30 +317,27 @@ async def send_to(update, context):
         if error:
             return
 
-        if card_opt:
-            if sending_payment_account.value - value >= 0:
+        
+        if sending_payment_account.value - value >= 0:
 
-                recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
-                if recipient_payment_account == sending_payment_account:
-                    await context.bot.send_message(chat_id=chat_id, text="Self-transfer is not supported")
-                    return
-
-                success_flag = await transfer_to(sending_payment_account, recipient_payment_account, value)
-
-                if success_flag:
-                    recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
-                    await context.bot.send_message(
-                        chat_id=chat_id, text=get_successful_transfer_message(recipient, value)
-                    )
-                    return
-
-                await context.bot.send_message(chat_id=chat_id, text="Some error occured during transfer!")
+            recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
+            if recipient_payment_account == sending_payment_account:
+                await context.bot.send_message(chat_id=chat_id, text=SELF_TRANSFER_ERROR)
                 return
 
-            await context.bot.send_message(chat_id=chat_id, text="Insufficient balance!")
+            success_flag = await transfer_to(sending_payment_account, recipient_payment_account, value)
+
+            if success_flag:
+                recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
+                await context.bot.send_message(
+                    chat_id=chat_id, text=get_successful_transfer_message(recipient, value)
+                )
+                return
+
+            await context.bot.send_message(chat_id=chat_id, text=ERROR_DURING_TRANSFER)
             return
 
-        await context.bot.send_message(chat_id=chat_id, text="Can't find Card for recipient")
+        await context.bot.send_message(chat_id=chat_id, text=INSUF_BALANCE)
         return
 
     await context.bot.send_message(chat_id=chat_id, text=get_message_for_send_command(command_data[0]))

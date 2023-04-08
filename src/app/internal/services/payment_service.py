@@ -177,8 +177,6 @@ async def try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command):
         case "/send_to_card":
             return await handle_case_with_send_to_card(context, chat_id, arg_user_or_id)
 
-    return (None, True)
-
 
 async def handle_case_with_send_to_user(context, chat_id, arg_user_or_id):
     """

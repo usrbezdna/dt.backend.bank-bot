@@ -4,7 +4,7 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.transport.bot.telegram_messages import NO_VERIFIED_PN
+from app.internal.transport.bot.telegram_messages import ME_WITH_NO_USER, NO_VERIFIED_PN
 
 from .user_service import get_user_by_id
 
@@ -25,7 +25,7 @@ def verified_phone_required(func):
 
         if not user:
             await context.bot.send_message(
-                chat_id=update.effective_chat.id, text="Type /start at first and verify you phone number"
+                chat_id=update.effective_chat.id, text=ME_WITH_NO_USER
             )
             return
 
