@@ -1,0 +1,28 @@
+overload:
+   enabled: true
+   job_name: App Test
+   job_dsc: Line from 1 to 50 for 1m; Const 50 for 1m
+   token_file: api_token.txt
+
+phantom:
+   address: bezdna.backend23.2tapp.cc:443
+   header_http: "1.1"
+   headers:
+     - "[Host: bezdna.backend23.2tapp.cc]"
+     - "[Connection: close]"
+   uris:
+     - /admin/
+   load_profile:
+     load_type: rps
+     schedule: line(1, 50, 1m) const(50, 1m)
+   ssl: true
+
+autostop:
+   autostop:
+      - http(5xx, 10%, 5s)
+
+console:
+  enabled: true
+  
+telegraf:
+  enabled: false
