@@ -11,7 +11,7 @@ phantom:
      - "[Host: bezdna.backend23.2tapp.cc]"
      - "[Connection: close]"
    uris:
-     - /admin/
+     - /admin/login/?next=/admin/
    load_profile:
      load_type: rps
      schedule: line(1, 50, 1m) const(50, 1m)
