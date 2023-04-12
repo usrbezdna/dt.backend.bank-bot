@@ -62,7 +62,7 @@ resource "yandex_compute_instance" "vm-instance" {
   # Boot disk with Ubuntu 22.04 LTS
   boot_disk {
     initialize_params {
-      image_id = data.yandex_compute_image.ubuntu-2204-latest.id
+      image_id = "fd8i3uauimpm750kd9vh"
       size     = var.boot_disk_size
     }
   }
