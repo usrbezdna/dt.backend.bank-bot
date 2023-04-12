@@ -30,7 +30,7 @@ test:
    - pip3 install pipenv
 
   script:
-    - make test
+    - pipenv run test
 
   needs: []
 
