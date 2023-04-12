@@ -29,11 +29,10 @@ test:
    - apt-get update && apt-get install make
    - pip3 install pipenv
 
-  script:
-    - pipenv shell
-    - pipenv install
+   - pipenv install --dev --system
 
-    - make test
+  script:
+    - pipenv run pytest
 
   needs: []
 
