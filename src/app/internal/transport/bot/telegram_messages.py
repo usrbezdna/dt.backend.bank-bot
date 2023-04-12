@@ -1,9 +1,16 @@
 # Default bot reply messages
 
+NO_VERIFIED_PN = "You don't have a verified phone number!"
+RESTRICT_SELF_OPS = "You can't do addition/deletion of themself!"
+RESTRICT_SECOND_TIME_ADD = "You have already added this user to your favourites."
+USER_NOT_IN_FAV = "Your favourites list doesn't include this user."
 
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 ABSENT_ID_NUMBER = "You should specify unique card / account id! "
+
+ME_WITH_NO_USER = "Type /start at first and verify you phone number"
+
 
 ABSENT_FAV_MSG = (
     "Couldn't find any users in your favourites.\n" + "Don't forget to add them at first with /add_fav command"
@@ -25,9 +32,18 @@ INCR_TX_VALUE = "Transfering value should be a positive number"
 
 NOT_VALID_ID_MSG = "Invalid ID."
 
+
+BALANCE_NOT_FOUND = "Unable to find balance for this card / account"
+
 RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram ID / username"
 RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
 RSP_USER_WITH_NO_CARDS = "Recipient user doesn't have any linked cards for his payment account"
+
+
+SENDER_RESTRICTION = "You should have Payment account and at least one Card for making transactions!"
+SELF_TRANSFER_ERROR = "Self-transfer is not supported"
+INSUF_BALANCE = "Insufficient balance!"
+ERROR_DURING_TRANSFER = "Some error occured during transfer!"
 
 CARD_NOT_FOUND = "There is no card with such ID in DB"
 
@@ -104,6 +120,14 @@ SEND_TO_USER_ARGS = (
 )
 
 
+def get_info_for_me_handler(user_from_db):
+    """
+    Returns info for /me handler
+    :param user_from_db: User object
+    """
+    return f"Here is some info about you:\n\n {str(user_from_db)}"
+
+
 def get_message_for_send_command(arg_command):
     """
     Returns uniq message for each type of send_to command.
@@ -120,8 +144,16 @@ def get_message_for_send_command(arg_command):
 
 def get_successful_transfer_message(recipient, value):
     """
-    Return message for successful transfer.
+    Returns message for successful transfer.
     :param recipient: recipient payment Account
     :value: transferring value
     """
     return f"OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}"
+
+
+def get_message_with_balance(account):
+    """
+    Returns message with account value
+    :param account: Payment Account object
+    """
+    return f"This card / account balance is {int(account.value)}"

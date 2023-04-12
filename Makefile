@@ -68,7 +68,7 @@ flush:
 # Running autopep8
 .PHONY: autopep8
 autopep8:
-	autopep8 --in-place --aggressive --aggressive -r src	
+	autopep8 --in-place --aggressive --aggressive -r .	
 
 # Running code linters
 .PHONY: lint
@@ -83,6 +83,11 @@ check_lint:
 	isort --check --diff .
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
+
+# Running tests with pytest
+.PHONY: test
+test:
+	pytest --cov=src
 
 # Starts DB in container
 .PHONY: start_db

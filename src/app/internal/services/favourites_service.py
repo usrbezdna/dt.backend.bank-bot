@@ -2,7 +2,12 @@ import logging
 
 from asgiref.sync import sync_to_async
 
-from app.internal.transport.bot.telegram_messages import NOT_VALID_ID_MSG
+from app.internal.transport.bot.telegram_messages import (
+    NOT_VALID_ID_MSG,
+    RESTRICT_SECOND_TIME_ADD,
+    RESTRICT_SELF_OPS,
+    USER_NOT_IN_FAV,
+)
 from app.models import Favourite
 
 from .user_service import get_user_by_id, get_user_by_username
@@ -66,7 +71,7 @@ async def try_get_another_user(context, chat_id, argument):
     if argument.startswith("@"):
         another_user_option = await get_user_by_username(argument[1:])
 
-    elif not argument.isdigit() or int(argument) < 0:
+    elif not argument.isdigit() or int(argument) <= 0:
         await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
         return (None, True)
 
@@ -90,7 +95,7 @@ async def prevent_ops_with_themself(context, chat_id, user_id, another_id):
 
     """
     if another_id == user_id:
-        await context.bot.send_message(chat_id=chat_id, text="You can't do addition/deletion of themself!")
+        await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SELF_OPS)
         return True
     return False
 
@@ -110,7 +115,7 @@ async def prevent_second_time_add(context, chat_id, user_id, another_user):
     list_fav = await get_list_of_favourites(user_id)
 
     if list_fav and another_user in list_fav:
-        await context.bot.send_message(chat_id=chat_id, text="You have already added this user to your favourites.")
+        await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SECOND_TIME_ADD)
         return True
     return False
 
@@ -132,6 +137,21 @@ async def ensure_user_in_fav(context, chat_id, user_id, another_user):
     list_fav = await get_list_of_favourites(user_id)
 
     if not list_fav or another_user not in list_fav:
-        await context.bot.send_message(chat_id=chat_id, text="Your favourites list doesn't include this user.")
+        await context.bot.send_message(chat_id=chat_id, text=USER_NOT_IN_FAV)
         return True
     return False
+
+
+def get_result_message_for_user_favourites(favs_list, users_limit):
+    """
+    Creates message with all favourites of a particular user
+    ----------
+    :param favs_list: list of favourite users
+    :param users_limit: allows us to limit number of users in result message
+    """
+    res_msg = ""
+    for fav_user in favs_list[:users_limit]:
+        res_msg += f"Name: {fav_user.first_name} {fav_user.last_name}," + f" ID: {fav_user.tlg_id}, Phone: "
+        res_msg += f"{fav_user.phone_number}\n" if fav_user.hasPhoneNumber() else "None\n"
+
+    return res_msg

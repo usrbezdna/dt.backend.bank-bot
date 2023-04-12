@@ -6,9 +6,10 @@ __pycache__
 *.pyc
 
 .env
-
 .env.docker.local
 .env.docker.server
+
+.coverage
 
 .env.runner
 .idea

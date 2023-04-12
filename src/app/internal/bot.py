@@ -52,7 +52,6 @@ def setup_application_handlers(application):
     """
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", get_help))
-
     application.add_handler(CommandHandler("set_phone", set_phone))
     application.add_handler(CommandHandler("me", me))
 
@@ -85,5 +84,10 @@ def set_bot_webhook(application):
 
     logger.info("Started")
     application.run_webhook(
-        listen="0.0.0.0", port=settings.WEBHOOK_PORT, url_path='webhook', webhook_url=f"{url}", close_loop=False, drop_pending_updates=True
+        listen="0.0.0.0",
+        port=settings.WEBHOOK_PORT,
+        url_path="webhook",
+        webhook_url=f"{url}",
+        close_loop=False,
+        drop_pending_updates=True,
     )

@@ -3,7 +3,7 @@
 echo -e "\e[1;34mStarting configuration...\e[0m"
 
 echo -e "\e[1;34mUpdating packages...\e[0m"
-sudo apt upgrade && sudo apt update
+sudo apt update && sudo apt upgrade -y
 
 
 # Docker Installation
@@ -44,7 +44,26 @@ echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
 http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
 
-sudo apt update && sudo apt install nginx -y
 
-echo -e "\e[1;32mNginx is successfully installed!\e[0m"
+sudo apt update && sudo apt install nginx -y
+echo -e "\e[1;32mNginx is successfully installed! Starting configuration...\e[0m"
+
+# Certbot
+sudo apt install snapd -y
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+
+# External Nginx Configuration
+sudo sed -i '\%include /etc/nginx/conf.d/\*.conf;%a\    include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
+sudo mkdir /etc/nginx/sites-available  /etc/nginx/sites-enabled
+
+
+sudo certbot certonly --nginx --non-interactive --agree-tos -m alexfernie@yahoo.com --nginx --domains bezdna.backend23.2tapp.cc
+
+# File with config must be already provisioned on remote machine
+sudo mv /home/gitlab/bezdna.backend23.2tapp.cc.conf /etc/nginx/sites-available/
+sudo ln --target-directory=/etc/nginx/sites-enabled -s /etc/nginx/sites-available/bezdna.backend23.2tapp.cc.conf
+
+sudo nginx -s reload
 echo -e "\e[1;32mConfiguration is now finished!\e[0m"

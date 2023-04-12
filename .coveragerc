@@ -1,0 +1,22 @@
+[run]
+omit = 
+
+    *__init__*
+
+    ./src/manage.py
+    ./src/config/*
+
+    ./src/app/admin.py
+    ./src/app/apps.py
+    ./src/app/models.py
+    ./src/app/migrations/*
+    
+    ./src/app/internal/models/*
+    ./src/app/internal/admin/*
+    ./src/app/internal/ngrok_parser.py 
+    ./src/app/internal/bot.py
+    ./src/app/internal/urls.py
+    
+   
+    
+    

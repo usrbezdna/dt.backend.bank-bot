@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 import environ
@@ -96,8 +97,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
+    "default": {},
+}
+
+if "pytest" in sys.argv[0]:
+    # Using SQLite DB for tests
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "testdb",
+    }
+
+else:
+    # Using Postgres as our main DB
+    DATABASES["default"] = {
         "ENGINE": os.environ.get("SQL_ENGINE"),
         "NAME": os.environ.get("SQL_DATABASE"),
         "USER": os.environ.get("SQL_USER", "user"),
@@ -105,7 +119,7 @@ DATABASES = {
         "HOST": os.environ.get("SQL_HOST", "localhost"),
         "PORT": os.environ.get("SQL_PORT", "5432"),
     }
-}
+
 
 LOGGING = {
     "version": 1,

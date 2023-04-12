@@ -89,6 +89,13 @@ resource "yandex_compute_instance" "vm-instance" {
     host        = self.network_interface.0.nat_ip_address
   }
 
+  # Copies External Nginx Config
+  provisioner "file" {
+    when        = create
+    source      = "external-nginx.conf"
+    destination = "/home/gitlab/bezdna.backend23.2tapp.cc.conf"
+  }
+
   # And this Provisioner starts instance configuration script
   provisioner "remote-exec" {
     when   = create
