@@ -30,7 +30,10 @@ test:
    - pip3 install pipenv
 
   script:
-    - pipenv run test
+    - pipenv shell
+    - pipenv install
+
+    - make test
 
   needs: []
 
