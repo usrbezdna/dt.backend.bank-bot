@@ -151,7 +151,6 @@ def get_result_message_for_user_favourites(favs_list, users_limit):
     """
     res_msg = ""
     for fav_user in favs_list[:users_limit]:
-
         res_msg += f"Name: {fav_user.first_name} {fav_user.last_name}," + f" ID: {fav_user.tlg_id}, Phone: "
         res_msg += f"{fav_user.phone_number}\n" if fav_user.hasPhoneNumber() else "None\n"
 

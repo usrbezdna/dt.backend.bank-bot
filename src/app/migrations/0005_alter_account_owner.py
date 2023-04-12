@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("app", "0004_remove_card_currency_remove_card_owner_and_more"),
     ]

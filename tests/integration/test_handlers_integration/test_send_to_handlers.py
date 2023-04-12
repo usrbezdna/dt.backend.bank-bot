@@ -51,7 +51,6 @@ async def test_send_to_without_requered_args(
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_send_to_with_invalid_value(mocked_context, already_verified_user, telegram_chat, get_list_with_updates):
-
     commands_list = [
         "/send_to_user @FooUser -521",
         "/send_to_user @Username text",
@@ -72,7 +71,6 @@ async def test_send_to_with_invalid_value(mocked_context, already_verified_user,
 async def test_send_to_with_no_sender_bank_requisites(
     mocked_context, already_verified_user, telegram_chat, get_list_with_updates
 ):
-
     commands_list = [
         "/send_to_user @BarUser 100",
         "/send_to_user @User 4512",
@@ -93,7 +91,6 @@ async def test_send_to_with_no_sender_bank_requisites(
 async def test_send_to_with_recipient_no_cards(
     mocked_context, sender_with_bank_requisites, new_user_with_account, get_list_with_updates, telegram_chat
 ):
-
     new_user_model, new_account_model = await new_user_with_account(
         user_tlg_id=567, account_uniq_id=600, account_value=500
     )
@@ -132,7 +129,6 @@ async def test_send_to_user_with_db_miss_on_recipient(
     telegram_chat,
     get_update_for_command,
 ):
-
     mocked_update = get_update_for_command("/send_to_user 4215124 300")
     await send_to(mocked_update, mocked_context)
 
@@ -178,7 +174,6 @@ async def test_send_to_with_self_transfer_restriction(
     telegram_chat,
     get_list_with_updates,
 ):
-
     sender_account_model = await Account.objects.filter(uniq_id=123).afirst()
     sender_card_model = await Card.objects.filter(uniq_id=1234).afirst()
 
@@ -202,7 +197,6 @@ async def test_send_to_with_self_transfer_restriction(
 async def test_send_to_with_insufficient_balance(
     mocked_context, sender_with_bank_requisites, telegram_chat, get_list_with_updates, new_user_with_account_and_card
 ):
-
     rcp_user_model, rcp_account_model, rcp_card_model = await new_user_with_account_and_card(
         user_tlg_id=987, account_uniq_id=567, card_uniq_id=5678, account_value=1000
     )
@@ -232,7 +226,6 @@ async def test_send_to_with_error_during_transfer(
     get_update_for_command,
     new_user_with_account_and_card,
 ):
-
     sender_account_model = await Account.objects.filter(uniq_id=123).afirst()
     sender_account_model.value += 1000
     await sender_account_model.asave()
@@ -255,7 +248,6 @@ async def test_send_to_with_error_during_transfer(
 async def test_send_to_with_valid_transfer(
     mocked_context, sender_with_bank_requisites, telegram_chat, get_list_with_updates, new_user_with_account_and_card
 ):
-
     sender_account_model = await Account.objects.filter(uniq_id=123).afirst()
     sender_account_model.value += 1000
     await sender_account_model.asave()

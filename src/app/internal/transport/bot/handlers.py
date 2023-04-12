@@ -153,7 +153,6 @@ async def check_payable(update, context):
     command_data = update.message.text.split(" ")
 
     if len(command_data) == 2:
-
         command, uniq_id = command_data[0], command_data[1]
         obj_option = None
 
@@ -231,7 +230,6 @@ async def add_fav(update, context):
             return
 
         if another_user_option:
-
             error_ops = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
             if error_ops:
                 return
@@ -269,7 +267,6 @@ async def del_fav(update, context):
             return
 
         if another_user_option:
-
             error_op = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
             if error_op:
                 return
@@ -318,7 +315,6 @@ async def send_to(update, context):
             return
 
         if sending_payment_account.value - value >= 0:
-
             recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
             if recipient_payment_account == sending_payment_account:
                 await context.bot.send_message(chat_id=chat_id, text=SELF_TRANSFER_ERROR)

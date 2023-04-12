@@ -52,7 +52,6 @@ async def test_smoke(
 
     await update_user_phone_number(user_model, "+7654321")
     with ThreadPoolExecutor(max_workers=1) as executor:
-
         future = executor.submit(lambda url_for_user: client.get(url_for_user), web_api_url(tlg_id=123))
         response = future.result()
 

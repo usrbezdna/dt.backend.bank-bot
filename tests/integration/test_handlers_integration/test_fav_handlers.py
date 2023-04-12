@@ -26,7 +26,6 @@ from src.app.internal.transport.bot.telegram_messages import (
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_list_fav_with_empty_list(mocked_context, already_verified_user, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/list_fav")
     await list_fav(mocked_update, mocked_context)
 
@@ -39,7 +38,6 @@ async def test_list_fav_with_empty_list(mocked_context, already_verified_user, t
 async def test_list_fav_with_added_user(
     mocked_context, already_verified_user, user_model_without_verified_pn, telegram_chat, get_update_for_command
 ):
-
     new_fav_user_model = user_model_without_verified_pn(tlg_id=100)
     await new_fav_user_model.asave()
 
@@ -59,7 +57,6 @@ async def test_list_fav_with_added_user(
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_ops_with_no_argument(mocked_context, already_verified_user, telegram_chat, get_update_for_command):
-
     mocked_add_update = get_update_for_command("/add_fav")
     mocked_del_update = get_update_for_command("/del_fav")
 
@@ -78,7 +75,6 @@ async def test_ops_with_no_argument(mocked_context, already_verified_user, teleg
 async def test_ops_with_invalid_telegram_id(
     mocked_context, already_verified_user, telegram_chat, get_list_with_updates
 ):
-
     add_commands_list = ["/add_fav sometrashinput", "/add_fav -9999999", "/add_fav -4214", "/add_fav 0"]
 
     del_command_list = ["/del_fav yt3qwtfa", "/del_fav -6363214", "/del_fav -900", "/del_fav 0"]

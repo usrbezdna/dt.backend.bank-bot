@@ -13,7 +13,6 @@ from src.app.models import User as UserModel
 
 @pytest.fixture
 def bot_application(mocked_context):
-
     application = ApplicationBuilder().bot(mocked_context.bot).updater(None).build()
 
     setup_application_handlers(application)
@@ -30,7 +29,6 @@ def already_saved_user(telegram_user):
 
 @pytest.fixture
 def already_verified_user(already_saved_user):
-
     user_model = UserModel.objects.filter(tlg_id=already_saved_user.id).first()
     user_model.phone_number = "+12345"
     user_model.save()
@@ -59,7 +57,6 @@ def telegram_chat():
 @pytest.fixture
 def get_update_for_command(get_message_with_text, mocked_context):
     def inner(message_text):
-
         message = get_message_with_text(message_text)
         custom_update = Update(update_id=123, message=message)
 
@@ -84,7 +81,6 @@ def get_list_with_updates(get_update_for_command):
 @pytest.fixture
 def get_message_with_text(telegram_user, telegram_chat, mocked_context):
     def inner(message_text):
-
         custom_message = Message(
             message_id=123,
             date=datetime.datetime.now(),

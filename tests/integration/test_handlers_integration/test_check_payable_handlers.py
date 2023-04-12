@@ -44,7 +44,6 @@ async def test_check_payable_with_absent_id(
 async def test_check_payable_with_invalid_id(
     mocked_context, already_verified_user, telegram_chat, get_list_with_updates
 ):
-
     commands_list = [
         "/check_card -5215125",
         "/check_card text",
@@ -80,7 +79,6 @@ async def test_check_payable_with_valid_args(
     get_update_for_command,
     new_user_with_account_and_card,
 ):
-
     _, account_model, card_model = await new_user_with_account_and_card(
         user_tlg_id=101, account_uniq_id=102, card_uniq_id=103, account_value=100
     )

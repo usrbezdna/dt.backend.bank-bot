@@ -26,7 +26,7 @@ test:
 
   image: python:3.10.10-slim-buster 
   before_script:
-   - apt-get install make 
+   - apt-get update && apt-get install make
    - pip3 install pytest
 
   script:

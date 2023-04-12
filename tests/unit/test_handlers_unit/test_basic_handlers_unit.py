@@ -18,7 +18,6 @@ async def test_get_help_handler(mocked_context, telegram_chat, get_update_for_co
 @pytest.mark.asyncio
 @pytest.mark.unit
 async def test_set_phone_with_no_phone_number(mocked_context, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/set_phone")
     await set_phone(mocked_update, mocked_context)
 
@@ -28,7 +27,6 @@ async def test_set_phone_with_no_phone_number(mocked_context, telegram_chat, get
 @pytest.mark.asyncio
 @pytest.mark.unit
 async def test_set_phone_with_incorrect_format(mocked_context, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/set_phone 51526361")
 
     await set_phone(mocked_update, mocked_context)
@@ -38,7 +36,6 @@ async def test_set_phone_with_incorrect_format(mocked_context, telegram_chat, ge
 @pytest.mark.asyncio
 @pytest.mark.unit
 async def test_set_phone_with_invalid_pn(mocked_context, telegram_chat, get_list_with_updates):
-
     commands_list = [
         "/set_phone +1234567891011121314",
         "/set_phone +1",
