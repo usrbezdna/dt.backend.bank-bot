@@ -30,10 +30,10 @@ test:
    - pip3 install pipenv
 
    - pipenv install --dev --system
-   - export SECRET_KEY=$SECRET_KEY_DJANGO
+   - cp $DOT_ENV .env
 
   script:
-    - pipenv run pytest
+    - make test
 
   needs: []
 
