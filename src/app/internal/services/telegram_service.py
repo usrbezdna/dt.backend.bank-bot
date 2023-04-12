@@ -24,9 +24,7 @@ def verified_phone_required(func):
         user = await get_user_by_id(update.effective_user.id)
 
         if not user:
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id, text=ME_WITH_NO_USER
-            )
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=ME_WITH_NO_USER)
             return
 
         if user.hasPhoneNumber():

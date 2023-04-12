@@ -12,6 +12,7 @@ phantom:
      - "[Connection: close]"
    uris:
      - /admin/login/?next=/admin/
+     - /api/me/1077392747/
    load_profile:
      load_type: rps
      schedule: line(1, 50, 1m) const(50, 1m)

@@ -317,7 +317,6 @@ async def send_to(update, context):
         if error:
             return
 
-        
         if sending_payment_account.value - value >= 0:
 
             recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
@@ -329,9 +328,7 @@ async def send_to(update, context):
 
             if success_flag:
                 recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
-                await context.bot.send_message(
-                    chat_id=chat_id, text=get_successful_transfer_message(recipient, value)
-                )
+                await context.bot.send_message(chat_id=chat_id, text=get_successful_transfer_message(recipient, value))
                 return
 
             await context.bot.send_message(chat_id=chat_id, text=ERROR_DURING_TRANSFER)

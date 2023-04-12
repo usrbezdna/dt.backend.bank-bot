@@ -159,7 +159,7 @@ async def test_add_fav_with_valid_args(
     new_fav_user_model = user_model_without_verified_pn(tlg_id=100)
     await new_fav_user_model.asave()
 
-    mocked_update = get_update_for_command(f"/add_fav @Testuser")
+    mocked_update = get_update_for_command("/add_fav @Testuser")
     await add_fav(mocked_update, mocked_context)
 
     favs = await get_list_of_favourites(already_verified_user.id)

@@ -66,9 +66,7 @@ async def test_me_without_user(mocked_context, telegram_user, telegram_chat, get
     mocked_update = get_update_for_command("/me")
 
     await me(mocked_update, mocked_context)
-    mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, text=ME_WITH_NO_USER
-    )
+    mocked_context.bot.send_message.assert_called_once_with(chat_id=telegram_chat.id, text=ME_WITH_NO_USER)
 
 
 @pytest.mark.asyncio

@@ -2,6 +2,7 @@ import datetime
 from unittest.mock import AsyncMock
 
 import pytest
+from django.urls import reverse
 from telegram import Chat, Message, MessageEntity, Update, User
 from telegram.ext import ApplicationBuilder
 
@@ -97,3 +98,11 @@ def get_message_with_text(telegram_user, telegram_chat, mocked_context):
         return custom_message
 
     return inner
+
+
+@pytest.fixture
+def web_api_url():
+    def inner_with_tlg_id(tlg_id):
+        return reverse("web_api", args=[tlg_id])
+
+    return inner_with_tlg_id
