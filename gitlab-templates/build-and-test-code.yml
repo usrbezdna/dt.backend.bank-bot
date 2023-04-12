@@ -30,6 +30,7 @@ test:
    - pip3 install pipenv
 
    - pipenv install --dev --system
+   - export SECRET_KEY=$SECRET_KEY_DJANGO
 
   script:
     - pipenv run pytest
