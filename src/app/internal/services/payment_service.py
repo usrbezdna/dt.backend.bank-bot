@@ -3,6 +3,8 @@ import logging
 from asgiref.sync import sync_to_async
 from django.db import DatabaseError, transaction
 
+from app.models import User
+
 from app.internal.transport.bot.telegram_messages import (
     CARD_NOT_FOUND,
     NOT_VALID_ID_MSG,
@@ -112,8 +114,14 @@ def transfer_to(sender_acc, recipient_acc, transferring_value):
     finally:
         return success_flag
 
-
+@sync_to_async
 def get_list_of_inter_usernames(user_id):
+    """
+    Retuns list of usernames for users who have
+    interacted with user_id
+    ----------
+    :param user_id: Telegram ID of specified user 
+    """
     qs_tx_list = Transaction.objects.\
         select_related('tx_sender__owner', 'tx_recip__owner').\
         values_list('tx_sender__owner', 'tx_recip__owner')
@@ -124,8 +132,25 @@ def get_list_of_inter_usernames(user_id):
           
           id_to_add = first_id if user_id != first_id else second_id
           list_of_ids.append(id_to_add)
+
+    uniq_list_of_ids = list(set(list_of_ids))
     
-    return list(set(list_of_ids))
+    return list(User.objects.filter(tlg_id__in=uniq_list_of_ids).\
+           values_list('username', flat=True).all())
+
+
+def get_result_message_for_list_interacted(usernames_list):
+    """
+    Returns message with usernames of users who
+    have interacted with this user.
+    ----------
+    :param usernames_list: list of usernames
+    """
+    res_msg = 'Here is the list of interacted users:'
+    for username in usernames_list:
+        res_msg += f'\n - {username}'
+
+    return res_msg
 
 
 def save_payment_transaction(sender_acc, recipient_acc, transferring_value):

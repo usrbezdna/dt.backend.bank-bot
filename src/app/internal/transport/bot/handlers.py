@@ -20,9 +20,11 @@ from app.internal.services.payment_service import (
     get_account_from_card,
     get_account_from_db,
     get_card_with_account_by_card_id,
+    get_list_of_inter_usernames,
     get_owner_name_from_account,
     transfer_to,
     try_get_recipient_card,
+    get_result_message_for_list_interacted
 )
 from app.internal.services.telegram_service import verified_phone_required
 from app.internal.services.user_service import (
@@ -45,6 +47,7 @@ from .telegram_messages import (
     INCR_TX_VALUE,
     INSUF_BALANCE,
     INVALID_PN_MSG,
+    NO_INTERACTED_USERS,
     NOT_INT_FORMAT_MSG,
     NOT_VALID_ID_MSG,
     SELF_TRANSFER_ERROR,
@@ -358,5 +361,20 @@ async def list_inter(update, context):
     """
 
     user_id, chat_id = update.effective_user.id, update.effective_chat.id 
+    usernames = await get_list_of_inter_usernames(user_id)
 
-    pass
+    print(usernames)
+
+    if usernames:
+        await context.bot.send_message(
+            chat_id=chat_id, text=get_result_message_for_list_interacted(usernames) 
+        ) 
+        return
+    await context.bot.send_message(
+        chat_id=chat_id, text=NO_INTERACTED_USERS
+    )
+
+
+
+    
+    
