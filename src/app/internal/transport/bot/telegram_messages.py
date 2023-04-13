@@ -142,13 +142,13 @@ def get_message_for_send_command(arg_command):
             return SEND_TO_CARD_ARGS
 
 
-def get_successful_transfer_message(recipient, value):
+def get_successful_transfer_message(recipient_name, value):
     """
     Returns message for successful transfer.
     :param recipient: recipient payment Account
     :value: transferring value
     """
-    return f"OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}"
+    return f"OK! Transaction is finished. Transferred {value} to user {recipient_name}"
 
 
 def get_message_with_balance(account):

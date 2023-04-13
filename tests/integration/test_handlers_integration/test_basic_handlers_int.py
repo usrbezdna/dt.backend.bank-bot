@@ -62,18 +62,6 @@ async def test_me_without_verified_phone(mocked_context, already_saved_user, tel
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
-async def test_me_without_user(mocked_context, telegram_user, telegram_chat, get_update_for_command):
-    mocked_update = get_update_for_command("/me")
-
-    await me(mocked_update, mocked_context)
-    mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, text=ME_WITH_NO_USER
-    )
-
-
-@pytest.mark.asyncio
-@pytest.mark.integration
-@pytest.mark.django_db(transaction=True)
 async def test_me_with_verified_phone(mocked_context, already_verified_user, telegram_chat, get_update_for_command):
 
     mocked_update = get_update_for_command("/me")

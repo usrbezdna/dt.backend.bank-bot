@@ -16,6 +16,19 @@ logger = logging.getLogger("django.server")
 
 
 @sync_to_async
+def get_limited_list_of_favourites(tlg_id, favs_limit):
+    """
+    Returns limited list of favourite users for Telegram User 
+    with ID tlg_id or returns None if fav object doens't exist.
+    ----------
+    :param tlg_id: Telegram ID of this user.
+    """
+    fav_opt = Favourite.objects.filter(tlg_id=tlg_id).first()
+    if fav_opt:
+        return list(fav_opt.favourites.all()[:favs_limit])
+    return None
+
+@sync_to_async
 def get_list_of_favourites(tlg_id):
     """
     Returns list of favourite users or None
@@ -142,15 +155,14 @@ async def ensure_user_in_fav(context, chat_id, user_id, another_user):
     return False
 
 
-def get_result_message_for_user_favourites(favs_list, users_limit):
+def get_result_message_for_user_favourites(favs_list):
     """
     Creates message with all favourites of a particular user
     ----------
     :param favs_list: list of favourite users
-    :param users_limit: allows us to limit number of users in result message
     """
     res_msg = ""
-    for fav_user in favs_list[:users_limit]:
+    for fav_user in favs_list:
 
         res_msg += f"Name: {fav_user.first_name} {fav_user.last_name}," + f" ID: {fav_user.tlg_id}, Phone: "
         res_msg += f"{fav_user.phone_number}\n" if fav_user.hasPhoneNumber() else "None\n"

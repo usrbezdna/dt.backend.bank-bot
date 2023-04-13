@@ -4,6 +4,7 @@ import pytest
 
 from src.app.internal.services.favourites_service import (
     add_fav_to_user,
+    get_limited_list_of_favourites,
     get_list_of_favourites,
     get_result_message_for_user_favourites,
 )
@@ -51,7 +52,7 @@ async def test_list_fav_with_added_user(
     favs_list = await get_list_of_favourites(tlg_id=already_verified_user.id)
 
     mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, text=get_result_message_for_user_favourites(favs_list=favs_list, users_limit=5)
+        chat_id=telegram_chat.id, text=get_result_message_for_user_favourites(favs_list=favs_list)
     )
 
 
@@ -140,7 +141,7 @@ async def test_ops_with_self_addition_prevention(
 
     mock_error_call = call(chat_id=telegram_chat.id, text=RESTRICT_SELF_OPS)
 
-    assert await get_list_of_favourites(already_verified_user.id) is None
+    assert await get_list_of_favourites(tlg_id=already_verified_user.id) is None
 
     assert len(mocked_context.mock_calls) == 2
     mocked_context.bot.send_message.assert_has_calls([mock_error_call] * 2, any_order=True)
@@ -162,7 +163,7 @@ async def test_add_fav_with_valid_args(
     mocked_update = get_update_for_command(f"/add_fav @Testuser")
     await add_fav(mocked_update, mocked_context)
 
-    favs = await get_list_of_favourites(already_verified_user.id)
+    favs = await get_list_of_favourites(tlg_id=already_verified_user.id)
 
     assert len(favs) == 1
     assert new_fav_user_model in favs
@@ -188,13 +189,13 @@ async def test_add_fav_with_second_time_add_prevention(
     mocked_update = get_update_for_command(f"/add_fav {new_fav_user_model.tlg_id}")
     await add_fav(mocked_update, mocked_context)
 
-    favs = await get_list_of_favourites(already_verified_user.id)
+    favs = await get_list_of_favourites(tlg_id=already_verified_user.id)
 
     assert len(favs) == 1
     assert new_fav_user_model in favs
 
     await add_fav(mocked_update, mocked_context)
-    assert len(await get_list_of_favourites(already_verified_user.id)) == 1
+    assert len(await get_list_of_favourites(tlg_id=already_verified_user.id)) == 1
 
     mocked_context.bot.send_message.assert_called_with(chat_id=telegram_chat.id, text=RESTRICT_SECOND_TIME_ADD)
 
@@ -234,14 +235,14 @@ async def test_del_fav_with_valid_args(
     add_mocked_update = get_update_for_command(f"/add_fav {new_fav_user_model.tlg_id}")
     await add_fav(add_mocked_update, mocked_context)
 
-    favs = await get_list_of_favourites(already_verified_user.id)
+    favs = await get_list_of_favourites(tlg_id=already_verified_user.id)
     assert len(favs) == 1
     assert new_fav_user_model in favs
 
     del_mocked_update = get_update_for_command(f"/del_fav {new_fav_user_model.tlg_id}")
     await del_fav(del_mocked_update, mocked_context)
 
-    assert len(await get_list_of_favourites(already_verified_user.id)) == 0
+    assert len(await get_list_of_favourites(tlg_id=already_verified_user.id)) == 0
 
     mocked_context.bot.send_message.assert_called_with(
         chat_id=telegram_chat.id, text=get_success_for_deleted_fav(new_fav_user_model)

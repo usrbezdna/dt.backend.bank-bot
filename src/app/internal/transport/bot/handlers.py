@@ -9,7 +9,7 @@ from app.internal.services.favourites_service import (
     add_fav_to_user,
     del_fav_from_user,
     ensure_user_in_fav,
-    get_list_of_favourites,
+    get_limited_list_of_favourites,
     get_result_message_for_user_favourites,
     prevent_ops_with_themself,
     prevent_second_time_add,
@@ -19,8 +19,8 @@ from app.internal.services.payment_service import (
     check_bank_requisites_for_sender,
     get_account_from_card,
     get_account_from_db,
-    get_card_from_db,
-    get_owner_from_account,
+    get_card_with_account_by_card_id,
+    get_owner_name_from_account,
     transfer_to,
     try_get_recipient_card,
 )
@@ -98,7 +98,6 @@ async def set_phone(update, context):
     :param update: recieved Update object
     :param context: context object passed to the callback
     """
-    user_data = update.effective_user
     chat_id = update.effective_chat.id
     command_data = update.message.text.split(" ")
 
@@ -108,9 +107,8 @@ async def set_phone(update, context):
         if phone_number.startswith("+"):
             try:
                 parsed_number = PhoneNumber.from_string(phone_number)
-                user_from_db = await get_user_by_id(user_data.id)
 
-                await update_user_phone_number(user_from_db, parsed_number)
+                await update_user_phone_number(update.effective_user.id, parsed_number)
                 await context.bot.send_message(chat_id=chat_id, text=get_success_phone_msg(parsed_number))
 
             except NumberParseException:
@@ -162,17 +160,19 @@ async def check_payable(update, context):
             return
 
         if command == "/check_card":
-            obj_option = await get_card_from_db(uniq_id)
+            obj_option = await get_card_with_account_by_card_id(uniq_id)
         else:
             obj_option = await get_account_from_db(uniq_id)
 
         if obj_option and command == "/check_card":
-            account = await get_account_from_card(uniq_id)
-
-            await context.bot.send_message(chat_id=chat_id, text=get_message_with_balance(account))
+            await context.bot.send_message(
+                chat_id=chat_id, text=get_message_with_balance(obj_option.corresponding_account)
+            )
 
         elif obj_option and command == "/check_account":
-            await context.bot.send_message(chat_id=chat_id, text=get_message_with_balance(obj_option))
+            await context.bot.send_message(
+                chat_id=chat_id, text=get_message_with_balance(obj_option)
+            )
 
         else:
             logger.info(f"Card / account with ID {uniq_id} not found in DB")
@@ -194,14 +194,13 @@ async def list_fav(update, context):
     :param context: context object passed to the callback
     """
 
-    users_limit = 5
+    favs_limit = 5
 
     user_id, chat_id = update.effective_user.id, update.effective_chat.id
-
-    favs_list_option = await get_list_of_favourites(tlg_id=user_id)
+    favs_list_option = await get_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
 
     if favs_list_option:
-        res_msg = get_result_message_for_user_favourites(favs_list_option, users_limit)
+        res_msg = get_result_message_for_user_favourites(favs_list_option)
 
         await context.bot.send_message(chat_id=chat_id, text=res_msg)
         return
@@ -312,15 +311,17 @@ async def send_to(update, context):
         sending_payment_account, requisites_error = await check_bank_requisites_for_sender(context, chat_id, user_id)
         if requisites_error:
             return
+        
 
-        card_opt, error = await try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command)
+        card_with_acc, error = await try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command)
         if error:
             return
 
         
         if sending_payment_account.value - value >= 0:
 
-            recipient_payment_account = await get_account_from_card(card_opt.uniq_id)
+            recipient_payment_account = card_with_acc.corresponding_account
+
             if recipient_payment_account == sending_payment_account:
                 await context.bot.send_message(chat_id=chat_id, text=SELF_TRANSFER_ERROR)
                 return
@@ -328,9 +329,11 @@ async def send_to(update, context):
             success_flag = await transfer_to(sending_payment_account, recipient_payment_account, value)
 
             if success_flag:
-                recipient = await get_owner_from_account(recipient_payment_account.uniq_id)
+                recipient_name_as_tuple = await get_owner_name_from_account(recipient_payment_account.uniq_id)
+                recipient_name = ' '.join(recipient_name_as_tuple)
+
                 await context.bot.send_message(
-                    chat_id=chat_id, text=get_successful_transfer_message(recipient, value)
+                    chat_id=chat_id, text=get_successful_transfer_message(recipient_name, value)
                 )
                 return
 
@@ -341,3 +344,19 @@ async def send_to(update, context):
         return
 
     await context.bot.send_message(chat_id=chat_id, text=get_message_for_send_command(command_data[0]))
+
+
+@verified_phone_required
+async def list_inter(update, context):
+    """
+    Handler for /list_inter command.
+    Returns list of users this user have interacted with.
+    Or returns empty list if user have no payment transactions.
+    ----------
+    :param update: recieved Update object
+    :param context: context object
+    """
+
+    user_id, chat_id = update.effective_user.id, update.effective_chat.id 
+
+    pass
