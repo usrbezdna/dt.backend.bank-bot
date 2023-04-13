@@ -9,7 +9,7 @@ INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 ABSENT_ID_NUMBER = "You should specify unique card / account id! "
 
-ME_WITH_NO_USER = "Type /start at first and verify you phone number" 
+ME_WITH_NO_USER = "Type /start at first and verify you phone number"
 
 
 ABSENT_FAV_MSG = (

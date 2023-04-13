@@ -1,10 +1,10 @@
 stages:
-  - lint_checks
+  - tests
   - build
 
 
 check_lint:
-  stage: lint_checks
+  stage: tests
   tags:
     - code
 
@@ -15,7 +15,27 @@ check_lint:
     - pip3 install flake8 black isort 
 
   script:
-    - make lint check_lint
+    - make check_lint
+
+  needs: []
+
+test:
+  stage: tests
+  tags:
+    - code
+
+  image: python:3.10.10-slim-buster 
+  before_script:
+   - apt-get update && apt-get install make
+   - pip3 install pipenv
+
+   - pipenv install --dev --system
+   - cp $DOT_ENV .env
+
+  script:
+    - make test
+
+  needs: []
 
 
 build:

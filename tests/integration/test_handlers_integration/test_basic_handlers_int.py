@@ -20,7 +20,6 @@ from src.app.models import User
 @pytest.mark.integration
 @pytest.mark.django_db
 async def test_start(mocked_context, telegram_user, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/start")
     await start(mocked_update, mocked_context)
 
@@ -34,7 +33,6 @@ async def test_start(mocked_context, telegram_user, telegram_chat, get_update_fo
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_set_phone_with_valid_pn(mocked_context, already_saved_user, telegram_chat, get_update_for_command):
-
     new_valid_phone_number = "+13371707"
 
     assert (await get_user_by_id(already_saved_user.id)).phone_number != new_valid_phone_number
@@ -52,7 +50,6 @@ async def test_set_phone_with_valid_pn(mocked_context, already_saved_user, teleg
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_me_without_verified_phone(mocked_context, already_saved_user, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/me")
     await me(mocked_update, mocked_context)
 
@@ -63,7 +60,6 @@ async def test_me_without_verified_phone(mocked_context, already_saved_user, tel
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_me_with_verified_phone(mocked_context, already_verified_user, telegram_chat, get_update_for_command):
-
     mocked_update = get_update_for_command("/me")
     await me(mocked_update, mocked_context)
 

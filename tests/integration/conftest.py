@@ -7,7 +7,6 @@ from src.app.models import Account, Card, User
 
 @pytest.fixture
 def sender_with_bank_requisites(already_verified_user, account_with_owner_and_value, card_with_id_and_corr_account):
-
     user_model = User.objects.filter(tlg_id=already_verified_user.id).first()
     new_account_model = account_with_owner_and_value(uniq_id=123, owner_user_model=user_model, account_value=0)
 
@@ -40,7 +39,6 @@ def new_user_with_account_and_card(
 @pytest.fixture
 def new_user_with_account(user_model_without_verified_pn, account_with_owner_and_value):
     async def inner(user_tlg_id, account_uniq_id, account_value):
-
         new_user_model = user_model_without_verified_pn(user_tlg_id)
         await new_user_model.asave()
 

@@ -84,6 +84,11 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
+# Running tests with pytest
+.PHONY: test
+test:
+	pytest --cov=src
+
 # Starts DB in container
 .PHONY: start_db
 start_db:
