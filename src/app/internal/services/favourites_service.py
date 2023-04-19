@@ -8,8 +8,8 @@ from app.internal.transport.bot.telegram_messages import (
     RESTRICT_SELF_OPS,
     USER_NOT_IN_FAV,
 )
-from app.models import Favourite
 
+from app.models import Favourite
 from .user_service import get_user_by_id, get_user_by_username
 
 logger = logging.getLogger("django.server")
@@ -42,31 +42,57 @@ def get_list_of_favourites(tlg_id):
     return None
 
 
-@sync_to_async
-def add_fav_to_user(tlg_id_of_owner, new_fav_user):
+
+async def try_del_fav_from_user(context, chat_id, tlg_id_of_owner, fav_user):
     """
-    Adds new User object to the list of favourites
+    Deletes fav_user User object from the list of
+    favourites for user with ID tlg_id_of_owner
+
+    Returns error flag (if specified fav_user not in favourites)
+    ----------
+    :param tlg_id_of_owner: Telegram ID of list owner.
+    :param fav_user: user that will be deleted from favourites
+
+    """
+
+    error_not_in_fav_flag = False
+    favs_manager = (await Favourite.objects.aget(tlg_id=tlg_id_of_owner)).favourites
+
+    if await favs_manager.filter(pk=fav_user.tlg_id).aexists():
+        await sync_to_async(favs_manager.remove)(fav_user)
+        logger.info(f"User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}")
+
+    else:
+        await context.bot.send_message(chat_id=chat_id, text=USER_NOT_IN_FAV)
+        error_not_in_fav_flag = True
+
+    return error_not_in_fav_flag
+
+
+
+async def try_add_fav_to_user(context, chat_id, tlg_id_of_owner, new_fav_user):
+    """
+    Tries to add new User object to the list of favourites
     for another Telegram User (tlg_id_of_owner).
+
+    Returns error flag (if new_fav_user was in favs).   
     ----------
     :param tlg_id_of_owner: Telegram ID of list owner.
     :param new_fav_user: new favourite User obj.
 
     """
-    Favourite.objects.get_or_create(tlg_id=tlg_id_of_owner)[0].favourites.add(new_fav_user)
-    logger.info(f"User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}")
+    error_add_flag = False
+    favs_manager = (await Favourite.objects.aget_or_create(tlg_id=tlg_id_of_owner))[0].favourites
+    
+    if await favs_manager.filter(pk=new_fav_user.tlg_id).aexists():
+        await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SECOND_TIME_ADD)
+        error_add_flag = True
+        
+    else:
+        await sync_to_async(favs_manager.add)(new_fav_user)
+        logger.info(f"User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}")
 
-
-@sync_to_async
-def del_fav_from_user(tlg_id_of_owner, fav_user):
-    """
-    Deletes fav_user User object from the list of
-    favourites for user with ID tlg_id_of_owner
-    ----------
-    :param tlg_id_of_owner: Telegram ID of list owner.
-    :param fav_user: user that will be deleted from favourites
-    """
-    Favourite.objects.get(tlg_id=tlg_id_of_owner).favourites.remove(fav_user)
-    logger.info(f"User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}")
+    return error_add_flag
 
 
 async def try_get_another_user(context, chat_id, argument):
@@ -107,52 +133,13 @@ async def prevent_ops_with_themself(context, chat_id, user_id, another_id):
     :return: error flag
 
     """
+    error_ops_flag = False
+    
     if another_id == user_id:
         await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SELF_OPS)
-        return True
-    return False
+        error_ops_flag = True
 
-
-async def prevent_second_time_add(context, chat_id, user_id, another_user):
-    """
-    Prevents addition of Telegram User that's already in list.
-    ----------
-    :param context: context object
-    :param chat_id: Telegram Chat ID
-
-    :param user_id: Telegram User ID
-    :param: another_user: new favourite user
-
-    :return: error flag
-    """
-    list_fav = await get_list_of_favourites(user_id)
-
-    if list_fav and another_user in list_fav:
-        await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SECOND_TIME_ADD)
-        return True
-    return False
-
-
-async def ensure_user_in_fav(context, chat_id, user_id, another_user):
-    """
-    Ensures that favourites for user with ID <user_id>
-    actually includes another_user.
-    ----------
-    :param context: context object
-    :param chat_id: Telegram Chat ID
-
-    :param user_id: Telegram User ID
-    :param: another_user: user that should be in favourites
-
-    :return: error flag
-    """
-
-    list_fav = await get_list_of_favourites(user_id)
-
-    if not list_fav or another_user not in list_fav:
-        await context.bot.send_message(chat_id=chat_id, text=USER_NOT_IN_FAV)
-        return True
-    return False
+    return error_ops_flag
 
 
 def get_result_message_for_user_favourites(favs_list):

@@ -50,7 +50,9 @@ async def test_smoke(
     assert await User.objects.acount() == 1
     assert user_model
 
-    await update_user_phone_number(user_model, "+7654321")
+    user_model.phone_number = '+4214214'
+    await user_model.asave()
+
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(lambda url_for_user: client.get(url_for_user), web_api_url(tlg_id=123))
         response = future.result()

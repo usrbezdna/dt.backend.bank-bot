@@ -5,7 +5,6 @@ from .account import Account
 class Transaction(models.Model):
     """
     Model of payment transaction.
-
     """
     
     tx_id = models.AutoField(primary_key=True)

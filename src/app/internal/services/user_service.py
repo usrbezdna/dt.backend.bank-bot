@@ -41,15 +41,14 @@ def get_user_by_username(username):
 @sync_to_async
 def get_user_field_by_id(tlg_id, field_name):
     """
-    Returns Query Set with specified field for User with Telegram ID tlg_id  
+    Returns Query Set with specified field 
+    for User with Telegram ID tlg_id  
     ----------
     :param tlg_id: Telegram User ID
     :params fields: Wished list of model fields 
     :return: Value of this field
     """
     return User.objects.values_list(field_name, flat=True).get(pk=tlg_id)
-
-
 
 
 @sync_to_async

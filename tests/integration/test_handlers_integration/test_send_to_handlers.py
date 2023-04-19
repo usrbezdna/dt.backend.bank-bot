@@ -216,7 +216,7 @@ async def test_send_to_with_insufficient_balance(
 
 
 @pytest.mark.asyncio
-@pytest.mark.current
+@pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 async def test_send_to_with_error_during_transfer(
     mocked_context,
@@ -236,7 +236,7 @@ async def test_send_to_with_error_during_transfer(
 
     mocked_update = get_update_for_command(f"/send_to_user {rcp_user_model.tlg_id} 300")
 
-    mocker.patch("src.app.internal.transport.bot.handlers.transfer_to", return_value=False)
+    mocker.patch("django.db.transaction.atomic", side_effect=DatabaseError())
     await send_to(mocked_update, mocked_context)
 
     mocked_context.bot.send_message.assert_called_once_with(chat_id=telegram_chat.id, text=ERROR_DURING_TRANSFER)

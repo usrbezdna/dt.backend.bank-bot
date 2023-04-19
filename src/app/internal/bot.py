@@ -8,7 +8,7 @@ from .transport.bot.handlers import (
     add_fav, check_payable, del_fav, 
     get_help, list_fav, me, 
     send_to, set_phone, start,
-    list_inter
+    list_inter, state_payable
 )
 
 logger = logging.getLogger("django.server")
@@ -71,7 +71,13 @@ def setup_application_handlers(application):
     application.add_handler(CommandHandler("send_to_account", send_to))
     application.add_handler(CommandHandler("send_to_card", send_to))
 
+
     application.add_handler(CommandHandler("list_inter", list_inter))
+
+
+    application.add_handler(CommandHandler("state_card", state_payable))
+    application.add_handler(CommandHandler("state_account", state_payable))
+
 
 
 def set_bot_webhook(application):

@@ -1,27 +1,25 @@
 import logging
 
-from asgiref.sync import sync_to_async
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
 
-from app.internal.models.user import User
 from app.internal.services.favourites_service import (
-    add_fav_to_user,
-    del_fav_from_user,
-    ensure_user_in_fav,
+    try_add_fav_to_user,
+    try_del_fav_from_user,
     get_limited_list_of_favourites,
     get_result_message_for_user_favourites,
     prevent_ops_with_themself,
-    prevent_second_time_add,
     try_get_another_user,
 )
 from app.internal.services.payment_service import (
-    check_bank_requisites_for_sender,
-    get_account_from_card,
+    get_bank_requisites_for_sender,
     get_account_from_db,
-    get_card_with_account_by_card_id,
+    get_card_with_related,
     get_list_of_inter_usernames,
+    get_list_of_transactions_for_the_last_month,
     get_owner_name_from_account,
+    get_result_message_for_transaction_state,
+    send_result_message_for_transaction_state,
     transfer_to,
     try_get_recipient_card,
     get_result_message_for_list_interacted
@@ -48,9 +46,11 @@ from .telegram_messages import (
     INSUF_BALANCE,
     INVALID_PN_MSG,
     NO_INTERACTED_USERS,
+    NO_TXS_FOR_LAST_MONTH,
     NOT_INT_FORMAT_MSG,
     NOT_VALID_ID_MSG,
     SELF_TRANSFER_ERROR,
+    STATE_NOT_FOUND,
     get_info_for_me_handler,
     get_message_for_send_command,
     get_message_with_balance,
@@ -162,7 +162,7 @@ async def check_payable(update, context):
             return
 
         if command == "/check_card":
-            obj_option = await get_card_with_account_by_card_id(uniq_id)
+            obj_option = await get_card_with_related(uniq_id)
         else:
             obj_option = await get_account_from_db(uniq_id)
 
@@ -177,8 +177,8 @@ async def check_payable(update, context):
             )
 
         else:
-            logger.info(f"Card / account with ID {uniq_id} not found in DB")
             await context.bot.send_message(chat_id=update.effective_chat.id, text=BALANCE_NOT_FOUND)
+            logger.info(f"Card / account with ID {uniq_id} not found in DB")
 
         return
 
@@ -232,20 +232,21 @@ async def add_fav(update, context):
             return
 
         if another_user_option:
+
             error_ops = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
             if error_ops:
                 return
 
-            error_sec = await prevent_second_time_add(context, chat_id, user_id, another_user_option)
-            if error_sec:
+            error_add = await try_add_fav_to_user(context, chat_id, user_id, another_user_option)
+            if error_add:
                 return
 
-            await add_fav_to_user(user_id, another_user_option)
             await context.bot.send_message(chat_id=chat_id, text=get_success_for_new_fav(another_user_option))
-
             return
+        
         await context.bot.send_message(chat_id=chat_id, text=ABSENT_FAV_USER)
         return
+    
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
 
 
@@ -269,15 +270,15 @@ async def del_fav(update, context):
             return
 
         if another_user_option:
-            error_op = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
-            if error_op:
+
+            error_ops = await prevent_ops_with_themself(context, chat_id, user_id, another_user_option.tlg_id)
+            if error_ops:
                 return
 
-            error_not_in_fav = await ensure_user_in_fav(context, chat_id, user_id, another_user_option)
+            error_not_in_fav = await try_del_fav_from_user(context, chat_id, user_id, another_user_option)
             if error_not_in_fav:
                 return
 
-            await del_fav_from_user(user_id, another_user_option)
             await context.bot.send_message(chat_id=chat_id, text=get_success_for_deleted_fav(another_user_option))
             return
 
@@ -308,40 +309,35 @@ async def send_to(update, context):
 
         value = int(arg_value)
 
-        sending_payment_account, requisites_error = await check_bank_requisites_for_sender(context, chat_id, user_id)
+        sender_card_with_acc, requisites_error = await get_bank_requisites_for_sender(context, chat_id, user_id)
         if requisites_error:
             return
         
-
-        card_with_acc, error = await try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command)
+        recip_card_with_acc, error = await try_get_recipient_card(context, chat_id, arg_user_or_id, arg_command)
         if error:
             return
 
-        if sending_payment_account.value - value >= 0:
+        sending_payment_account = sender_card_with_acc.corresponding_account
+        recipient_payment_account = recip_card_with_acc.corresponding_account
 
-            recipient_payment_account = card_with_acc.corresponding_account
-
-            if recipient_payment_account == sending_payment_account:
-                await context.bot.send_message(chat_id=chat_id, text=SELF_TRANSFER_ERROR)
-                return
-
-            success_flag = await transfer_to(sending_payment_account, recipient_payment_account, value)
-
-            if success_flag:
-                recipient_name_as_tuple = await get_owner_name_from_account(recipient_payment_account.uniq_id)
-                recipient_name = ' '.join(recipient_name_as_tuple)
-
-                await context.bot.send_message(
-                    chat_id=chat_id, text=get_successful_transfer_message(recipient_name, value)
-                )
-                return
-
-            await context.bot.send_message(chat_id=chat_id, text=ERROR_DURING_TRANSFER)
+        if recipient_payment_account == sending_payment_account:
+            await context.bot.send_message(chat_id=chat_id, text=SELF_TRANSFER_ERROR)
             return
 
-        await context.bot.send_message(chat_id=chat_id, text=INSUF_BALANCE)
-        return
+        success_flag = await transfer_to(
+            sending_payment_account, recipient_payment_account, value, context, chat_id
+        )
 
+        if success_flag:
+            recipient_name_as_tuple = await get_owner_name_from_account(recipient_payment_account.uniq_id)
+            recipient_name = ' '.join(recipient_name_as_tuple)
+
+            await context.bot.send_message(
+                chat_id=chat_id, text=get_successful_transfer_message(recipient_name, value)
+            )
+
+        return
+        
     await context.bot.send_message(chat_id=chat_id, text=get_message_for_send_command(command_data[0]))
 
 
@@ -359,8 +355,6 @@ async def list_inter(update, context):
     user_id, chat_id = update.effective_user.id, update.effective_chat.id 
     usernames = await get_list_of_inter_usernames(user_id)
 
-    print(usernames)
-
     if usernames:
         await context.bot.send_message(
             chat_id=chat_id, text=get_result_message_for_list_interacted(usernames) 
@@ -369,8 +363,54 @@ async def list_inter(update, context):
     await context.bot.send_message(
         chat_id=chat_id, text=NO_INTERACTED_USERS
     )
-
-
-
     
-    
+
+@verified_phone_required
+async def state_payable(update, context):
+    """
+    Handler for /state_card and /state_account commands.
+
+    Returns list of payment transaction for specified
+    card or account for the last month.
+    Or returns empty list if user have no payment transactions.
+    ----------
+    :param update: recieved Update object
+    :param context: context object
+    """
+
+    user_id, chat_id = update.effective_user.id, update.effective_chat.id 
+    command_data = update.message.text.split(" ")
+
+    if len(command_data) == 2:
+
+        command, uniq_id = command_data[0], command_data[1]
+        obj_option = None
+
+        if not uniq_id.isdigit() or int(uniq_id) <= 0:
+            await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
+            return
+
+
+        if command == "/state_card":
+            obj_option = await get_card_with_related(uniq_id)
+        else:
+            obj_option = await get_account_from_db(uniq_id)
+
+
+        if obj_option and command == "/state_card":
+            owner_id = obj_option.corresponding_account.owner.tlg_id
+            await send_result_message_for_transaction_state(context, chat_id, owner_id)
+
+
+        elif obj_option and command == "/state_account":
+            owner_id = obj_option.owner.tlg_id
+            await send_result_message_for_transaction_state(context, chat_id, owner_id)
+        
+
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=STATE_NOT_FOUND)
+            logger.info(f"Card / account with ID {uniq_id} not found in DB")
+
+        return
+
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)

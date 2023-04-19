@@ -34,6 +34,7 @@ NOT_VALID_ID_MSG = "Invalid ID."
 
 
 BALANCE_NOT_FOUND = "Unable to find balance for this card / account"
+STATE_NOT_FOUND = "Unable to find state for this card / account"
 
 RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram ID / username"
 RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
@@ -65,7 +66,7 @@ HELP_MSG = (
 )
 
 NO_INTERACTED_USERS = 'There is no users you have interacted with'
-
+NO_TXS_FOR_LAST_MONTH = 'You don\'t have any payment transactions for the last month'
 
 def get_unique_start_msg(first_name):
     """

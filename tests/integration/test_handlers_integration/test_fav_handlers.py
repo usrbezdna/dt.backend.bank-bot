@@ -3,11 +3,13 @@ from unittest.mock import call
 import pytest
 
 from src.app.internal.services.favourites_service import (
-    add_fav_to_user,
+    try_add_fav_to_user,
     get_limited_list_of_favourites,
     get_list_of_favourites,
     get_result_message_for_user_favourites,
 )
+
+from asgiref.sync import sync_to_async
 from src.app.internal.transport.bot.handlers import add_fav, del_fav, list_fav
 from src.app.internal.transport.bot.telegram_messages import (
     ABSENT_ARG_FAV_MSG,
@@ -21,6 +23,8 @@ from src.app.internal.transport.bot.telegram_messages import (
     get_success_for_deleted_fav,
     get_success_for_new_fav,
 )
+
+from src.app.models import Favourite
 
 
 @pytest.mark.asyncio
@@ -42,7 +46,7 @@ async def test_list_fav_with_added_user(
     new_fav_user_model = user_model_without_verified_pn(tlg_id=100)
     await new_fav_user_model.asave()
 
-    await add_fav_to_user(already_verified_user.id, new_fav_user_model)
+    await try_add_fav_to_user(mocked_context, telegram_chat.id, already_verified_user.id, new_fav_user_model)
 
     mocked_update = get_update_for_command("/list_fav")
     await list_fav(mocked_update, mocked_context)
@@ -210,6 +214,8 @@ async def test_del_fav_with_user_not_in_favs(
     await new_fav_user_model.asave()
 
     mocked_update = get_update_for_command(f"/del_fav {new_fav_user_model.tlg_id}")
+
+    await Favourite.objects.acreate(tlg_id=already_verified_user.id)
     await del_fav(mocked_update, mocked_context)
 
     mocked_context.bot.send_message.assert_called_once_with(chat_id=telegram_chat.id, text=USER_NOT_IN_FAV)

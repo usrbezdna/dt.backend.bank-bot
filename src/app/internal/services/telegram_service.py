@@ -25,15 +25,7 @@ def verified_phone_required(func):
             tlg_id=update.effective_user.id, field_name='phone_number'
         )
 
-<<<<<<< src/app/internal/services/telegram_service.py
         if user_phone_number:
-=======
-        if not user:
-            await context.bot.send_message(chat_id=update.effective_chat.id, text=ME_WITH_NO_USER)
-            return
-
-        if user.hasPhoneNumber():
->>>>>>> src/app/internal/services/telegram_service.py
             await func(update, context)
         else:
             logger.info(f"User with {update.effective_user.id} ID don't have access to this function: {func.__name__}")

@@ -12,12 +12,8 @@ django-debug-toolbar = "~=4.0.0"
 django = "~=4.0"
 django-environ = "~=0.8"
 isort = "~=5.10"
-<<<<<<< Pipfile
 flake8 = "~=6.0"
-=======
-flake8 = "~=4.0"
 black = "~=23.3.0"
->>>>>>> Pipfile
 phonenumbers = "~=8.13.5"
 djangorestframework = "~=3.14.0"
 requests = "~=2.28.2"
