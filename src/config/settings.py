@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "phonenumber_field",
     "rest_framework",
-    "debug_toolbar", 
+    "debug_toolbar",
     "django_extensions",
     "app",
 ]
