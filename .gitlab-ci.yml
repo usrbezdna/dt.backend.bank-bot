@@ -17,6 +17,10 @@ infra:
     include: gitlab-templates/deploy-testserver.yml
     strategy: depend
 
+  only:
+   refs: 
+       - dev
+
 
 code:
   stage: bridge
@@ -33,6 +37,10 @@ get_ip:
   stage: get_ip
   tags: 
     - infra
+
+  only:
+   refs: 
+       - dev
 
   script:
     - echo Running Some Deploy Scripts
@@ -62,6 +70,10 @@ deploy:
   stage: deploy
   tags:
     - deploy
+
+  only:
+   refs: 
+       - dev
 
 
   variables:
