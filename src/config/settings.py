@@ -60,12 +60,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "phonenumber_field",
     "rest_framework",
+    "debug_toolbar", 
+    "django_extensions",
     "app",
 ]
-
-if not DEBUG:
-    INSTALLED_APPS.extend(["debug_toolbar", "django_extensions"])
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -75,12 +73,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
-
-if not DEBUG:
-    MIDDLEWARE.append(
-        "debug_toolbar.middleware.DebugToolbarMiddleware",
-    )
 
 ROOT_URLCONF = "config.urls"
 
