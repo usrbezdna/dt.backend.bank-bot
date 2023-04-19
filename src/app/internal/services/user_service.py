@@ -41,11 +41,11 @@ def get_user_by_username(username):
 @sync_to_async
 def get_user_field_by_id(tlg_id, field_name):
     """
-    Returns Query Set with specified field 
-    for User with Telegram ID tlg_id  
+    Returns Query Set with specified field
+    for User with Telegram ID tlg_id
     ----------
     :param tlg_id: Telegram User ID
-    :params fields: Wished list of model fields 
+    :params fields: Wished list of model fields
     :return: Value of this field
     """
     return User.objects.values_list(field_name, flat=True).get(pk=tlg_id)
@@ -75,7 +75,6 @@ def save_user_to_db(user):
     """
     user.save()
     logger.info(f"User with {user.tlg_id} ID was successfully saved to DB")
-
 
 
 def create_user_model_for_telegram(user):

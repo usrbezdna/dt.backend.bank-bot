@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "rest_framework",
     "debug_toolbar",
-    'django_extensions',
+    "django_extensions",
     "app",
 ]
 
@@ -148,11 +148,7 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "django.server",
         },
-
-        "sql.console" : {
-            "class" : "logging.StreamHandler"
-        }
-
+        "sql.console": {"class": "logging.StreamHandler"},
     },
     "loggers": {
         "django.server": {
@@ -160,11 +156,10 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-
-        "django.db.backends" : {
+        "django.db.backends": {
             "handlers": ["sql.console"],
-            "level": "DEBUG",  
-        }
+            "level": "DEBUG",
+        },
     },
 }
 
@@ -212,11 +207,8 @@ STATIC_ROOT = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.AdminUser"
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-    "localhost"
-]
+INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,
+    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG,
 }

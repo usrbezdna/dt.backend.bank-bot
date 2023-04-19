@@ -65,8 +65,9 @@ HELP_MSG = (
     + "/list_inter - returns list of users you have interacted with"
 )
 
-NO_INTERACTED_USERS = 'There is no users you have interacted with'
-NO_TXS_FOR_LAST_MONTH = 'You don\'t have any payment transactions for the last month'
+NO_INTERACTED_USERS = "There is no users you have interacted with"
+NO_TXS_FOR_LAST_MONTH = "You don't have any payment transactions for the last month"
+
 
 def get_unique_start_msg(first_name):
     """

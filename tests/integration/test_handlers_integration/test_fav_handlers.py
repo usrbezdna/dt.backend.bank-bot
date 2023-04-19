@@ -1,15 +1,14 @@
 from unittest.mock import call
 
 import pytest
+from asgiref.sync import sync_to_async
 
 from src.app.internal.services.favourites_service import (
-    try_add_fav_to_user,
     get_limited_list_of_favourites,
     get_list_of_favourites,
     get_result_message_for_user_favourites,
+    try_add_fav_to_user,
 )
-
-from asgiref.sync import sync_to_async
 from src.app.internal.transport.bot.handlers import add_fav, del_fav, list_fav
 from src.app.internal.transport.bot.telegram_messages import (
     ABSENT_ARG_FAV_MSG,
@@ -23,7 +22,6 @@ from src.app.internal.transport.bot.telegram_messages import (
     get_success_for_deleted_fav,
     get_success_for_new_fav,
 )
-
 from src.app.models import Favourite
 
 

@@ -50,7 +50,7 @@ async def test_smoke(
     assert await User.objects.acount() == 1
     assert user_model
 
-    user_model.phone_number = '+4214214'
+    user_model.phone_number = "+4214214"
     await user_model.asave()
 
     with ThreadPoolExecutor(max_workers=1) as executor:

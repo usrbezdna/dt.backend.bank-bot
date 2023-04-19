@@ -268,7 +268,7 @@ async def test_send_to_with_valid_transfer(
     for mocked_update in updates_list:
         await send_to(mocked_update, mocked_context)
 
-        rcp_name =  " ".join([rcp_user_model.first_name, rcp_user_model.last_name]) 
+        rcp_name = " ".join([rcp_user_model.first_name, rcp_user_model.last_name])
         mocked_context.bot.send_message.assert_called_with(
             chat_id=telegram_chat.id, text=get_successful_transfer_message(rcp_name, transfer_on_each_step)
         )
