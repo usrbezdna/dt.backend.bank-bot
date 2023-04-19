@@ -34,6 +34,7 @@ NOT_VALID_ID_MSG = "Invalid ID."
 
 
 BALANCE_NOT_FOUND = "Unable to find balance for this card / account"
+STATE_NOT_FOUND = "Unable to find state for this card / account"
 
 RSP_NOT_FOUND = "Recipient not found. Make sure you are using correct Telegram ID / username"
 RSP_USER_WITH_NO_ACC = "This recipient user doesn't have a payment account."
@@ -61,7 +62,11 @@ HELP_MSG = (
     + "/me - returns known info about your account (verified phone req.)\n"
     + "/check_card and /check_account - returns balance of specified card or account\n"
     + "/list_fav; /add_fav and /del_fav - commands for management of your favourites\n"
+    + "/list_inter - returns list of users you have interacted with"
 )
+
+NO_INTERACTED_USERS = "There is no users you have interacted with"
+NO_TXS_FOR_LAST_MONTH = "You don't have any payment transactions for the last month"
 
 
 def get_unique_start_msg(first_name):
@@ -142,13 +147,13 @@ def get_message_for_send_command(arg_command):
             return SEND_TO_CARD_ARGS
 
 
-def get_successful_transfer_message(recipient, value):
+def get_successful_transfer_message(recipient_name, value):
     """
     Returns message for successful transfer.
     :param recipient: recipient payment Account
     :value: transferring value
     """
-    return f"OK! Transaction is finished. Transferred {value} to user {recipient.first_name}{recipient.last_name}"
+    return f"OK! Transaction is finished. Transferred {value} to user {recipient_name}"
 
 
 def get_message_with_balance(account):

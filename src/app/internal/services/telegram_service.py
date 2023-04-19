@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext
 
 from app.internal.transport.bot.telegram_messages import ME_WITH_NO_USER, NO_VERIFIED_PN
 
-from .user_service import get_user_by_id
+from .user_service import get_user_by_id, get_user_field_by_id
 
 logger = logging.getLogger("django.server")
 
@@ -21,13 +21,9 @@ def verified_phone_required(func):
 
     @wraps(func)
     async def wrapper(update: Update, context: CallbackContext):
-        user = await get_user_by_id(update.effective_user.id)
+        user_phone_number = await get_user_field_by_id(tlg_id=update.effective_user.id, field_name="phone_number")
 
-        if not user:
-            await context.bot.send_message(chat_id=update.effective_chat.id, text=ME_WITH_NO_USER)
-            return
-
-        if user.hasPhoneNumber():
+        if user_phone_number:
             await func(update, context)
         else:
             logger.info(f"User with {update.effective_user.id} ID don't have access to this function: {func.__name__}")
