@@ -64,9 +64,7 @@ INSTALLED_APPS = [
 ]
 
 if not DEBUG:
-    INSTALLED_APPS.extend(
-        ["debug_toolbar", "django_extensions"]
-    )
+    INSTALLED_APPS.extend(["debug_toolbar", "django_extensions"])
 
 
 MIDDLEWARE = [
