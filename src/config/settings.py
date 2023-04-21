@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "phonenumber_field",
     "rest_framework",
+    "debug_toolbar",
+    "django_extensions",
     "app",
 ]
 
@@ -71,6 +73,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -145,12 +148,17 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "django.server",
         },
+        "sql.console": {"class": "logging.StreamHandler"},
     },
     "loggers": {
         "django.server": {
             "handlers": ["django.server"],
             "level": "INFO",
             "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["sql.console"],
+            "level": "DEBUG",
         },
     },
 }
@@ -198,3 +206,9 @@ STATIC_ROOT = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.AdminUser"
+
+INTERNAL_IPS = ["127.0.0.1", "localhost"]
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG,
+}
