@@ -62,6 +62,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "django_extensions",
+
+    "ninja_jwt",
+    "ninja_extra",
     "app",
 ]
 
@@ -156,10 +159,10 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "django.db.backends": {
-            "handlers": ["sql.console"],
-            "level": "DEBUG",
-        },
+        # "django.db.backends": {
+        #     "handlers": ["sql.console"],
+        #     "level": "DEBUG",
+        # },
     },
 }
 

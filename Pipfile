@@ -27,6 +27,10 @@ pytest-cov = "~=4.0.0"
 pytest-mock = "~=3.10.0"
 django-extensions = "~=3.2.1"
 werkzeug = "~=2.2.3"
+pyjwt = "~=2.6.0"
+django-ninja = "~=0.21.0"
+django-ninja-jwt = "~=5.2.5"
+six = "*"
 
 [requires]
 python_version = "3.10"

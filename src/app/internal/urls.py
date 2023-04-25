@@ -1,8 +1,7 @@
 from django.urls import path
-
-from .transport.rest.handlers import WebAPIView
+from .transport.rest.api import ninja_api
 
 # API Calls Go Here
 urlpatterns = [
-    path("me/<int:tlg_id>/", WebAPIView.as_view(), name="web_api"),
+    path("", ninja_api.urls),
 ]
