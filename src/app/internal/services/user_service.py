@@ -65,6 +65,22 @@ def update_user_phone_number(tlg_id, new_phone_number):
 
 
 @sync_to_async
+def update_user_password(tlg_id, new_password):
+    """
+    Updates password for a specific User.
+    ----------
+    :param tlg_id: Telegram ID of this User
+    :param new_password: new password as string
+    """
+    user_option = User.objects.filter(tlg_id=tlg_id).first()
+    user_option.set_password(new_password)
+    
+    user_option.save()
+    logger.info(f"Updated password for user with ID {tlg_id}")
+
+
+
+@sync_to_async
 def save_user_to_db(user):
     """
     Receives Telegram user and saves it in DB.

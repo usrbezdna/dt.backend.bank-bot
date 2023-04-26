@@ -27,10 +27,8 @@ def get_me(request):
     """
     logger.info("Got new GET request on /api/me endpoint!")
 
-    print(dir(request))
-
-    # user_from_db = asyncio.run(get_user_by_id(tlg_id))
-    # if user_from_db:
-    #     return 200, user_from_db
+    user_from_db = asyncio.run(get_user_by_id(request.user.tlg_id))
+    if user_from_db:
+        return 200, user_from_db
     
     return 404, MessageResponse.create('Not Found')
