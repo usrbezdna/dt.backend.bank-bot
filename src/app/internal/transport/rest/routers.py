@@ -22,7 +22,6 @@ def create_me_router():
 
         response =  {
             200 : UserSchema, 
-            403 : MessageResponse,
             404 : MessageResponse,
         },
 

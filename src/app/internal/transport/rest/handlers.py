@@ -20,15 +20,17 @@ class MessageResponse(Schema):
 
 
 
-def get_me(request, tlg_id : int):
+def get_me(request):
     """
     Returns info about specified Telegram User
     
     """
     logger.info("Got new GET request on /api/me endpoint!")
 
-    user_from_db = asyncio.run(get_user_by_id(tlg_id))
-    if user_from_db:
-        return 200, user_from_db
+    print(dir(request))
+
+    # user_from_db = asyncio.run(get_user_by_id(tlg_id))
+    # if user_from_db:
+    #     return 200, user_from_db
     
     return 404, MessageResponse.create('Not Found')
