@@ -1,7 +1,6 @@
-from django.db import models
-
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
@@ -16,40 +15,38 @@ class CustomUserManager(BaseUserManager):
         Creates user with basic fields set.
         """
         if not tlg_id:
-            raise ValueError('Telegram ID acts like PK and must be set')
-        
+            raise ValueError("Telegram ID acts like PK and must be set")
+
         user = self.model(tlg_id=tlg_id, **extra_fields)
         user.set_password(password)
 
         user.save()
         return user
 
-
-    def create_user(self, tlg_id, password = None, **extra_fields):
+    def create_user(self, tlg_id, password=None, **extra_fields):
         """
         Creates normal user
         """
-        extra_fields.setdefault('is_superuser', False)
-        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault("is_staff", False)
 
         return self._create_base_user(tlg_id, password, **extra_fields)
-    
+
     def create_superuser(self, tlg_id, password, **extra_fields):
         """
         Creates superuser
         """
 
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_staff', True)   
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_staff", True)
 
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('is_superser must be set to True')
-        
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('is_staff must be also set to True')
-        
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("is_superser must be set to True")
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("is_staff must be also set to True")
+
         return self._create_base_user(tlg_id, password, **extra_fields)
-
 
 
 class User(AbstractUser):
@@ -68,7 +65,7 @@ class User(AbstractUser):
 
     phone_number = models.CharField(max_length=32, blank=True)
 
-    USERNAME_FIELD = 'tlg_id'
+    USERNAME_FIELD = "tlg_id"
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()

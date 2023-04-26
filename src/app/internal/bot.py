@@ -5,10 +5,18 @@ from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
 
 from .ngrok_parser import parse_ngrok_url
 from .transport.bot.handlers import (
-    add_fav,  del_fav, list_fav,
-    check_payable, get_help,  me,
-    list_inter, send_to, set_password,
-    set_phone, start, state_payable,
+    add_fav,
+    check_payable,
+    del_fav,
+    get_help,
+    list_fav,
+    list_inter,
+    me,
+    send_to,
+    set_password,
+    set_phone,
+    start,
+    state_payable,
 )
 
 logger = logging.getLogger("django.server")

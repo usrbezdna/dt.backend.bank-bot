@@ -406,7 +406,7 @@ async def state_payable(update, context):
 async def set_password(update, context):
     """
     Handler for /set_password
-    Allows user to set password. 
+    Allows user to set password.
     ----------
     :param update: recieved Update object
     :param context: context object

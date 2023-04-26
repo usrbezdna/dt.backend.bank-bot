@@ -28,8 +28,8 @@ ABSENT_OLD_FAV_USER = (
     + "Telegram ID doesn't exist). Can't delete it from your favourites!"
 )
 
-ABSENT_PASSWORD_MSG = 'Don\'t forget to specify a new password!'
-PASSWORD_UPDATED = 'OK! Your password was updated.'
+ABSENT_PASSWORD_MSG = "Don't forget to specify a new password!"
+PASSWORD_UPDATED = "OK! Your password was updated."
 
 INCR_TX_VALUE = "Transfering value should be a positive number"
 
@@ -61,15 +61,11 @@ HELP_MSG = (
     "Hi, I am yet another banking bot!\n"
     + "Here is the list of commands I support:\n\n"
     + "/start - prints started message, adds you to DB\n"
-
     + "/set_phone - sets your phone number in an international format\n"
     + "/me - returns known info about your account (verified phone req.)\n"
-
     + "/check_card and /check_account - returns balance of specified card or account\n"
-
     + "/list_fav; /add_fav and /del_fav - commands for management of your favourites\n"
     + "/list_inter - returns list of users you have interacted with\n"
-
     + "/set_password - updates your password"
 )
 

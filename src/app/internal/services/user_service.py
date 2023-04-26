@@ -74,10 +74,9 @@ def update_user_password(tlg_id, new_password):
     """
     user_option = User.objects.filter(tlg_id=tlg_id).first()
     user_option.set_password(new_password)
-    
+
     user_option.save()
     logger.info(f"Updated password for user with ID {tlg_id}")
-
 
 
 @sync_to_async
