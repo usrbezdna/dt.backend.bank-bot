@@ -29,6 +29,8 @@ def get_me(request):
 
     user_from_db = asyncio.run(get_user_by_id(request.user.tlg_id))
     if user_from_db:
-        return 200, user_from_db
+        if user_from_db.hasPhoneNumber():
+            return 200, user_from_db
+        return 403, MessageResponse.create("No verified phone number")
 
     return 404, MessageResponse.create("Not Found")
