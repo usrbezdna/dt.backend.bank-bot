@@ -4,15 +4,9 @@ from app.models import User
 
 UserSchema = create_schema(
     User,
-    exclude=[
-        "is_staff",
-        "is_superuser",
-        "is_active",
-        "password",
-        "email",
-        "last_login",
-        "groups",
-        "user_permissions",
-        "date_joined",
-    ],
+    fields=[
+        'tlg_id', 'username', 
+        'first_name', 'last_name',
+        'phone_number'
+    ]
 )
