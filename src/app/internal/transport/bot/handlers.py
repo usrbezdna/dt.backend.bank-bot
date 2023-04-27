@@ -29,6 +29,7 @@ from app.internal.services.user_service import (
     create_user_model_for_telegram,
     get_user_by_id,
     save_user_to_db,
+    update_user_password,
     update_user_phone_number,
 )
 
@@ -38,6 +39,7 @@ from .telegram_messages import (
     ABSENT_FAV_USER,
     ABSENT_ID_NUMBER,
     ABSENT_OLD_FAV_USER,
+    ABSENT_PASSWORD_MSG,
     ABSENT_PN_MSG,
     BALANCE_NOT_FOUND,
     ERROR_DURING_TRANSFER,
@@ -49,6 +51,7 @@ from .telegram_messages import (
     NO_TXS_FOR_LAST_MONTH,
     NOT_INT_FORMAT_MSG,
     NOT_VALID_ID_MSG,
+    PASSWORD_UPDATED,
     SELF_TRANSFER_ERROR,
     STATE_NOT_FOUND,
     get_info_for_me_handler,
@@ -397,3 +400,26 @@ async def state_payable(update, context):
         return
 
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
+
+
+@verified_phone_required
+async def set_password(update, context):
+    """
+    Handler for /set_password
+    Allows user to set password.
+    ----------
+    :param update: recieved Update object
+    :param context: context object
+    """
+
+    user_id, chat_id = update.effective_user.id, update.effective_chat.id
+    command_data = update.message.text.split(" ")
+
+    if len(command_data) == 2:
+        argument = command_data[1]
+
+        await update_user_password(tlg_id=user_id, new_password=argument)
+        await context.bot.send_message(chat_id=chat_id, text=PASSWORD_UPDATED)
+
+        return
+    await context.bot.send_message(chat_id=chat_id, text=ABSENT_PASSWORD_MSG)

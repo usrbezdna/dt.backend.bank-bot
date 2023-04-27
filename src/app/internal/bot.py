@@ -13,6 +13,7 @@ from .transport.bot.handlers import (
     list_inter,
     me,
     send_to,
+    set_password,
     set_phone,
     start,
     state_payable,
@@ -82,6 +83,8 @@ def setup_application_handlers(application):
 
     application.add_handler(CommandHandler("state_card", state_payable))
     application.add_handler(CommandHandler("state_account", state_payable))
+
+    application.add_handler(CommandHandler("set_password", set_password))
 
 
 def set_bot_webhook(application):
