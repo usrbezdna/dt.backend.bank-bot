@@ -27,9 +27,6 @@ ABSENT_OLD_FAV_USER = (
     + "Telegram ID doesn't exist). Can't delete it from your favourites!"
 )
 
-ABSENT_PASSWORD_MSG = "Don't forget to specify a new password!"
-PASSWORD_UPDATED = "OK! Your password was updated."
-
 INCR_TX_VALUE = "Transfering value should be a positive number"
 
 NOT_VALID_ID_MSG = "Invalid ID."

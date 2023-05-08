@@ -8,8 +8,8 @@ from phonenumbers.phonenumberutil import NumberParseException
 
 from app.internal.api_v1.users.domain.services import UserService
 from app.internal.api_v1.users.presentation.bot.telegram_messages import (
-    ABSENT_PN_MSG, HELP_MSG, INVALID_PN_MSG, 
-    NOT_INT_FORMAT_MSG, USER_NOT_FOUND_MSG, 
+    ABSENT_PASSWORD_MSG, ABSENT_PN_MSG, HELP_MSG, INVALID_PN_MSG, 
+    NOT_INT_FORMAT_MSG, PASSWORD_UPDATED, USER_NOT_FOUND_MSG, 
     get_info_for_me_handler, get_success_phone_msg, 
     get_unique_start_msg
 )
@@ -82,8 +82,8 @@ class TelegramUserHandlers:
 
         try:
             parsed_number = PhoneNumber.from_string(phone_number)
-        except NumberParseException:
 
+        except NumberParseException:
             logger.info("User did not provide a valid phone number and it caused ParseError")
             await context.bot.send_message(chat_id=chat_id, text=INVALID_PN_MSG)
             return
@@ -122,3 +122,27 @@ class TelegramUserHandlers:
             return
 
         await context.bot.send_message(chat_id=chat_id, text=get_info_for_me_handler(user_from_db))
+
+
+    @verified_phone_required
+    async def set_password(self, update : Update, context : ContextTypes.DEFAULT_TYPE):
+        """
+        Handler for /set_password
+        Allows user to set password.
+        ----------
+        :param update: recieved Update object
+        :param context: context object
+        """
+
+        user_id, chat_id = update.effective_user.id, update.effective_chat.id
+        command_data = update.message.text.split(" ")
+
+        if len(command_data) != 2:
+            await context.bot.send_message(chat_id=chat_id, text=ABSENT_PASSWORD_MSG)
+            return 
+        
+        argument = command_data[1]
+
+        await self._user_service.update_user_password(tlg_id=user_id, new_password=argument)
+        await context.bot.send_message(chat_id=chat_id, text=PASSWORD_UPDATED)
+        

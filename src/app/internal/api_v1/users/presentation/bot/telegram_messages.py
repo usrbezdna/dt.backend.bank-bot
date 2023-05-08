@@ -3,10 +3,12 @@ from app.internal.api_v1.users.domain.entities import UserOut
 
 
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
-
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 
 USER_NOT_FOUND_MSG = "Can't find any info about you, type /start at first!"
+
+ABSENT_PASSWORD_MSG = "Don't forget to specify a new password!"
+PASSWORD_UPDATED = "OK! Your password was updated."
 
 HELP_MSG = (
     "Hi, I am yet another banking bot!\n"

@@ -70,26 +70,32 @@ def setup_application_handlers(application : Application):
 
     application.add_handler(CommandHandler("start", user_handlers.start))
     application.add_handler(CommandHandler("help", user_handlers.get_help))
-    application.add_handler(CommandHandler("set_phone", user_handlers.set_phone))
     application.add_handler(CommandHandler("me", user_handlers.me))
+    application.add_handler(CommandHandler("set_phone", user_handlers.set_phone))
+    application.add_handler(CommandHandler("set_password", user_handlers.set_password))
+
 
     # application.add_handler(CommandHandler("list_fav", list_fav))
     # application.add_handler(CommandHandler("add_fav", add_fav))
     # application.add_handler(CommandHandler("del_fav", del_fav))
 
+
     # application.add_handler(CommandHandler("check_card", check_payable))
     # application.add_handler(CommandHandler("check_account", check_payable))
+
 
     # application.add_handler(CommandHandler("send_to_user", send_to))
     # application.add_handler(CommandHandler("send_to_account", send_to))
     # application.add_handler(CommandHandler("send_to_card", send_to))
 
+
     # application.add_handler(CommandHandler("list_inter", list_inter))
+
 
     # application.add_handler(CommandHandler("state_card", state_payable))
     # application.add_handler(CommandHandler("state_account", state_payable))
 
-    # application.add_handler(CommandHandler("set_password", set_password))
+    
 
 
 def set_bot_webhook(application : Application):

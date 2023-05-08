@@ -90,26 +90,3 @@ async def state_payable(update, context):
         return
 
     await context.bot.send_message(chat_id=chat_id, text=ABSENT_ID_NUMBER)
-
-
-@verified_phone_required
-async def set_password(update, context):
-    """
-    Handler for /set_password
-    Allows user to set password.
-    ----------
-    :param update: recieved Update object
-    :param context: context object
-    """
-
-    user_id, chat_id = update.effective_user.id, update.effective_chat.id
-    command_data = update.message.text.split(" ")
-
-    if len(command_data) == 2:
-        argument = command_data[1]
-
-        await update_user_password(tlg_id=user_id, new_password=argument)
-        await context.bot.send_message(chat_id=chat_id, text=PASSWORD_UPDATED)
-
-        return
-    await context.bot.send_message(chat_id=chat_id, text=ABSENT_PASSWORD_MSG)
