@@ -5,7 +5,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from app.internal.transport.rest.routers import me_router
 
 
-def create_api():
+def create_api() -> NinjaExtraAPI:
     """
     Creates NinjaAPI with routers
     :return: api
@@ -18,12 +18,12 @@ def create_api():
     )
 
     api.register_controllers(NinjaJWTDefaultController)
-    add_routers(api)
 
+    add_routers(api)
     return api
 
 
-def add_routers(api: NinjaAPI):
+def add_routers(api: NinjaExtraAPI):
     """
     Attaches routers to Ninja API obj
     """

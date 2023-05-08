@@ -78,7 +78,6 @@ class User(AbstractUser):
         """
 
         verbose_name = "TelegramUser"
-        # db_table = 'telegram_users'
 
     def hasPhoneNumber(self) -> bool:
         """
@@ -99,16 +98,3 @@ class User(AbstractUser):
         user_as_a_str += f"Last name: {self.last_name}\n" if self.last_name else "You don't have a last name\n"
         user_as_a_str += f"Username: {self.username}\n" if self.username else "Can't find your username\n"
         return user_as_a_str
-
-
-class Favourite(models.Model):
-    """
-    Model for the list of favourite users.
-    """
-
-    tlg_id = models.IntegerField(primary_key=True)
-    favourites = models.ManyToManyField(User, related_name="favs")
-
-    class Meta:
-        verbose_name = "Favourite"
-        db_table = "fav_table"

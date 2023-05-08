@@ -1,7 +1,7 @@
 from ninja import Router, Schema
 from ninja_jwt.authentication import JWTAuth
 
-from app.internal.schemas.user import UserSchema
+from app.internal.api_v1.users.domain.entities import UserSchema
 
 from .handlers import MessageResponse, get_me
 

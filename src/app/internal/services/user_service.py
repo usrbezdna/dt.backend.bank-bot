@@ -80,7 +80,7 @@ def update_user_password(tlg_id, new_password):
 
 
 @sync_to_async
-def save_user_to_db(user):
+def save_telegram_user_to_db(user):
     """
     Receives Telegram user and saves it in DB.
     (Might be modified in the future to run some

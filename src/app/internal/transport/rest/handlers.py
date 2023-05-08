@@ -4,7 +4,7 @@ import logging
 from ninja import Schema
 from ninja.errors import HttpError
 
-from app.internal.schemas.user import UserSchema
+from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.services.user_service import get_user_by_id
 
 from .content_messages import NO_PHONE_VERIFICATION, USER_NOT_FOUND
