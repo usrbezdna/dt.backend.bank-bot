@@ -1,0 +1,5 @@
+# Default content objects for request rejections
+
+
+INVALID_PHONE_NUMBER = 'Invalid phone number'
+PHONE_NUMBER_SUCCESS = 'Successfully updated your phone number!'

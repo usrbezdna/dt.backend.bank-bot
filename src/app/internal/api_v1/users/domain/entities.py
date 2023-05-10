@@ -1,7 +1,17 @@
+from ninja import Schema
+
 from ninja.orm import create_schema
 from app.internal.api_v1.users.db.models import User
 
 
+class MessageResponseSchema(Schema):
+    message: str
+
+    @staticmethod
+    def create(msg: str):
+        return MessageResponseSchema(message=msg)
+    
+    
 UserSchema = create_schema(
     User,
     fields=[
@@ -10,9 +20,3 @@ UserSchema = create_schema(
         'phone_number'
     ]
 )
-
-class UserOut(UserSchema):
-    pass
-
-class UserIn(UserSchema):
-    pass

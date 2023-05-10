@@ -1,8 +1,6 @@
 import logging
 
 from phonenumbers import is_valid_number
-from phonenumbers.phonenumberutil import NumberParseException
-
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers.phonenumberutil import NumberParseException
 

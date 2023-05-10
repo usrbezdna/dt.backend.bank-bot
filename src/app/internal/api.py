@@ -2,32 +2,26 @@ from ninja import NinjaAPI
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
 
-from app.internal.transport.rest.routers import me_router
+
+from app.internal.api_v1.users.api import register_users_api
 
 
-def create_api() -> NinjaExtraAPI:
+def create_global_api() -> NinjaExtraAPI:
     """
     Creates NinjaAPI with routers
-    :return: api
+    :return: Global API
     """
 
-    api = NinjaExtraAPI(
+    global_api = NinjaExtraAPI(
         title="NinjaREST",
         description="REST API",
         version="1.0.0",
     )
 
-    api.register_controllers(NinjaJWTDefaultController)
+    global_api.register_controllers(NinjaJWTDefaultController)
 
-    add_routers(api)
-    return api
-
-
-def add_routers(api: NinjaExtraAPI):
-    """
-    Attaches routers to Ninja API obj
-    """
-    api.add_router("/me", me_router)
+    register_users_api(global_api)
+    return global_api
 
 
-ninja_api = create_api()
+global_ninja_api = create_global_api()
