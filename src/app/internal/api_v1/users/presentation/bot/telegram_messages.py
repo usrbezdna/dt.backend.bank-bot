@@ -1,5 +1,7 @@
 
-from app.internal.api_v1.users.domain.entities import UserOut
+
+
+from app.internal.api_v1.users.db.models import User
 
 
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
@@ -54,7 +56,7 @@ def get_success_phone_msg(phone_number : str) -> str:
     return f"Successfully updated your phone number: {phone_number}"
 
 
-def get_info_for_me_handler(user_from_db : UserOut) -> str:
+def get_info_for_me_handler(user_from_db : User) -> str:
     """
     Returns info for /me handler
     :param user_from_db: User object

@@ -4,10 +4,12 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from app.internal.api_v1.telegram_messages import ME_WITH_NO_USER, NO_VERIFIED_PN
+from app.internal.api_v1.utils.presentation.bot.telegram_messages import NO_VERIFIED_PN
 
 from app.internal.api_v1.users.db.repositories import UserRepository
 from app.internal.api_v1.users.domain.services import UserService
+
+from asgiref.sync import sync_to_async
 
 logger = logging.getLogger("django.server")
 
@@ -21,11 +23,10 @@ def verified_phone_required(func):
     """
 
     user_repo = UserRepository()
-    user_services = UserService(user_repo=user_repo)
 
     @wraps(func)
     async def wrapper(_self, update : Update, context : ContextTypes.DEFAULT_TYPE):
-        user_phone_number = await user_services.get_user_field_by_id(
+        user_phone_number = await sync_to_async(user_repo.get_user_field_by_id)(
             tlg_id=update.effective_user.id, field_name="phone_number"
         )
 

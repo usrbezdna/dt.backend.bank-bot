@@ -1,5 +1,4 @@
 from app.internal.api_v1.users.domain.services import IUserRepository
-from app.internal.api_v1.users.domain.entities import UserIn, UserOut
 
 from app.internal.api_v1.users.db.models import User
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
@@ -13,14 +12,14 @@ logger = logging.getLogger("django.server")
 
 class UserRepository(IUserRepository):
 
-    def get_user_by_id(self, tlg_id : int) -> UserOut:
+    def get_user_by_id(self, tlg_id : int) -> User:
         """
         Returns Telegram user by ID from DB 
         or raises UserNotFoundException (if user with such TgID doesn't exist)
         ----------
 
         :param tlg_id: Telegram user ID
-        :return: UserOut
+        :return: User object
         :raises UserNotFoundException: if user not found in DB  
         """
         user_option : Optional[User] = User.objects.filter(tlg_id=tlg_id).first()
@@ -29,24 +28,25 @@ class UserRepository(IUserRepository):
             logger.info(f"User with ID {tlg_id} not found in DB")
             raise UserNotFoundException('Can\'t find user with such ID')
         
-        return UserOut.from_orm(user_option)
+        return user_option
 
-    def get_user_by_username(self, username : str) -> UserOut:
+    def get_user_by_username(self, username : str) -> User:
         """
         Returns Telegram user by username from DB 
         or raises UserNotFoundException (if user with such username doesn't exist)
         ----------
 
         :param username: Telegram user username
-        :return: UserOut
+        :return: User object
         :raises UserNotFoundException: if user not found in DB  
         """
         user_option : Optional[User] = User.objects.filter(username=username).first()
+        
         if user_option is None:
             logger.info(f"User with username {username} not found in DB")
             raise UserNotFoundException('Can\'t find user with such username')
         
-        return UserOut.from_orm(user_option)
+        return user_option
     
     def get_user_field_by_id(self, tlg_id : int, field_name : str) -> Any:
         """

@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
-from app.internal.api_v1.users.domain.entities import UserOut, UserIn
 from typing import Any
+from app.internal.api_v1.users.db.models import User
 
 from telegram import User as TelegramUser
 from asgiref.sync import sync_to_async
@@ -9,11 +9,11 @@ from asgiref.sync import sync_to_async
 class IUserRepository(ABC):
     
     @abstractmethod
-    def get_user_by_id(self, tlg_id : int) -> UserOut:
+    def get_user_by_id(self, tlg_id : int) -> User:
         pass
 
     @abstractmethod
-    def get_user_by_username(self, username : str) -> UserOut:
+    def get_user_by_username(self, username : str) -> User:
         pass
 
     @abstractmethod
@@ -40,12 +40,12 @@ class UserService:
 
 
     @sync_to_async
-    def get_user_by_id(self, tlg_id : int) -> UserOut:
+    def get_user_by_id(self, tlg_id : int) -> User:
         return self._user_repo.get_user_by_id(tlg_id=tlg_id)
 
 
     @sync_to_async
-    def get_user_by_username(self, username : str) -> UserOut:
+    def get_user_by_username(self, username : str) -> User:
         return self._user_repo.get_user_by_username(username=username)
     
 

@@ -19,8 +19,8 @@ from src.app.internal.transport.bot.telegram_messages import (
     RESTRICT_SECOND_TIME_ADD,
     RESTRICT_SELF_OPS,
     USER_NOT_IN_FAV,
-    get_success_for_deleted_fav,
-    get_success_for_new_fav,
+    get_success_msg_for_deleted_fav,
+    get_success_msg_for_new_fav,
 )
 from src.app.models import Favourite
 
@@ -167,7 +167,7 @@ async def test_add_fav_with_valid_args(
     assert new_fav_user_model in favs
 
     mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, text=get_success_for_new_fav(new_fav_user_model)
+        chat_id=telegram_chat.id, text=get_success_msg_for_new_fav(new_fav_user_model)
     )
 
 
@@ -245,5 +245,5 @@ async def test_del_fav_with_valid_args(
     assert len(await get_list_of_favourites(tlg_id=already_verified_user.id)) == 0
 
     mocked_context.bot.send_message.assert_called_with(
-        chat_id=telegram_chat.id, text=get_success_for_deleted_fav(new_fav_user_model)
+        chat_id=telegram_chat.id, text=get_success_msg_for_deleted_fav(new_fav_user_model)
     )

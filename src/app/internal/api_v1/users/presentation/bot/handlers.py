@@ -15,8 +15,8 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
 )
 
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.domain.entities import UserOut
 from app.internal.api_v1.utils.domain.services import verified_phone_required
+from app.internal.api_v1.users.db.models import User
 
 
 from telegram import Update
@@ -28,7 +28,7 @@ logger = logging.getLogger("django.server")
 
 class TelegramUserHandlers:
 
-    def __init__(self, user_service : UserService) -> None:
+    def __init__(self, user_service : UserService):
         self._user_service = user_service
 
 
@@ -41,8 +41,7 @@ class TelegramUserHandlers:
         :param update: recieved Update object
         :param context: context object passed to the callback
         """
-        telegram_user = update.effective_user
-        chat_id = update.effective_chat.id
+        telegram_user, chat_id = update.effective_user, update.effective_chat.id
 
         await self._user_service.save_telegram_user_to_db(telegram_user)
         await context.bot.send_message(chat_id=chat_id, text=get_unique_start_msg(telegram_user.first_name))
@@ -111,12 +110,11 @@ class TelegramUserHandlers:
         :param update: recieved Update object
         :param context: context object passed to the callback
         """
-        user_id = update.effective_user.id
-        chat_id = update.effective_chat.id
+        user_id, chat_id = update.effective_user.id,  update.effective_chat.id
 
         try:
-            user_from_db : UserOut = await self._user_service.get_user_by_id(tlg_id=user_id)
-
+            user_from_db : User = await self._user_service.get_user_by_id(tlg_id=user_id)
+            
         except UserNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=USER_NOT_FOUND_MSG)
             return

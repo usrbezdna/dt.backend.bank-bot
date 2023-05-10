@@ -6,7 +6,6 @@ from src.app.internal.services.user_service import get_user_by_id
 from src.app.internal.transport.bot.handlers import me, set_phone, start
 from src.app.internal.transport.bot.telegram_messages import (
     INVALID_PN_MSG,
-    ME_WITH_NO_USER,
     NO_VERIFIED_PN,
     NOT_INT_FORMAT_MSG,
     get_info_for_me_handler,
