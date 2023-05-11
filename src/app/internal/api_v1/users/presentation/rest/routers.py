@@ -1,4 +1,4 @@
-from ninja import Router, Schema
+from ninja import Router
 from ninja_jwt.authentication import JWTAuth
 
 from app.internal.api_v1.users.domain.entities import UserSchema, MessageResponseSchema
@@ -27,8 +27,8 @@ def get_users_router(rest_user_handlers : RestUserHandlers):
     )
 
     router.add_api_operation(
-        path="/set_phone",
-        methods=["PUT"],
+        path="/phone",
+        methods=["POST"],
         view_func=rest_user_handlers.set_phone,
         response = {
             200 : MessageResponseSchema,

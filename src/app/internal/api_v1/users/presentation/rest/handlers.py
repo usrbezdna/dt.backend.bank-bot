@@ -8,7 +8,7 @@ from phonenumbers.phonenumberutil import NumberParseException
 from app.internal.api_v1.users.domain.entities import MessageResponseSchema
 from app.internal.api_v1.users.domain.services import UserService
 
-from .content_messages import INVALID_PHONE_NUMBER, PHONE_NUMBER_SUCCESS
+from .content_messages import INVALID_PHONE_NUMBER, NOT_VERIFIED, PHONE_NUMBER_SUCCESS
 
 logger = logging.getLogger("django.server")
 
@@ -29,21 +29,18 @@ class RestUserHandlers:
         user_from_db = asyncio.run(self._user_service.\
             get_user_by_id(request.user.tlg_id))
 
-        if user_from_db is None:
-            return 404, MessageResponseSchema.create("Not Found")
-
         if not user_from_db.hasPhoneNumber():
-            return 403, MessageResponseSchema.create("No verified phone number")
+            return 403, MessageResponseSchema.create(NOT_VERIFIED)
         
         return 200, user_from_db 
-    
+
 
     def set_phone(self, request, new_phone : str):
         """
         Sets new phone for this user
         """
 
-        logger.info("Got new GET request on /api/set_phone endpoint!")
+        logger.info("Got new GET request on /api/users/phone endpoint!")
 
         try:
             parsed_number = PhoneNumber.from_string(new_phone)
