@@ -35,7 +35,18 @@ def get_users_router(rest_user_handlers : RestUserHandlers):
             400 : MessageResponseSchema,
         },
         auth=JWTAuth(),
-        description="Returns help message"
+        description="Resets phone number for this user"
+    )
+
+    router.add_api_operation(
+        path="/password",
+        methods=["POST"],
+        view_func=rest_user_handlers.set_password,
+        response = {
+            200 : MessageResponseSchema
+        },
+        auth=JWTAuth(),
+        description="Resets password for this user"
     )
 
     return router

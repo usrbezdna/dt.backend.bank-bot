@@ -8,7 +8,7 @@ from phonenumbers.phonenumberutil import NumberParseException
 from app.internal.api_v1.users.domain.entities import MessageResponseSchema
 from app.internal.api_v1.users.domain.services import UserService
 
-from .content_messages import INVALID_PHONE_NUMBER, NOT_VERIFIED, PHONE_NUMBER_SUCCESS
+from .content_messages import INVALID_PHONE_NUMBER, NOT_VERIFIED, PASSWORD_SUCCESS, PHONE_NUMBER_SUCCESS
 
 logger = logging.getLogger("django.server")
 
@@ -60,4 +60,16 @@ class RestUserHandlers:
         ))
 
         return 200, MessageResponseSchema.create(PHONE_NUMBER_SUCCESS)
+
+
+    def set_password(self, request, new_password : str):
+        """
+        Sets new password for this user
+        """      
+
+        logger.info("Got new POST request on /api/users/password endpoint!")
+
+        asyncio.run(self._user_service.\
+            update_user_password(tlg_id=request.user.tlg_id, new_password=new_password))
         
+        return 200, MessageResponseSchema.create(PASSWORD_SUCCESS)
