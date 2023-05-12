@@ -1,5 +1,7 @@
 from django.db import models
+
 from app.internal.api_v1.accounts.db.models import Account
+
 
 class Card(models.Model):
     """

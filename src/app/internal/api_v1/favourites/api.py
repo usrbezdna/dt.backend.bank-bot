@@ -1,17 +1,16 @@
-
 from ninja_extra import NinjaExtraAPI
 
-from app.internal.api_v1.users.db.repositories import UserRepository
 from app.internal.api_v1.favourites.db.repositories import FavouriteRepository
 from app.internal.api_v1.favourites.domain.services import FavouriteService
-
 from app.internal.api_v1.favourites.presentation.rest.handlers import RestFavouritesHandlers
 from app.internal.api_v1.favourites.presentation.rest.routers import get_favourites_router
+from app.internal.api_v1.users.db.repositories import UserRepository
+
 
 def register_favourites_api(global_api: NinjaExtraAPI):
     """
-    Builds Favourites part of REST APi and 
-    attaches routers to global Ninja API 
+    Builds Favourites part of REST APi and
+    attaches routers to global Ninja API
     """
 
     user_repo = UserRepository()

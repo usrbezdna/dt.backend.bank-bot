@@ -1,68 +1,61 @@
-
 from abc import ABC, abstractmethod
 from typing import Any
+
+from asgiref.sync import sync_to_async
+from telegram import User as TelegramUser
+
 from app.internal.api_v1.users.db.models import User
 
-from telegram import User as TelegramUser
-from asgiref.sync import sync_to_async
 
 class IUserRepository(ABC):
-    
     @abstractmethod
-    def get_user_by_id(self, tlg_id : int) -> User:
+    def get_user_by_id(self, tlg_id: int) -> User:
         pass
 
     @abstractmethod
-    def get_user_by_username(self, username : str) -> User:
+    def get_user_by_username(self, username: str) -> User:
         pass
 
     @abstractmethod
-    def get_user_field_by_id(self, tlg_id : int, field_name : str) -> Any:
+    def get_user_field_by_id(self, tlg_id: int, field_name: str) -> Any:
         pass
 
     @abstractmethod
-    def update_user_phone_number(self, tlg_id : int, new_phone_number : str) -> None:
+    def update_user_phone_number(self, tlg_id: int, new_phone_number: str) -> None:
         pass
 
     @abstractmethod
-    def update_user_password(self, tlg_id : int, new_password : str) -> None:
+    def update_user_password(self, tlg_id: int, new_password: str) -> None:
         pass
 
     @abstractmethod
-    def save_telegram_user_to_db(self, user : TelegramUser) -> None:
+    def save_telegram_user_to_db(self, user: TelegramUser) -> None:
         pass
 
 
 class UserService:
-
-    def __init__(self, user_repo : IUserRepository):
+    def __init__(self, user_repo: IUserRepository):
         self._user_repo = user_repo
 
-
     @sync_to_async
-    def get_user_by_id(self, tlg_id : int) -> User:
+    def get_user_by_id(self, tlg_id: int) -> User:
         return self._user_repo.get_user_by_id(tlg_id=tlg_id)
 
-
     @sync_to_async
-    def get_user_by_username(self, username : str) -> User:
+    def get_user_by_username(self, username: str) -> User:
         return self._user_repo.get_user_by_username(username=username)
-    
 
     @sync_to_async
-    def get_user_field_by_id(self, tlg_id : int, field_name : str) -> Any:
+    def get_user_field_by_id(self, tlg_id: int, field_name: str) -> Any:
         return self._user_repo.get_user_field_by_id(tlg_id=tlg_id, field_name=field_name)
 
-
     @sync_to_async
-    def update_user_phone_number(self, tlg_id : int, new_phone_number : str) -> None: 
+    def update_user_phone_number(self, tlg_id: int, new_phone_number: str) -> None:
         self._user_repo.update_user_phone_number(tlg_id=tlg_id, new_phone_number=new_phone_number)
 
-
     @sync_to_async
-    def update_user_password(self, tlg_id : int, new_password : str) -> None:
+    def update_user_password(self, tlg_id: int, new_password: str) -> None:
         self._user_repo.update_user_password(tlg_id=tlg_id, new_password=new_password)
-
 
     @sync_to_async
     def save_telegram_user_to_db(self, user: TelegramUser) -> None:

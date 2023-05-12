@@ -1,17 +1,15 @@
-
 from ninja_extra import NinjaExtraAPI
 
 from app.internal.api_v1.users.db.repositories import UserRepository
 from app.internal.api_v1.users.domain.services import UserService
-
 from app.internal.api_v1.users.presentation.rest.handlers import RestUserHandlers
 from app.internal.api_v1.users.presentation.rest.routers import get_users_router
 
 
 def register_users_api(global_api: NinjaExtraAPI):
     """
-    Builds User part of REST APi and 
-    attaches routers to global Ninja API 
+    Builds User part of REST APi and
+    attaches routers to global Ninja API
     """
 
     user_repo = UserRepository()

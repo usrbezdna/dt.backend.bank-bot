@@ -1,8 +1,6 @@
-
-
 from typing import Any, Dict, List
-from app.internal.api_v1.accounts.db.models import Account
 
+from app.internal.api_v1.accounts.db.models import Account
 
 NO_VERIFIED_PN = "You don't have a verified phone number!"
 
@@ -47,13 +45,12 @@ ERROR_DURING_TRANSFER = "Some error occured during transfer!"
 CARD_NOT_FOUND = "There is no card with such ID in DB"
 
 
-
 STATE_NOT_FOUND = "Unable to find state for this card / account"
 NO_INTERACTED_USERS = "There is no users you have interacted with"
 NO_TXS_FOR_LAST_MONTH = "You don't have any payment transactions for the last month"
 
 
-def get_message_with_balance(account : Account) -> str:
+def get_message_with_balance(account: Account) -> str:
     """
     Returns message with account value
     :param account: Payment Account object
@@ -61,7 +58,7 @@ def get_message_with_balance(account : Account) -> str:
     return f"This card / account balance is {int(account.value)}"
 
 
-def get_message_for_send_command(arg_command : str) -> str:
+def get_message_for_send_command(arg_command: str) -> str:
     """
     Returns uniq message for each type of send_to command.
     :param arg_command: first command argument with command name.
@@ -73,9 +70,9 @@ def get_message_for_send_command(arg_command : str) -> str:
             return SEND_TO_ACC_ARGS
         case "/send_to_card":
             return SEND_TO_CARD_ARGS
-        
-        
-def get_successful_transfer_message(recipient_name : str, value : int) -> str:
+
+
+def get_successful_transfer_message(recipient_name: str, value: int) -> str:
     """
     Returns message for successful transfer.
     :param recipient: recipient payment Account
@@ -84,7 +81,7 @@ def get_successful_transfer_message(recipient_name : str, value : int) -> str:
     return f"OK! Transaction is finished. Transferred {value} to user {recipient_name}"
 
 
-def get_result_message_for_list_interacted(usernames_list : List[str]) -> str:
+def get_result_message_for_list_interacted(usernames_list: List[str]) -> str:
     """
     Returns message with usernames of users who
     have interacted with this user.
@@ -98,7 +95,7 @@ def get_result_message_for_list_interacted(usernames_list : List[str]) -> str:
     return res_msg
 
 
-def get_result_message_for_transaction_state(transactions_list : List[Dict[str, Any]]) -> str:
+def get_result_message_for_transaction_state(transactions_list: List[Dict[str, Any]]) -> str:
     """
     Returns message with transactions for the last month.
     ----------

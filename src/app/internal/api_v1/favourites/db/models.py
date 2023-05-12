@@ -1,5 +1,7 @@
 from django.db import models
+
 from app.internal.api_v1.users.db.models import User
+
 
 class Favourite(models.Model):
     """

@@ -1,28 +1,23 @@
-
-import logging
 import calendar
+import logging
 from datetime import timedelta
-
 from typing import Any, Dict, List
-from app.internal.api_v1.transactions.domain.services import ITransactionRepository
-from app.internal.api_v1.transactions.db.exceptions import InsufficientBalanceException, TransferException
-
-from app.internal.api_v1.users.db.models import User
-from app.internal.api_v1.accounts.db.models import Account
-from app.internal.api_v1.transactions.db.models import Transaction
-
 
 from django.db import DatabaseError, transaction
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat, ExtractDay, ExtractMonth, ExtractYear
 from django.utils import timezone
 
-
+from app.internal.api_v1.accounts.db.models import Account
+from app.internal.api_v1.transactions.db.exceptions import InsufficientBalanceException, TransferException
+from app.internal.api_v1.transactions.db.models import Transaction
+from app.internal.api_v1.transactions.domain.services import ITransactionRepository
+from app.internal.api_v1.users.db.models import User
 
 logger = logging.getLogger("django.server")
 
-class TransactionRepository(ITransactionRepository):
 
+class TransactionRepository(ITransactionRepository):
     def try_transfer_to(self, sender_acc: Account, recipient_acc: Account, transferring_value: float) -> None:
         """
         Tries to transfer value from first_payment_account to second_payment_account.
@@ -39,7 +34,6 @@ class TransactionRepository(ITransactionRepository):
             Account.objects.select_for_update().filter(uniq_id__in=[sender_acc.uniq_id, recipient_acc.uniq_id])
 
             with transaction.atomic():
-
                 if sender_acc.value - transferring_value >= 0:
                     sender_acc.value = F("value") - transferring_value
                     recipient_acc.value = F("value") + transferring_value
@@ -47,30 +41,29 @@ class TransactionRepository(ITransactionRepository):
                     sender_acc.save()
                     recipient_acc.save()
 
-                    Transaction.objects.create(tx_sender=sender_acc, tx_recip=recipient_acc, tx_value=transferring_value)
-                    
+                    Transaction.objects.create(
+                        tx_sender=sender_acc, tx_recip=recipient_acc, tx_value=transferring_value
+                    )
+
                 else:
-                    logger.info(f'Balance of {sender_acc.uniq_id} was not sufficient for payment transaction')
+                    logger.info(f"Balance of {sender_acc.uniq_id} was not sufficient for payment transaction")
                     raise InsufficientBalanceException()
-                    
+
         except DatabaseError as err:
             logger.info(f"Error during try_transfer_to call:\n{err}")
             raise TransferException
-        
-        
-    def get_list_of_inter_usernames(self, user_id : int) -> List[str]:
+
+    def get_list_of_inter_usernames(self, user_id: int) -> List[str]:
         """
         Retuns list of usernames for users who have
         interacted with user_id
         ----------
-        
+
         :param user_id: Telegram ID of specified user
         """
 
         tx_list = list(
-            Transaction.objects.filter(
-                Q(tx_sender__owner__tlg_id=user_id) | Q(tx_recip__owner__tlg_id=user_id)
-            )\
+            Transaction.objects.filter(Q(tx_sender__owner__tlg_id=user_id) | Q(tx_recip__owner__tlg_id=user_id))
             .order_by("tx_sender__owner__tlg_id", "tx_recip__owner__tlg_id")
             .distinct("tx_sender__owner__tlg_id", "tx_recip__owner__tlg_id")
             .values_list("tx_sender__owner", "tx_recip__owner")
@@ -80,9 +73,8 @@ class TransactionRepository(ITransactionRepository):
         unique_ids = [tuple[1] if tuple[0] == user_id else tuple[0] for tuple in unique_tx_list]
 
         return list(User.objects.filter(tlg_id__in=unique_ids).values_list("username", flat=True).all())
-    
 
-    def get_list_of_transactions_for_the_last_month(self, user_id : int) -> List[Dict[str, Any]]:
+    def get_list_of_transactions_for_the_last_month(self, user_id: int) -> List[Dict[str, Any]]:
         """
         Returns list of payment transactions for the last
         month for Telegram user with ID user_id
@@ -120,4 +112,4 @@ class TransactionRepository(ITransactionRepository):
             .values("tx_id", "tx_value", "sender_name", "recip_name", "date")
         )
 
-        return tx_list 
+        return tx_list

@@ -1,8 +1,4 @@
-
-
-
 from app.internal.api_v1.users.db.models import User
-
 
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
@@ -17,12 +13,9 @@ HELP_MSG = (
     + "Here is the list of commands I support:\n\n"
     + "/start - prints started message, adds you to DB\n"
     + "/set_phone - sets your phone number in an international format\n"
-
     + "/me - returns known info about your account (verified phone req.)\n"
     + "/check_card and /check_account - returns balance of specified card or account\n"
-
     + "/list_fav; /add_fav and /del_fav - commands for management of your favourites\n"
-
     + "/list_inter - returns list of users you have interacted with\n"
     + "/set_password - updates your password"
 )
@@ -35,7 +28,7 @@ NOT_INT_FORMAT_MSG = (
 )
 
 
-def get_unique_start_msg(first_name : str) -> str:
+def get_unique_start_msg(first_name: str) -> str:
     """
     Creates unique start message for each user.
     :param first_name: Telegram User first name
@@ -48,7 +41,7 @@ def get_unique_start_msg(first_name : str) -> str:
     )
 
 
-def get_success_phone_msg(phone_number : str) -> str:
+def get_success_phone_msg(phone_number: str) -> str:
     """
     Returns message with valid phone number.
     :param phone_number: Telegram User parsed and validated number
@@ -56,7 +49,7 @@ def get_success_phone_msg(phone_number : str) -> str:
     return f"Successfully updated your phone number: {phone_number}"
 
 
-def get_info_for_me_handler(user_from_db : User) -> str:
+def get_info_for_me_handler(user_from_db: User) -> str:
     """
     Returns info for /me handler
     :param user_from_db: User object
