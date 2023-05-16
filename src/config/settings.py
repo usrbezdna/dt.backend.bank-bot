@@ -217,7 +217,7 @@ AUTH_USER_MODEL = "app.User"
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG,
+    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG and "pytest" not in sys.argv[0],
 }
 
 NINJA_JWT = {

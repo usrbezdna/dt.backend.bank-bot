@@ -20,15 +20,18 @@ from app.internal.api_v1.favourites.presentation.rest.content_messages import (
     SELF_OPS_PROHIBITED,
 )
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.users.domain.services import UserService
+
 from app.internal.api_v1.users.domain.entities import MessageResponseSchema
 
 logger = logging.getLogger("django.server")
 
 
 class RestFavouritesHandlers:
-    def __init__(self, fav_service: FavouriteService) -> None:
+    def __init__(self, fav_service: FavouriteService, user_service : UserService) -> None:
         self._fav_service = fav_service
+        self._user_service = user_service
 
     def list_fav(self, request):
         """
@@ -40,9 +43,9 @@ class RestFavouritesHandlers:
         user_id = request.user.tlg_id
 
         try:
-            favs_list: List[User] = asyncio.run(
-                self._fav_service.get_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
-            )
+            favs_list: List[UserSchema] = self._fav_service.\
+                get_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
+            
 
         except FavouriteNotFoundException:
             logger.info(f"Unable to find favourites for user with ID: {user_id}")
@@ -54,9 +57,9 @@ class RestFavouritesHandlers:
 
         return 200, favs_list
 
-    def del_fav(self, request, argument: str | int):
+    def del_fav(self, request, tlg_id: int):
         """
-        Deletes Telegram user with ID {tlg_id} or {username}
+        Deletes Telegram user with ID {tlg_id} 
         from the favourites list of authenticated user
         """
 
@@ -64,10 +67,7 @@ class RestFavouritesHandlers:
         user_id = request.user.tlg_id
 
         try:
-            another_user: User = asyncio.run(self._fav_service.get_another_user(argument))
-
-        except InvalidIDArgumentException:
-            return 400, MessageResponseSchema.create(INVALID_ID)
+            another_user: UserSchema = self._user_service.get_user_by_id(tlg_id=tlg_id)
 
         except UserNotFoundException:
             return 404, MessageResponseSchema.create(FAV_USER_NOT_FOUND)
@@ -76,16 +76,16 @@ class RestFavouritesHandlers:
             return 403, MessageResponseSchema.create(SELF_OPS_PROHIBITED)
 
         try:
-            asyncio.run(self._fav_service.try_del_fav_from_user(user_id, another_user))
+            self._fav_service.try_del_fav_from_user(user_id, another_user)
 
         except UserNotInFavouritesException:
             return 403, MessageResponseSchema.create(NOT_IN_FAV)
 
         return 200, MessageResponseSchema.create(DELETED_SUCCESS)
 
-    def add_fav(self, request, argument: str | int):
+    def add_fav(self, request, tlg_id: int):
         """
-        Addes Telegram user with ID {tlg_id} or {username}
+        Addes Telegram user with ID {tlg_id}
         to the favourites list of authenticated user
         """
 
@@ -93,10 +93,7 @@ class RestFavouritesHandlers:
         user_id = request.user.tlg_id
 
         try:
-            another_user: User = asyncio.run(self._fav_service.get_another_user(argument))
-
-        except InvalidIDArgumentException:
-            return 400, MessageResponseSchema.create(INVALID_ID)
+            another_user: UserSchema = self._user_service.get_user_by_id(tlg_id=tlg_id)
 
         except UserNotFoundException:
             return 404, MessageResponseSchema.create(FAV_USER_NOT_FOUND)
@@ -105,7 +102,8 @@ class RestFavouritesHandlers:
             return 403, MessageResponseSchema.create(SELF_OPS_PROHIBITED)
 
         try:
-            asyncio.run(self._fav_service.try_add_fav_to_user(user_id, another_user))
+            self._fav_service.\
+                try_add_fav_to_user(user_id, another_user)
 
         except SecondTimeAdditionException:
             return 403, MessageResponseSchema.create(NO_SECOND_TIME_ADDITION)

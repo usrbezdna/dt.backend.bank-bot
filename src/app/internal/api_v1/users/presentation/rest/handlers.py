@@ -24,9 +24,9 @@ class RestUserHandlers:
 
         logger.info("Got new GET request on /api/me endpoint!")
 
-        user_from_db = asyncio.run(self._user_service.get_user_by_id(request.user.tlg_id))
+        user_from_db = self._user_service.get_user_by_id(request.user.tlg_id)
 
-        if not user_from_db.hasPhoneNumber():
+        if user_from_db.phone_number == '':
             return 403, MessageResponseSchema.create(NOT_VERIFIED)
 
         return 200, user_from_db
@@ -49,9 +49,10 @@ class RestUserHandlers:
             logger.info("Provided number was parsed, but is not valid anyway")
             return 400, MessageResponseSchema.create(INVALID_PHONE_NUMBER)
 
-        asyncio.run(
-            self._user_service.update_user_phone_number(tlg_id=request.user.tlg_id, new_phone_number=parsed_number)
-        )
+        
+        self._user_service.\
+            update_user_phone_number(tlg_id=request.user.tlg_id, new_phone_number=parsed_number)
+        
 
         return 200, MessageResponseSchema.create(PHONE_NUMBER_SUCCESS)
 
@@ -62,6 +63,7 @@ class RestUserHandlers:
 
         logger.info("Got new POST request on /api/users/password endpoint!")
 
-        asyncio.run(self._user_service.update_user_password(tlg_id=request.user.tlg_id, new_password=new_password))
+        self._user_service.\
+                update_user_password(tlg_id=request.user.tlg_id, new_password=new_password)
 
         return 200, MessageResponseSchema.create(PASSWORD_SUCCESS)

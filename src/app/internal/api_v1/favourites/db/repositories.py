@@ -8,19 +8,23 @@ from app.internal.api_v1.favourites.db.exceptions import (
     UserNotInFavouritesException,
 )
 from app.internal.api_v1.favourites.db.models import Favourite
-from app.internal.api_v1.favourites.domain.services import IFavouriteRepository
-from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.db.models import User
+
+from app.internal.api_v1.favourites.domain.services import IFavouriteRepository
+
+from app.internal.api_v1.users.db.exceptions import UserNotFoundException
+from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.db.repositories import UserRepository
 
 logger = logging.getLogger("django.server")
 
 
 class FavouriteRepository(IFavouriteRepository):
+
     def __init__(self, user_repo: UserRepository) -> None:
         self._user_repo = user_repo
 
-    def get_limited_list_of_favourites(self, tlg_id: int, favs_limit: int) -> List[User]:
+    def get_limited_list_of_favourites(self, tlg_id: int, favs_limit: int) -> List[UserSchema]:
         """
         Returns limited list of favourite users for Telegram User
         with ID tlg_id or raises FavouriteNotFoundException (if fav_obj was not found)
@@ -34,12 +38,9 @@ class FavouriteRepository(IFavouriteRepository):
         if fav_opt is None:
             raise FavouriteNotFoundException("There is no Favourite object with such owner")
 
-        return list(fav_opt.favourites.all()[:favs_limit])
+        return [UserSchema.from_orm(user_model) for user_model in fav_opt.favourites.all()[:favs_limit]]
 
-    def get_list_of_favourites(self, tlg_id: int) -> List[User]:
-        pass
-
-    def try_del_fav_from_user(self, tlg_id_of_owner: int, fav_user: User) -> None:
+    def try_del_fav_from_user(self, tlg_id_of_owner: int, fav_user: UserSchema) -> None:
         """
         Deletes fav_user from the list of favourites of user with ID tlg_id_of_owner
         or raises UserNotInFavouritesException
@@ -53,14 +54,15 @@ class FavouriteRepository(IFavouriteRepository):
         favs_manager = Favourite.objects.get(tlg_id=tlg_id_of_owner).favourites
 
         if favs_manager.filter(pk=fav_user.tlg_id).exists():
-            favs_manager.remove(fav_user)
-            logger.info(f"User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}")
+            user_model = User.objects.get(pk=fav_user.tlg_id)
+            favs_manager.remove(user_model)
 
+            logger.info(f"User with ID {fav_user.tlg_id} was deleted from favourites of user {tlg_id_of_owner}")
             return
 
         raise UserNotInFavouritesException()
 
-    def try_add_fav_to_user(self, tlg_id_of_owner: int, new_fav_user: User) -> None:
+    def try_add_fav_to_user(self, tlg_id_of_owner: int, new_fav_user: UserSchema) -> None:
         """
         Tries to add new User object to the list of favourites
         for another Telegram User (tlg_id_of_owner).
@@ -75,14 +77,15 @@ class FavouriteRepository(IFavouriteRepository):
         favs_manager = Favourite.objects.get_or_create(tlg_id=tlg_id_of_owner)[0].favourites
 
         if not favs_manager.filter(pk=new_fav_user.tlg_id).exists():
-            favs_manager.add(new_fav_user)
-            logger.info(f"User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}")
+            user_model = User.objects.get(pk=new_fav_user.tlg_id)
+            favs_manager.add(user_model)
 
+            logger.info(f"User with ID {new_fav_user.tlg_id} added as favourite for {tlg_id_of_owner}")
             return
 
         raise SecondTimeAdditionException()
 
-    def get_another_user(self, argument: Any) -> User:
+    def get_another_user_by_arg(self, argument: Any) -> UserSchema:
         """
         This function tries to get user by username or Telegram ID.
         Returns User object or raises InvalidIDArgumentException | UserNotFoundException
@@ -94,12 +97,14 @@ class FavouriteRepository(IFavouriteRepository):
         """
 
         if argument.startswith("@"):
-            another_user: User = self._user_repo.get_user_by_username(argument[1:])
+            another_user: UserSchema = self._user_repo.\
+                get_user_by_username(argument[1:])
 
         elif not argument.isdigit() or int(argument) <= 0:
             raise InvalidIDArgumentException()
 
         else:
-            another_user: User = self._user_repo.get_user_by_id(argument)
+            another_user: UserSchema = self._user_repo.\
+                get_user_by_id(argument)
 
         return another_user

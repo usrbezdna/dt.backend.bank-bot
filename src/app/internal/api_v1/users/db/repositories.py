@@ -3,15 +3,17 @@ from typing import Any, Optional
 
 from telegram import User as TelegramUser
 
+from app.internal.api_v1.users.domain.services import IUserRepository
+from app.internal.api_v1.users.domain.entities import UserSchema
+
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.db.models import User
-from app.internal.api_v1.users.domain.services import IUserRepository
 
 logger = logging.getLogger("django.server")
 
 
 class UserRepository(IUserRepository):
-    def get_user_by_id(self, tlg_id: int) -> User:
+    def get_user_by_id(self, tlg_id: int) -> UserSchema:
         """
         Returns Telegram user by ID from DB
         or raises UserNotFoundException (if user with such TgID doesn't exist)
@@ -27,9 +29,10 @@ class UserRepository(IUserRepository):
             logger.info(f"User with ID {tlg_id} not found in DB")
             raise UserNotFoundException("Can't find user with such ID")
 
-        return user_option
+        return UserSchema.from_orm(user_option)
 
-    def get_user_by_username(self, username: str) -> User:
+
+    def get_user_by_username(self, username: str) -> UserSchema:
         """
         Returns Telegram user by username from DB
         or raises UserNotFoundException (if user with such username doesn't exist)
@@ -45,7 +48,8 @@ class UserRepository(IUserRepository):
             logger.info(f"User with username {username} not found in DB")
             raise UserNotFoundException("Can't find user with such username")
 
-        return user_option
+        return UserSchema.from_orm(user_option)
+
 
     def get_user_field_by_id(self, tlg_id: int, field_name: str) -> Any:
         """
@@ -57,6 +61,9 @@ class UserRepository(IUserRepository):
         :params field_name: wished model field
         :return: Value of this field
         """
+        if not User.objects.filter(tlg_id=tlg_id).exists():
+            raise UserNotFoundException("This user does not exist! Can't address to his fields")
+        
         return User.objects.values_list(field_name, flat=True).get(pk=tlg_id)
 
     def update_user_phone_number(self, tlg_id: int, new_phone_number: str) -> None:
@@ -84,7 +91,7 @@ class UserRepository(IUserRepository):
         user.save()
         logger.info(f"Updated password for user with ID {tlg_id}")
 
-    def save_telegram_user_to_db(self, user: TelegramUser) -> None:
+    def save_telegram_user_to_db(self, tlg_user: TelegramUser) -> None:
         """
         Receives Telegram user and saves it in DB.
         ----------
@@ -92,10 +99,10 @@ class UserRepository(IUserRepository):
         :param user: TelegramUser object
         """
         user_model: User = User(
-            tlg_id=user.id,
-            username=user.username if user.username else "",
-            first_name=user.first_name,
-            last_name=user.last_name if user.last_name else "",
+            tlg_id=tlg_user.id,
+            username=tlg_user.username if tlg_user.username else "",
+            first_name=tlg_user.first_name,
+            last_name=tlg_user.last_name if tlg_user.last_name else "",
             phone_number="",
         )
         user_model.save()

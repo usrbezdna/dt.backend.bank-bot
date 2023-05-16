@@ -1,6 +1,6 @@
 from typing import List
 
-from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
 
 ABSENT_FAV_MSG = (
     "Couldn't find any users in your favourites.\n" + "Don't forget to add them at first with /add_fav command"
@@ -23,7 +23,7 @@ RESTRICT_SECOND_TIME_ADD = "You have already added this user to your favourites.
 USER_NOT_IN_FAV = "Your favourites list doesn't include this user."
 
 
-def get_result_message_for_user_favourites(favs_list: List[User]) -> str:
+def get_result_message_for_user_favourites(favs_list: List[UserSchema]) -> str:
     """
     Creates message with all favourites of a particular user
     ----------
@@ -37,7 +37,7 @@ def get_result_message_for_user_favourites(favs_list: List[User]) -> str:
     return res_msg
 
 
-def get_success_msg_for_new_fav(fav_user: User) -> str:
+def get_success_msg_for_new_fav(fav_user: UserSchema) -> str:
     """
     Returns message with success for favourites addition.
     :param fav_user: Telegram User object that acts as a new favourite.
@@ -45,7 +45,7 @@ def get_success_msg_for_new_fav(fav_user: User) -> str:
     return f"User {fav_user.first_name} with ID: {fav_user.tlg_id} added to your favourites!"
 
 
-def get_success_msg_for_deleted_fav(fav_user: User) -> str:
+def get_success_msg_for_deleted_fav(fav_user: UserSchema) -> str:
     """
     Return message about successful deletion of fav_user from favourites.
     :param fav_user: Telegram User object that was deleted from favourites.

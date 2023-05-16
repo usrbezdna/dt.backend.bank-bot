@@ -3,12 +3,14 @@ import logging
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
 from phonenumbers.phonenumberutil import NumberParseException
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
+
 from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     ABSENT_PASSWORD_MSG,
     ABSENT_PN_MSG,
@@ -21,8 +23,8 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     get_success_phone_msg,
     get_unique_start_msg,
 )
-from app.internal.api_v1.utils.domain.services import verified_phone_required
 
+from app.internal.api_v1.utils.domain.services import verified_phone_required
 logger = logging.getLogger("django.server")
 
 
@@ -41,7 +43,7 @@ class TelegramUserHandlers:
         """
         telegram_user, chat_id = update.effective_user, update.effective_chat.id
 
-        await self._user_service.save_telegram_user_to_db(telegram_user)
+        await self._user_service.asave_telegram_user_to_db(tlg_user=telegram_user)
         await context.bot.send_message(chat_id=chat_id, text=get_unique_start_msg(telegram_user.first_name))
 
     async def get_help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -88,7 +90,7 @@ class TelegramUserHandlers:
             await context.bot.send_message(chat_id=chat_id, text=INVALID_PN_MSG)
             return
 
-        await self._user_service.update_user_phone_number(
+        await self._user_service.aupdate_user_phone_number(
             tlg_id=update.effective_user.id, new_phone_number=parsed_number
         )
         await context.bot.send_message(chat_id=chat_id, text=get_success_phone_msg(parsed_number))
@@ -106,7 +108,7 @@ class TelegramUserHandlers:
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
 
         try:
-            user_from_db: User = await self._user_service.get_user_by_id(tlg_id=user_id)
+            user_from_db: UserSchema = await self._user_service.aget_user_by_id(tlg_id=user_id)
 
         except UserNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=USER_NOT_FOUND_MSG)
@@ -133,5 +135,5 @@ class TelegramUserHandlers:
 
         argument = command_data[1]
 
-        await self._user_service.update_user_password(tlg_id=user_id, new_password=argument)
+        await self._user_service.aupdate_user_password(tlg_id=user_id, new_password=argument)
         await context.bot.send_message(chat_id=chat_id, text=PASSWORD_UPDATED)

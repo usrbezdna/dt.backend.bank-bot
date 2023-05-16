@@ -24,7 +24,7 @@ from app.internal.api_v1.favourites.presentation.bot.telegram_messages import (
     get_success_msg_for_new_fav,
 )
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.utils.domain.services import verified_phone_required
 
 logger = logging.getLogger("django.server")
@@ -49,9 +49,8 @@ class TelegramFavouritesHandlers:
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
 
         try:
-            favs_list: List[User] = await self._favourite_service.get_limited_list_of_favourites(
-                tlg_id=user_id, favs_limit=favs_limit
-            )
+            favs_list: List[UserSchema] = await self._favourite_service.\
+                aget_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
 
         except FavouriteNotFoundException:
             logger.info(f"Unable to find favourites for user with ID: {user_id}")
@@ -84,7 +83,7 @@ class TelegramFavouritesHandlers:
             await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
             return
 
-        another_user = await self.try_get_another_user(
+        another_user : UserSchema = await self.try_get_another_user(
             update=update, context=context, chat_id=chat_id, user_id=user_id, argument=command_data[1]
         )
 
@@ -92,7 +91,7 @@ class TelegramFavouritesHandlers:
             return
 
         try:
-            await self._favourite_service.try_del_fav_from_user(user_id, another_user)
+            await self._favourite_service.atry_del_fav_from_user(user_id, another_user)
 
         except UserNotInFavouritesException:
             await context.bot.send_message(chat_id=chat_id, text=USER_NOT_IN_FAV)
@@ -117,7 +116,7 @@ class TelegramFavouritesHandlers:
             await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
             return
 
-        another_user = await self.try_get_another_user(
+        another_user : UserSchema = await self.try_get_another_user(
             update=update, context=context, chat_id=chat_id, user_id=user_id, argument=command_data[1]
         )
 
@@ -125,7 +124,7 @@ class TelegramFavouritesHandlers:
             return
 
         try:
-            await self._favourite_service.try_add_fav_to_user(user_id, another_user)
+            await self._favourite_service.atry_add_fav_to_user(user_id, another_user)
 
         except SecondTimeAdditionException:
             await context.bot.send_message(chat_id=chat_id, text=RESTRICT_SECOND_TIME_ADD)
@@ -135,7 +134,7 @@ class TelegramFavouritesHandlers:
 
     async def try_get_another_user(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id: int, user_id: int, argument: Any
-    ) -> Optional[User]:
+    ) -> Optional[UserSchema]:
         """
         This function acts like a sublogic handler. It sends request to internal
         service and tries to get another_user User object.
@@ -155,7 +154,7 @@ class TelegramFavouritesHandlers:
 
         """
         try:
-            another_user: User = await self._favourite_service.get_another_user(argument)
+            another_user: UserSchema = await self._favourite_service.aget_another_user_by_arg(argument)
 
         except InvalidIDArgumentException:
             await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)

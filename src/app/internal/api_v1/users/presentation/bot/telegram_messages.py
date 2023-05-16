@@ -1,9 +1,12 @@
-from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
+
+NO_VERIFIED_PN = "You don't have a verified phone number!"
 
 ABSENT_PN_MSG = "It seems like you forgot to specify the phone number :("
 INVALID_PN_MSG = "It doesn't look like a valid phone number. Try again, please!"
 
 USER_NOT_FOUND_MSG = "Can't find any info about you, type /start at first!"
+
 
 ABSENT_PASSWORD_MSG = "Don't forget to specify a new password!"
 PASSWORD_UPDATED = "OK! Your password was updated."
@@ -49,9 +52,9 @@ def get_success_phone_msg(phone_number: str) -> str:
     return f"Successfully updated your phone number: {phone_number}"
 
 
-def get_info_for_me_handler(user_from_db: User) -> str:
+def get_info_for_me_handler(user_from_db: UserSchema) -> str:
     """
     Returns info for /me handler
     :param user_from_db: User object
     """
-    return f"Here is some info about you:\n\n {str(user_from_db)}"
+    return f"Here is some info about you:\n\n{str(user_from_db)}"
