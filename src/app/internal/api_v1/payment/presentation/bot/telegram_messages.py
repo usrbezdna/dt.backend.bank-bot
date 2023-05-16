@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema 
+from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
 
 NO_VERIFIED_PN = "You don't have a verified phone number!"
 

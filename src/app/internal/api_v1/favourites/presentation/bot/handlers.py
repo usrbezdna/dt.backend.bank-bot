@@ -49,8 +49,9 @@ class TelegramFavouritesHandlers:
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
 
         try:
-            favs_list: List[UserSchema] = await self._favourite_service.\
-                aget_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
+            favs_list: List[UserSchema] = await self._favourite_service.aget_limited_list_of_favourites(
+                tlg_id=user_id, favs_limit=favs_limit
+            )
 
         except FavouriteNotFoundException:
             logger.info(f"Unable to find favourites for user with ID: {user_id}")
@@ -83,7 +84,7 @@ class TelegramFavouritesHandlers:
             await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
             return
 
-        another_user : UserSchema = await self.try_get_another_user(
+        another_user: UserSchema = await self.try_get_another_user(
             update=update, context=context, chat_id=chat_id, user_id=user_id, argument=command_data[1]
         )
 
@@ -116,7 +117,7 @@ class TelegramFavouritesHandlers:
             await context.bot.send_message(chat_id=chat_id, text=ABSENT_ARG_FAV_MSG)
             return
 
-        another_user : UserSchema = await self.try_get_another_user(
+        another_user: UserSchema = await self.try_get_another_user(
             update=update, context=context, chat_id=chat_id, user_id=user_id, argument=command_data[1]
         )
 

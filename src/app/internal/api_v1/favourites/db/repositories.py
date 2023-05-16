@@ -8,19 +8,16 @@ from app.internal.api_v1.favourites.db.exceptions import (
     UserNotInFavouritesException,
 )
 from app.internal.api_v1.favourites.db.models import Favourite
-from app.internal.api_v1.users.db.models import User
-
 from app.internal.api_v1.favourites.domain.services import IFavouriteRepository
-
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.users.db.models import User
 from app.internal.api_v1.users.db.repositories import UserRepository
+from app.internal.api_v1.users.domain.entities import UserSchema
 
 logger = logging.getLogger("django.server")
 
 
 class FavouriteRepository(IFavouriteRepository):
-
     def __init__(self, user_repo: UserRepository) -> None:
         self._user_repo = user_repo
 
@@ -97,14 +94,12 @@ class FavouriteRepository(IFavouriteRepository):
         """
 
         if argument.startswith("@"):
-            another_user: UserSchema = self._user_repo.\
-                get_user_by_username(argument[1:])
+            another_user: UserSchema = self._user_repo.get_user_by_username(argument[1:])
 
         elif not argument.isdigit() or int(argument) <= 0:
             raise InvalidIDArgumentException()
 
         else:
-            another_user: UserSchema = self._user_repo.\
-                get_user_by_id(argument)
+            another_user: UserSchema = self._user_repo.get_user_by_id(argument)
 
         return another_user

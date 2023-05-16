@@ -1,25 +1,19 @@
+import json
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
-import json
-from django.test import Client, AsyncClient
+from django.test import AsyncClient, Client
 
-
-from src.app.models import User
 from src.app.internal.api_v1.users.domain.entities import UserSchema
 from src.app.internal.api_v1.users.presentation.bot.telegram_messages import get_unique_start_msg
+from src.app.models import User
 
 
 @pytest.mark.smoke
 @pytest.mark.asyncio
 @pytest.mark.django_db
 @pytest.mark.valid_case
-async def test_smoke(
-    bot_application, 
-    get_update_for_command, 
-    telegram_user, telegram_chat,
-    mocked_context, client
-):
+async def test_smoke(bot_application, get_update_for_command, telegram_user, telegram_chat, mocked_context, client):
     """
     This smoke test does the following steps:
     1) Tries to start Bot Application and ensures it is running
@@ -41,7 +35,7 @@ async def test_smoke(
         - And compares the response body with actual data of this UserSchema
 
     """
-    
+
     # 1
     await bot_application.initialize()
     await bot_application.start()
@@ -53,7 +47,6 @@ async def test_smoke(
     await bot_application.process_update(mocked_update)
     await bot_application.stop()
 
-    
     # 3
     mocked_context.bot.send_message.assert_called_once_with(
         chat_id=telegram_chat.id, text=get_unique_start_msg(telegram_user.first_name)
@@ -65,23 +58,23 @@ async def test_smoke(
     assert await User.objects.aget(pk=user_model.tlg_id) == user_model
 
     # 4
-    user_model.set_password('123456789')
+    user_model.set_password("123456789")
     user_model.phone_number = "+4214214"
     await user_model.asave()
 
     client = AsyncClient()
 
-    req_data = {"password": '123456789', "tlg_id": telegram_user.id }
+    req_data = {"password": "123456789", "tlg_id": telegram_user.id}
     token_response = await client.post(
-        path='/api/token/pair', data=json.dumps(req_data), content_type='application/json',
+        path="/api/token/pair",
+        data=json.dumps(req_data),
+        content_type="application/json",
     )
 
-    access_token = token_response.json()['access']
+    access_token = token_response.json()["access"]
 
-    # 5 
-    me_response = await client.get(
-        path='/api/users/me', **{'Authorization': f'Bearer {access_token}'}
-    )
+    # 5
+    me_response = await client.get(path="/api/users/me", **{"Authorization": f"Bearer {access_token}"})
 
     # 6
     assert UserSchema.from_orm(user_model) == me_response.json()

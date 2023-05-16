@@ -3,11 +3,10 @@ from typing import Any, Optional
 
 from telegram import User as TelegramUser
 
-from app.internal.api_v1.users.domain.services import IUserRepository
-from app.internal.api_v1.users.domain.entities import UserSchema
-
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.db.models import User
+from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.users.domain.services import IUserRepository
 
 logger = logging.getLogger("django.server")
 
@@ -31,7 +30,6 @@ class UserRepository(IUserRepository):
 
         return UserSchema.from_orm(user_option)
 
-
     def get_user_by_username(self, username: str) -> UserSchema:
         """
         Returns Telegram user by username from DB
@@ -50,7 +48,6 @@ class UserRepository(IUserRepository):
 
         return UserSchema.from_orm(user_option)
 
-
     def get_user_field_by_id(self, tlg_id: int, field_name: str) -> Any:
         """
         Returns value of specified field
@@ -63,7 +60,7 @@ class UserRepository(IUserRepository):
         """
         if not User.objects.filter(tlg_id=tlg_id).exists():
             raise UserNotFoundException("This user does not exist! Can't address to his fields")
-        
+
         return User.objects.values_list(field_name, flat=True).get(pk=tlg_id)
 
     def update_user_phone_number(self, tlg_id: int, new_phone_number: str) -> None:

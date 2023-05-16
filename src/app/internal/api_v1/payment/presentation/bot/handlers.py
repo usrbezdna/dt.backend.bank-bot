@@ -4,25 +4,15 @@ from typing import Optional
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from app.internal.api_v1.users.domain.services import UserService
-from app.internal.api_v1.favourites.domain.services import FavouriteService
-from app.internal.api_v1.payment.accounts.domain.services import AccountService
-from app.internal.api_v1.payment.cards.domain.services import CardService
-from app.internal.api_v1.payment.transactions.domain.services import TransactionService
-
 from app.internal.api_v1.favourites.db.exceptions import InvalidIDArgumentException
-from app.internal.api_v1.payment.transactions.db.exceptions import InsufficientBalanceException, TransferException
-from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.payment.cards.db.exceptions import CardNotFoundException
-from app.internal.api_v1.payment.accounts.db.exceptions import AccountNotFoundException
-
-from app.internal.api_v1.payment.cards.domain.entities import CardSchema
-from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
-from app.internal.api_v1.users.domain.entities import UserSchema
-
-from app.internal.api_v1.utils.domain.services import verified_phone_required
-
+from app.internal.api_v1.favourites.domain.services import FavouriteService
 from app.internal.api_v1.favourites.presentation.bot.telegram_messages import NOT_VALID_ID_MSG
+from app.internal.api_v1.payment.accounts.db.exceptions import AccountNotFoundException
+from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
+from app.internal.api_v1.payment.accounts.domain.services import AccountService
+from app.internal.api_v1.payment.cards.db.exceptions import CardNotFoundException
+from app.internal.api_v1.payment.cards.domain.entities import CardSchema
+from app.internal.api_v1.payment.cards.domain.services import CardService
 from app.internal.api_v1.payment.presentation.bot.telegram_messages import (
     ABSENT_ID_NUMBER,
     BALANCE_NOT_FOUND,
@@ -43,12 +33,17 @@ from app.internal.api_v1.payment.presentation.bot.telegram_messages import (
     get_result_message_for_transaction_state,
     get_successful_transfer_message,
 )
+from app.internal.api_v1.payment.transactions.db.exceptions import InsufficientBalanceException, TransferException
+from app.internal.api_v1.payment.transactions.domain.services import TransactionService
+from app.internal.api_v1.users.db.exceptions import UserNotFoundException
+from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.users.domain.services import UserService
+from app.internal.api_v1.utils.domain.services import verified_phone_required
 
 logger = logging.getLogger("django.server")
 
 
 class TelegramPaymentHandlers:
-
     def __init__(
         self,
         user_service: UserService,
@@ -92,19 +87,19 @@ class TelegramPaymentHandlers:
 
         if command == "/check_card":
             try:
-                obj_option: CardSchema = await self._card_service.\
-                    aget_card_with_related_account_by_card_id(uniq_id=uniq_id)
-                
+                obj_option: CardSchema = await self._card_service.aget_card_with_related_account_by_card_id(
+                    uniq_id=uniq_id
+                )
+
             except CardNotFoundException:
                 logger.info(f"Card with ID {uniq_id} not found in DB")
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=BALANCE_NOT_FOUND)
                 return
-                
+
         else:
             try:
-                obj_option: AccountSchema = await self._account_service.\
-                    aget_account_by_id(uniq_id=uniq_id)
-                
+                obj_option: AccountSchema = await self._account_service.aget_account_by_id(uniq_id=uniq_id)
+
             except AccountNotFoundException:
                 logger.info(f"Account with ID {uniq_id} not found in DB")
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=BALANCE_NOT_FOUND)
@@ -117,7 +112,6 @@ class TelegramPaymentHandlers:
 
         elif command == "/check_account":
             await context.bot.send_message(chat_id=chat_id, text=get_message_with_balance(obj_option))
-
 
     @verified_phone_required
     async def state_payable(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -147,23 +141,21 @@ class TelegramPaymentHandlers:
 
         if command == "/state_card":
             try:
-                obj_option: CardSchema = await self._card_service.\
-                    aget_card_with_related_account_by_card_id(uniq_id)
-                
+                obj_option: CardSchema = await self._card_service.aget_card_with_related_account_by_card_id(uniq_id)
+
             except CardNotFoundException:
                 logger.info(f"Card with ID {uniq_id} not found in DB")
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=STATE_NOT_FOUND)
                 return
         else:
             try:
-                obj_option: AccountSchema = await self._account_service.\
-                    aget_account_by_id(uniq_id)
-                
+                obj_option: AccountSchema = await self._account_service.aget_account_by_id(uniq_id)
+
             except AccountNotFoundException:
                 logger.info(f"Account with ID {uniq_id} not found in DB")
                 await context.bot.send_message(chat_id=update.effective_chat.id, text=STATE_NOT_FOUND)
                 return
-                
+
         if command == "/state_card":
             owner_id = obj_option.corresponding_account.owner.tlg_id
             await self.send_result_message_for_transaction_state(context, chat_id, owner_id)
@@ -171,7 +163,6 @@ class TelegramPaymentHandlers:
         elif command == "/state_account":
             owner_id = obj_option.owner.tlg_id
             await self.send_result_message_for_transaction_state(context, chat_id, owner_id)
-
 
     @verified_phone_required
     async def list_inter(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -193,7 +184,6 @@ class TelegramPaymentHandlers:
             return
 
         await context.bot.send_message(chat_id=chat_id, text=NO_INTERACTED_USERS)
-
 
     @verified_phone_required
     async def send_to(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -221,13 +211,14 @@ class TelegramPaymentHandlers:
         value = int(arg_value)
 
         try:
-            sender_card_with_acc_opt: CardSchema = await self._card_service.\
-                aget_card_with_related_account_by_account_owner_id(tlg_id=user_id)
-        
+            sender_card_with_acc_opt: CardSchema = (
+                await self._card_service.aget_card_with_related_account_by_account_owner_id(tlg_id=user_id)
+            )
+
         except CardNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=SENDER_RESTRICTION)
             return
-           
+
         match arg_command:
             case "/send_to_user":
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_user(context, chat_id, arg_user_or_id)
@@ -263,10 +254,7 @@ class TelegramPaymentHandlers:
             uniq_id=recipient_payment_account.uniq_id
         )
 
-        await context.bot.send_message(
-            chat_id=chat_id, text=get_successful_transfer_message(recipient_name, value)
-        )
-
+        await context.bot.send_message(chat_id=chat_id, text=get_successful_transfer_message(recipient_name, value))
 
     async def send_result_message_for_transaction_state(
         self, context: ContextTypes.DEFAULT_TYPE, chat_id: int, user_id: int
@@ -288,7 +276,6 @@ class TelegramPaymentHandlers:
 
         await context.bot.send_message(chat_id=chat_id, text=NO_TXS_FOR_LAST_MONTH)
 
-
     async def handle_case_with_send_to_user(
         self, context: ContextTypes.DEFAULT_TYPE, chat_id: int, arg_user_or_id: int
     ) -> Optional[CardSchema]:
@@ -305,8 +292,7 @@ class TelegramPaymentHandlers:
         """
 
         try:
-            another_user: UserSchema = await self._fav_service.\
-                aget_another_user_by_arg(arg_user_or_id)
+            another_user: UserSchema = await self._fav_service.aget_another_user_by_arg(arg_user_or_id)
 
         except InvalidIDArgumentException:
             await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
@@ -317,15 +303,15 @@ class TelegramPaymentHandlers:
             return None
 
         try:
-            card_with_acc = await self._card_service.\
-                aget_card_with_related_account_by_account_owner_id(another_user.tlg_id)
-            
+            card_with_acc = await self._card_service.aget_card_with_related_account_by_account_owner_id(
+                another_user.tlg_id
+            )
+
             return card_with_acc
 
         except CardNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=RSP_RESTRICTION)
             return None
-
 
     async def handle_case_with_send_to_account(
         self, context: ContextTypes.DEFAULT_TYPE, chat_id: int, account_id: int
@@ -346,14 +332,12 @@ class TelegramPaymentHandlers:
             return None
 
         try:
-            card_with_acc = await self._card_service.\
-                aget_card_with_related_account_by_account_id(account_id)
+            card_with_acc = await self._card_service.aget_card_with_related_account_by_account_id(account_id)
             return card_with_acc
-            
+
         except CardNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=RSP_RESTRICTION)
             return None
-
 
     async def handle_case_with_send_to_card(
         self, context: ContextTypes.DEFAULT_TYPE, chat_id: int, card_id: int
@@ -372,12 +356,11 @@ class TelegramPaymentHandlers:
         if not card_id.isdigit() or int(card_id) <= 0:
             await context.bot.send_message(chat_id=chat_id, text=NOT_VALID_ID_MSG)
             return None
-        
+
         try:
-            card_with_acc = await self._card_service.\
-                aget_card_with_related_account_by_card_id(card_id)
+            card_with_acc = await self._card_service.aget_card_with_related_account_by_card_id(card_id)
             return card_with_acc
-        
+
         except CardNotFoundException:
             await context.bot.send_message(chat_id=chat_id, text=CARD_NOT_FOUND)
             return None

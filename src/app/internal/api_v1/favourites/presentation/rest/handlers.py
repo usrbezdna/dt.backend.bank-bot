@@ -20,16 +20,14 @@ from app.internal.api_v1.favourites.presentation.rest.content_messages import (
     SELF_OPS_PROHIBITED,
 )
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
-from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.users.domain.entities import MessageResponseSchema, UserSchema
 from app.internal.api_v1.users.domain.services import UserService
-
-from app.internal.api_v1.users.domain.entities import MessageResponseSchema
 
 logger = logging.getLogger("django.server")
 
 
 class RestFavouritesHandlers:
-    def __init__(self, fav_service: FavouriteService, user_service : UserService) -> None:
+    def __init__(self, fav_service: FavouriteService, user_service: UserService) -> None:
         self._fav_service = fav_service
         self._user_service = user_service
 
@@ -43,9 +41,9 @@ class RestFavouritesHandlers:
         user_id = request.user.tlg_id
 
         try:
-            favs_list: List[UserSchema] = self._fav_service.\
-                get_limited_list_of_favourites(tlg_id=user_id, favs_limit=favs_limit)
-            
+            favs_list: List[UserSchema] = self._fav_service.get_limited_list_of_favourites(
+                tlg_id=user_id, favs_limit=favs_limit
+            )
 
         except FavouriteNotFoundException:
             logger.info(f"Unable to find favourites for user with ID: {user_id}")
@@ -59,7 +57,7 @@ class RestFavouritesHandlers:
 
     def del_fav(self, request, tlg_id: int):
         """
-        Deletes Telegram user with ID {tlg_id} 
+        Deletes Telegram user with ID {tlg_id}
         from the favourites list of authenticated user
         """
 
@@ -102,8 +100,7 @@ class RestFavouritesHandlers:
             return 403, MessageResponseSchema.create(SELF_OPS_PROHIBITED)
 
         try:
-            self._fav_service.\
-                try_add_fav_to_user(user_id, another_user)
+            self._fav_service.try_add_fav_to_user(user_id, another_user)
 
         except SecondTimeAdditionException:
             return 403, MessageResponseSchema.create(NO_SECOND_TIME_ADDITION)

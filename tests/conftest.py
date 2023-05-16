@@ -3,9 +3,13 @@ import json
 from unittest.mock import AsyncMock
 
 import pytest
-from django.test import Client, AsyncClient
+from django.test import AsyncClient, Client
+from telegram import Chat, Message, MessageEntity, Update, User
+from telegram.ext import ApplicationBuilder
 
-
+from src.app.internal.api_v1.favourites.db.repositories import FavouriteRepository
+from src.app.internal.api_v1.favourites.domain.services import FavouriteService
+from src.app.internal.api_v1.favourites.presentation.bot.handlers import TelegramFavouritesHandlers
 from src.app.internal.api_v1.payment.accounts.db.repositories import AccountRepository
 from src.app.internal.api_v1.payment.accounts.domain.services import AccountService
 from src.app.internal.api_v1.payment.cards.db.repositories import CardRepository
@@ -13,20 +17,11 @@ from src.app.internal.api_v1.payment.cards.domain.services import CardService
 from src.app.internal.api_v1.payment.presentation.bot.handlers import TelegramPaymentHandlers
 from src.app.internal.api_v1.payment.transactions.db.repositories import TransactionRepository
 from src.app.internal.api_v1.payment.transactions.domain.services import TransactionService
-
-from telegram import Chat, Message, MessageEntity, Update, User
-from telegram.ext import ApplicationBuilder
-
-from src.app.internal.bot import setup_application_handlers
-from src.app.models import User as UserModel
-
 from src.app.internal.api_v1.users.db.repositories import UserRepository
 from src.app.internal.api_v1.users.domain.services import UserService
 from src.app.internal.api_v1.users.presentation.bot.handlers import TelegramUserHandlers
-
-from src.app.internal.api_v1.favourites.db.repositories import FavouriteRepository
-from src.app.internal.api_v1.favourites.domain.services import FavouriteService
-from src.app.internal.api_v1.favourites.presentation.bot.handlers import TelegramFavouritesHandlers
+from src.app.internal.bot import setup_application_handlers
+from src.app.models import User as UserModel
 
 
 @pytest.fixture
@@ -46,9 +41,9 @@ def telegram_user_handlers():
 
     return user_handlers
 
+
 @pytest.fixture
 def telegram_fav_handlers():
-
     user_repo = UserRepository()
     fav_repo = FavouriteRepository(user_repo=user_repo)
 
@@ -57,9 +52,9 @@ def telegram_fav_handlers():
 
     return fav_handlers
 
+
 @pytest.fixture
 def telegram_payment_handlers():
-
     user_repo = UserRepository()
     user_service = UserService(user_repo=user_repo)
 
@@ -78,10 +73,8 @@ def telegram_payment_handlers():
     payment_handlers = TelegramPaymentHandlers(
         user_service=user_service,
         fav_service=fav_service,
-
         account_service=account_service,
         card_service=card_service,
-
         tx_service=tx_service,
     )
 
@@ -90,14 +83,11 @@ def telegram_payment_handlers():
 
 @pytest.fixture
 def already_saved_user(telegram_user):
-
     user_model = UserModel(
         tlg_id=telegram_user.id,
         username=telegram_user.username,
-
         first_name=telegram_user.first_name,
         last_name=telegram_user.last_name,
-
         phone_number="",
     )
     user_model.save()
@@ -123,21 +113,12 @@ def mocked_context():
 
 @pytest.fixture
 def telegram_user():
-    return User(
-        id=123, 
-        is_bot=False, 
-        first_name="foo", 
-        last_name="bar", 
-        username="foobar"
-    )
+    return User(id=123, is_bot=False, first_name="foo", last_name="bar", username="foobar")
 
 
 @pytest.fixture
 def telegram_chat():
-    return Chat(
-        id=123, 
-        type="private"
-    )
+    return Chat(id=123, type="private")
 
 
 @pytest.fixture

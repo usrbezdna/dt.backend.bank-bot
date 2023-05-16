@@ -9,19 +9,19 @@ from django.db.models.functions import Concat, ExtractDay, ExtractMonth, Extract
 from django.utils import timezone
 
 from app.internal.api_v1.payment.accounts.db.models import Account
-from app.internal.api_v1.users.db.models import User
-
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
-
 from app.internal.api_v1.payment.transactions.db.exceptions import InsufficientBalanceException, TransferException
 from app.internal.api_v1.payment.transactions.db.models import Transaction
 from app.internal.api_v1.payment.transactions.domain.services import ITransactionRepository
+from app.internal.api_v1.users.db.models import User
 
 logger = logging.getLogger("django.server")
 
 
 class TransactionRepository(ITransactionRepository):
-    def try_transfer_to(self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float) -> None:
+    def try_transfer_to(
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+    ) -> None:
         """
         Tries to transfer value from first_payment_account to second_payment_account.
         Saves each Payment Transaction or raises exceptions if something went wrong.

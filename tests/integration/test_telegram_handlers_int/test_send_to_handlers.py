@@ -1,7 +1,7 @@
 import pytest
 from django.db import DatabaseError
-from src.app.internal.api_v1.favourites.presentation.bot.telegram_messages import NOT_VALID_ID_MSG
 
+from src.app.internal.api_v1.favourites.presentation.bot.telegram_messages import NOT_VALID_ID_MSG
 from src.app.internal.api_v1.payment.presentation.bot.telegram_messages import (
     CARD_NOT_FOUND,
     ERROR_DURING_TRANSFER,
@@ -18,9 +18,12 @@ from src.app.models import Account, Card, Transaction
 
 
 async def basic_test_for_send_to_validations(
-    telegram_payment_handlers, get_list_with_updates, 
-    mocked_context, telegram_chat, 
-    list_of_commands, expected_error_text
+    telegram_payment_handlers,
+    get_list_with_updates,
+    mocked_context,
+    telegram_chat,
+    list_of_commands,
+    expected_error_text,
 ):
     updates_list = get_list_with_updates(list_of_commands)
     for update in updates_list:
@@ -35,9 +38,7 @@ async def basic_test_for_send_to_validations(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_without_requered_args(
-    telegram_payment_handlers, mocked_context, 
-    already_verified_user, telegram_chat, 
-    get_update_for_command
+    telegram_payment_handlers, mocked_context, already_verified_user, telegram_chat, get_update_for_command
 ):
     commands_list = ["/send_to_user", "/send_to_account", "/send_to_card"]
 
@@ -55,8 +56,7 @@ async def test_send_to_without_requered_args(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_invalid_value(
-    telegram_payment_handlers, mocked_context, 
-    already_verified_user, telegram_chat, get_list_with_updates
+    telegram_payment_handlers, mocked_context, already_verified_user, telegram_chat, get_list_with_updates
 ):
     commands_list = [
         "/send_to_user @FooUser -521",
@@ -68,8 +68,7 @@ async def test_send_to_with_invalid_value(
     ]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, INCR_TX_VALUE
+        telegram_payment_handlers, get_list_with_updates, mocked_context, telegram_chat, commands_list, INCR_TX_VALUE
     )
 
 
@@ -78,9 +77,7 @@ async def test_send_to_with_invalid_value(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_no_sender_bank_requisites(
-    telegram_payment_handlers, mocked_context, 
-    already_verified_user, telegram_chat, 
-    get_list_with_updates
+    telegram_payment_handlers, mocked_context, already_verified_user, telegram_chat, get_list_with_updates
 ):
     commands_list = [
         "/send_to_user @BarUser 100",
@@ -92,8 +89,12 @@ async def test_send_to_with_no_sender_bank_requisites(
     ]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, SENDER_RESTRICTION
+        telegram_payment_handlers,
+        get_list_with_updates,
+        mocked_context,
+        telegram_chat,
+        commands_list,
+        SENDER_RESTRICTION,
     )
 
 
@@ -102,9 +103,12 @@ async def test_send_to_with_no_sender_bank_requisites(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_recipient_no_cards(
-    telegram_payment_handlers, mocked_context, 
-    sender_with_bank_requisites, new_user_with_account, 
-    get_list_with_updates, telegram_chat
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    new_user_with_account,
+    get_list_with_updates,
+    telegram_chat,
 ):
     new_user_model, new_account_model = await new_user_with_account(
         user_tlg_id=567, account_uniq_id=600, account_value=500
@@ -113,8 +117,7 @@ async def test_send_to_with_recipient_no_cards(
     commands_list = [f"/send_to_user {new_user_model.tlg_id} 300", f"/send_to_account {new_account_model.uniq_id} 300"]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, RSP_RESTRICTION
+        telegram_payment_handlers, get_list_with_updates, mocked_context, telegram_chat, commands_list, RSP_RESTRICTION
     )
 
 
@@ -123,9 +126,7 @@ async def test_send_to_with_recipient_no_cards(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_with_invalid_id(
-    telegram_payment_handlers, mocked_context, 
-    sender_with_bank_requisites, telegram_chat,
-    get_list_with_updates
+    telegram_payment_handlers, mocked_context, sender_with_bank_requisites, telegram_chat, get_list_with_updates
 ):
     commands_list = [
         "/send_to_user -51251 300",
@@ -137,8 +138,7 @@ async def test_send_with_invalid_id(
     ]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, NOT_VALID_ID_MSG
+        telegram_payment_handlers, get_list_with_updates, mocked_context, telegram_chat, commands_list, NOT_VALID_ID_MSG
     )
 
 
@@ -147,8 +147,10 @@ async def test_send_with_invalid_id(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_user_with_db_miss_on_recipient(
-    telegram_payment_handlers, mocked_context,
-    sender_with_bank_requisites, telegram_chat,
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
     get_update_for_command,
 ):
     mocked_update = get_update_for_command("/send_to_user 4215124 300")
@@ -162,9 +164,12 @@ async def test_send_to_user_with_db_miss_on_recipient(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_user_with_recipient_no_account(
-    telegram_payment_handlers, mocked_context, 
-    sender_with_bank_requisites, telegram_chat, 
-    get_update_for_command, user_model_without_verified_pn
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
+    get_update_for_command,
+    user_model_without_verified_pn,
 ):
     new_user_model = user_model_without_verified_pn(tlg_id=567)
     await new_user_model.asave()
@@ -180,8 +185,10 @@ async def test_send_to_user_with_recipient_no_account(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_card_with_db_miss_on_card(
-    telegram_payment_handlers, mocked_context,
-    sender_with_bank_requisites, telegram_chat,
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
     get_update_for_command,
 ):
     mocked_update = get_update_for_command("/send_to_card 123456789 300")
@@ -195,8 +202,10 @@ async def test_send_to_card_with_db_miss_on_card(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_self_transfer_restriction(
-    telegram_payment_handlers, mocked_context,
-    sender_with_bank_requisites, telegram_chat,
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
     get_list_with_updates,
 ):
     sender_account_model = await Account.objects.filter(uniq_id=123).afirst()
@@ -212,8 +221,12 @@ async def test_send_to_with_self_transfer_restriction(
     ]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, SELF_TRANSFER_ERROR
+        telegram_payment_handlers,
+        get_list_with_updates,
+        mocked_context,
+        telegram_chat,
+        commands_list,
+        SELF_TRANSFER_ERROR,
     )
 
 
@@ -222,9 +235,12 @@ async def test_send_to_with_self_transfer_restriction(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_insufficient_balance(
-    telegram_payment_handlers, mocked_context, 
-    sender_with_bank_requisites, telegram_chat, 
-    get_list_with_updates, new_user_with_account_and_card
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
+    get_list_with_updates,
+    new_user_with_account_and_card,
 ):
     rcp_user_model, rcp_account_model, rcp_card_model = await new_user_with_account_and_card(
         user_tlg_id=987, account_uniq_id=567, card_uniq_id=5678, account_value=1000
@@ -240,8 +256,7 @@ async def test_send_to_with_insufficient_balance(
     ]
 
     await basic_test_for_send_to_validations(
-        telegram_payment_handlers, get_list_with_updates, 
-        mocked_context, telegram_chat, commands_list, INSUF_BALANCE
+        telegram_payment_handlers, get_list_with_updates, mocked_context, telegram_chat, commands_list, INSUF_BALANCE
     )
 
 
@@ -250,9 +265,12 @@ async def test_send_to_with_insufficient_balance(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.error_case
 async def test_send_to_with_error_during_transfer(
-    telegram_payment_handlers, mocked_context,
-    sender_with_bank_requisites, telegram_chat,
-    mocker, get_update_for_command,
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
+    mocker,
+    get_update_for_command,
     new_user_with_account_and_card,
 ):
     sender_account_model = await Account.objects.filter(uniq_id=123).afirst()
@@ -268,9 +286,7 @@ async def test_send_to_with_error_during_transfer(
     mocker.patch("django.db.transaction.atomic", side_effect=DatabaseError())
     await telegram_payment_handlers.send_to(mocked_update, mocked_context)
 
-    mocked_context.bot.send_message.assert_called_once_with(
-        chat_id=telegram_chat.id, text=ERROR_DURING_TRANSFER
-    )
+    mocked_context.bot.send_message.assert_called_once_with(chat_id=telegram_chat.id, text=ERROR_DURING_TRANSFER)
 
 
 @pytest.mark.asyncio
@@ -278,9 +294,12 @@ async def test_send_to_with_error_during_transfer(
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.valid_case
 async def test_send_to_with_valid_transfer(
-    telegram_payment_handlers, mocked_context, 
-    sender_with_bank_requisites, telegram_chat, 
-    get_list_with_updates, new_user_with_account_and_card
+    telegram_payment_handlers,
+    mocked_context,
+    sender_with_bank_requisites,
+    telegram_chat,
+    get_list_with_updates,
+    new_user_with_account_and_card,
 ):
     sender_account_model = await Account.objects.filter(uniq_id=sender_with_bank_requisites.id).afirst()
     sender_account_model.value += 1000

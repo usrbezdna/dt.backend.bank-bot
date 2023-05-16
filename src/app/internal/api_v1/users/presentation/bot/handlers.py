@@ -3,14 +3,12 @@ import logging
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
 from phonenumbers.phonenumberutil import NumberParseException
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
-
 from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     ABSENT_PASSWORD_MSG,
     ABSENT_PN_MSG,
@@ -23,8 +21,8 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     get_success_phone_msg,
     get_unique_start_msg,
 )
-
 from app.internal.api_v1.utils.domain.services import verified_phone_required
+
 logger = logging.getLogger("django.server")
 
 

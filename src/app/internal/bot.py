@@ -3,9 +3,9 @@ import logging
 from django.conf import settings
 from telegram.ext import AIORateLimiter, Application, ApplicationBuilder
 
-from app.internal.api_v1.users.bot import register_telegram_user_handlers
 from app.internal.api_v1.favourites.bot import register_telegram_favourite_handlers
 from app.internal.api_v1.payment.bot import register_telegram_payment_handlers
+from app.internal.api_v1.users.bot import register_telegram_user_handlers
 
 from .ngrok_parser import parse_ngrok_url
 

@@ -1,11 +1,11 @@
-
 from telegram.ext import Application, CommandHandler
 
 from .db.repositories import UserRepository
 from .domain.services import UserService
 from .presentation.bot.handlers import TelegramUserHandlers
 
-def register_telegram_user_handlers(application : Application) -> None:
+
+def register_telegram_user_handlers(application: Application) -> None:
     """
     Registers handlers for user part of Telegram bot
     """

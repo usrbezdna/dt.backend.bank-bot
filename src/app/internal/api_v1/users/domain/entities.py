@@ -10,11 +10,11 @@ class MessageResponseSchema(Schema):
 
 
 class UserSchema(Schema):
-    tlg_id : int
-    username : str
-    first_name : str
-    last_name : str
-    phone_number : str
+    tlg_id: int
+    username: str
+    first_name: str
+    last_name: str
+    phone_number: str
 
     def __str__(self) -> str:
         """

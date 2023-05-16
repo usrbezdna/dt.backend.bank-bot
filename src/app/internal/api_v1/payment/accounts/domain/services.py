@@ -23,16 +23,13 @@ class AccountService:
     @sync_to_async
     def aget_account_by_id(self, uniq_id: int) -> AccountSchema:
         return self.get_account_by_id(uniq_id=uniq_id)
-    
+
     def get_account_by_id(self, uniq_id: int) -> AccountSchema:
         return self._account_repo.get_account_by_id(uniq_id=uniq_id)
-    
-    
 
     @sync_to_async
     def aget_full_owner_name_from_account_by_id(self, uniq_id: int) -> str:
         return self.get_full_owner_name_from_account_by_id(uniq_id=uniq_id)
-    
+
     def get_full_owner_name_from_account_by_id(self, uniq_id: int) -> str:
         return self._account_repo.get_full_owner_name_from_account_by_id(uniq_id=uniq_id)
-
