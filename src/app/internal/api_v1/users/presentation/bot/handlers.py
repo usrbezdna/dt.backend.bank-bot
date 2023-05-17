@@ -1,7 +1,11 @@
 import logging
 
 from io import BytesIO
-from django.core.files.base import ContentFile
+from django.conf import settings 
+from django.core.files.images import ImageFile
+
+import boto3
+from botocore.client import Config
 
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
@@ -62,18 +66,44 @@ class TelegramUserHandlers:
         photo = update.message.photo
 
         if photo:
-           
-            photo_id = update.message.photo[-1].file_id
-            photo_file = await context.bot.get_file(photo_id)
-            await photo_file.download_to_drive('temp.jpg')
+                
+            # photo_id = update.message.photo[-1].file_id
+            # photo_file = await context.bot.get_file(photo_id)
 
-            with open('temp.jpg', "rb") as f:
-                content = f.read()
-                await RemoteImage.objects.acreate(content=ContentFile(content))
+            # memory_file = BytesIO()
+            # await photo_file.download_to_memory(memory_file)
 
-                # # image_url = upload.file.url
-                # print(image_url)
-            # await context.bot.send_message(chat_id=update.effective_chat.id, text=f'Uploaded on {image_url}')
+
+            # image = ImageFile(BytesIO(memory_file.getvalue()), name=f'{photo_id}.jpg')
+            # image_url = f'{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/telegram/{photo_id}.jpg'
+            
+            # await RemoteImage.objects.acreate(remote_url=image_url, content=image)
+
+            # await context.bot.send_message(chat_id=update.effective_chat.id, text=image_url)
+            # return
+
+            session = boto3.Session(
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name="ru-central1",
+            )
+
+            s3 = session.client(
+                "s3", endpoint_url=settings.AWS_S3_ENDPOINT_URL, config=Config(signature_version="s3v4")
+            )
+
+            presigned_url = s3.generate_presigned_url(
+                'get_object',
+                Params={
+                    "Bucket": f"{settings.AWS_STORAGE_BUCKET_NAME}", 
+                    "Key": "telegram/AgACAgIAAxkBAAIQXWRkb4y7JTdNC8d-OIiuC79lbVzAAALPxDEbzY8pS9lW_G2slje6AQADAgADeQADLwQ.jpg"
+                },
+                ExpiresIn=100,
+            )
+
+            print(presigned_url)
+
+
 
 
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
