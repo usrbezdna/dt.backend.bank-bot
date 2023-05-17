@@ -1,13 +1,26 @@
 import datetime
+import json
 from unittest.mock import AsyncMock
 
 import pytest
-from django.urls import reverse
+from django.test import AsyncClient, Client
 from telegram import Chat, Message, MessageEntity, Update, User
 from telegram.ext import ApplicationBuilder
 
+from src.app.internal.api_v1.favourites.db.repositories import FavouriteRepository
+from src.app.internal.api_v1.favourites.domain.services import FavouriteService
+from src.app.internal.api_v1.favourites.presentation.bot.handlers import TelegramFavouritesHandlers
+from src.app.internal.api_v1.payment.accounts.db.repositories import AccountRepository
+from src.app.internal.api_v1.payment.accounts.domain.services import AccountService
+from src.app.internal.api_v1.payment.cards.db.repositories import CardRepository
+from src.app.internal.api_v1.payment.cards.domain.services import CardService
+from src.app.internal.api_v1.payment.presentation.bot.handlers import TelegramPaymentHandlers
+from src.app.internal.api_v1.payment.transactions.db.repositories import TransactionRepository
+from src.app.internal.api_v1.payment.transactions.domain.services import TransactionService
+from src.app.internal.api_v1.users.db.repositories import UserRepository
+from src.app.internal.api_v1.users.domain.services import UserService
+from src.app.internal.api_v1.users.presentation.bot.handlers import TelegramUserHandlers
 from src.app.internal.bot import setup_application_handlers
-from src.app.internal.services.user_service import create_user_model_for_telegram
 from src.app.models import User as UserModel
 
 
@@ -20,16 +33,70 @@ def bot_application(mocked_context):
 
 
 @pytest.fixture
-def already_saved_user(telegram_user):
-    user_model = create_user_model_for_telegram(telegram_user)
-    user_model.save()
+def telegram_user_handlers():
+    user_repo = UserRepository()
 
+    user_service = UserService(user_repo=user_repo)
+    user_handlers = TelegramUserHandlers(user_service=user_service)
+
+    return user_handlers
+
+
+@pytest.fixture
+def telegram_fav_handlers():
+    user_repo = UserRepository()
+    fav_repo = FavouriteRepository(user_repo=user_repo)
+
+    fav_service = FavouriteService(fav_repo=fav_repo)
+    fav_handlers = TelegramFavouritesHandlers(favourite_service=fav_service)
+
+    return fav_handlers
+
+
+@pytest.fixture
+def telegram_payment_handlers():
+    user_repo = UserRepository()
+    user_service = UserService(user_repo=user_repo)
+
+    fav_repo = FavouriteRepository(user_repo=user_repo)
+    fav_service = FavouriteService(fav_repo=fav_repo)
+
+    account_repo = AccountRepository()
+    account_service = AccountService(account_repo=account_repo)
+
+    card_repo = CardRepository()
+    card_service = CardService(card_repo=card_repo)
+
+    tx_repo = TransactionRepository()
+    tx_service = TransactionService(tx_repo=tx_repo)
+
+    payment_handlers = TelegramPaymentHandlers(
+        user_service=user_service,
+        fav_service=fav_service,
+        account_service=account_service,
+        card_service=card_service,
+        tx_service=tx_service,
+    )
+
+    return payment_handlers
+
+
+@pytest.fixture
+def already_saved_user(telegram_user):
+    user_model = UserModel(
+        tlg_id=telegram_user.id,
+        username=telegram_user.username,
+        first_name=telegram_user.first_name,
+        last_name=telegram_user.last_name,
+        phone_number="",
+    )
+    user_model.save()
     return telegram_user
 
 
 @pytest.fixture
 def already_verified_user(already_saved_user):
-    user_model = UserModel.objects.filter(tlg_id=already_saved_user.id).first()
+    user_model = UserModel.objects.get(tlg_id=already_saved_user.id)
     user_model.phone_number = "+12345"
     user_model.save()
 
@@ -94,11 +161,3 @@ def get_message_with_text(telegram_user, telegram_chat, mocked_context):
         return custom_message
 
     return inner
-
-
-@pytest.fixture
-def web_api_url():
-    def inner_with_tlg_id(tlg_id):
-        return reverse("web_api", args=[tlg_id])
-
-    return inner_with_tlg_id

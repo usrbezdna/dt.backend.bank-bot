@@ -217,11 +217,11 @@ AUTH_USER_MODEL = "app.User"
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG,
+    "SHOW_TOOLBAR_CALLBACK": lambda _: DEBUG and "pytest" not in sys.argv[0],
 }
 
 NINJA_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,

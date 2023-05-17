@@ -3,6 +3,7 @@
 echo -e "\e[1;34mStarting configuration...\e[0m"
 
 echo -e "\e[1;34mUpdating packages...\e[0m"
+sudo apt -y remove needrestart
 sudo apt update && sudo apt upgrade -y
 
 

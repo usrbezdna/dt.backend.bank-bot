@@ -1,28 +1,18 @@
 import logging
 
 from django.conf import settings
-from telegram.ext import AIORateLimiter, ApplicationBuilder, CommandHandler
+from telegram.ext import AIORateLimiter, Application, ApplicationBuilder
+
+from app.internal.api_v1.favourites.bot import register_telegram_favourite_handlers
+from app.internal.api_v1.payment.bot import register_telegram_payment_handlers
+from app.internal.api_v1.users.bot import register_telegram_user_handlers
 
 from .ngrok_parser import parse_ngrok_url
-from .transport.bot.handlers import (
-    add_fav,
-    check_payable,
-    del_fav,
-    get_help,
-    list_fav,
-    list_inter,
-    me,
-    send_to,
-    set_password,
-    set_phone,
-    start,
-    state_payable,
-)
 
 logger = logging.getLogger("django.server")
 
 
-def get_bot_application():
+def get_bot_application() -> Application:
     """
     This function creates default
     Telegram Bot Application and sets up
@@ -41,7 +31,8 @@ def start_polling_bot():
     Starts a new instanse of Telegram Bot
     Application in polling mode
     """
-    application = get_bot_application()
+    application: Application = get_bot_application()
+
     logger.info("Started")
     application.run_polling()
 
@@ -51,43 +42,25 @@ def start_webhook_bot():
     This function starts a new instance of
     Telegram Bot Application with webhook.
     """
-    application = get_bot_application()
+    application: Application = get_bot_application()
 
     set_bot_webhook(application)
 
 
-def setup_application_handlers(application):
+def setup_application_handlers(application: Application):
     """
     Creates command handlers for specified Bot Application.
     Each handler represents a single Telegram command.
     ----------
     :param application: Bot Application instance
     """
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", get_help))
-    application.add_handler(CommandHandler("set_phone", set_phone))
-    application.add_handler(CommandHandler("me", me))
 
-    application.add_handler(CommandHandler("list_fav", list_fav))
-    application.add_handler(CommandHandler("add_fav", add_fav))
-    application.add_handler(CommandHandler("del_fav", del_fav))
-
-    application.add_handler(CommandHandler("check_card", check_payable))
-    application.add_handler(CommandHandler("check_account", check_payable))
-
-    application.add_handler(CommandHandler("send_to_user", send_to))
-    application.add_handler(CommandHandler("send_to_account", send_to))
-    application.add_handler(CommandHandler("send_to_card", send_to))
-
-    application.add_handler(CommandHandler("list_inter", list_inter))
-
-    application.add_handler(CommandHandler("state_card", state_payable))
-    application.add_handler(CommandHandler("state_account", state_payable))
-
-    application.add_handler(CommandHandler("set_password", set_password))
+    register_telegram_user_handlers(application)
+    register_telegram_favourite_handlers(application)
+    register_telegram_payment_handlers(application)
 
 
-def set_bot_webhook(application):
+def set_bot_webhook(application: Application):
     """
     Sets a webhook to recieve incoming Telegram updates.
     Tries to use WEBHOOK_URL from .env file.
