@@ -15,12 +15,16 @@ from app.internal.api_v1.payment.transactions.db.models import Transaction
 from app.internal.api_v1.payment.transactions.domain.services import ITransactionRepository
 from app.internal.api_v1.users.db.models import User
 
+from app.internal.api_v1.utils.s3.db.models import RemoteImage
+from django.core.files.images import ImageFile
+
+
 logger = logging.getLogger("django.server")
 
 
 class TransactionRepository(ITransactionRepository):
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
     ) -> None:
         """
         Tries to transfer value from first_payment_account to second_payment_account.
@@ -47,8 +51,9 @@ class TransactionRepository(ITransactionRepository):
                     sender_acc_model.save()
                     recipient_acc_model.save()
 
+                    tx_image = RemoteImage.objects.filter(content=image_file).first()
                     Transaction.objects.create(
-                        tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value
+                        tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value, tx_image=tx_image
                     )
 
                 else:

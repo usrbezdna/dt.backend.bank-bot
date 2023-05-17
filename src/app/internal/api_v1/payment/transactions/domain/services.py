@@ -4,12 +4,13 @@ from typing import Any, Dict, List
 from asgiref.sync import sync_to_async
 
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
+from django.core.files.images import ImageFile
 
 
 class ITransactionRepository(ABC):
     @abstractmethod
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
     ) -> None:
         pass
 
@@ -28,15 +29,17 @@ class TransactionService:
 
     @sync_to_async
     def atry_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
     ) -> None:
-        self.try_transfer_to(sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value)
+        self.try_transfer_to(
+            sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value, image_file=ImageFile
+        )
 
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
     ) -> None:
         self._tx_repo.try_transfer_to(
-            sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value
+            sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value, image_file=image_file
         )
 
     @sync_to_async

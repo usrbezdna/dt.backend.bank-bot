@@ -38,8 +38,9 @@ from app.internal.api_v1.payment.transactions.domain.services import Transaction
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
+from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
-
+from django.core.files.images import ImageFile
 
 logger = logging.getLogger("django.server")
 
@@ -52,6 +53,7 @@ class TelegramPaymentHandlers:
         account_service: AccountService,
         card_service: CardService,
         tx_service: TransactionService,
+        s3_service : S3Service
     ):
         self._user_service = user_service
         self._fav_service = fav_service
@@ -60,6 +62,7 @@ class TelegramPaymentHandlers:
         self._card_service = card_service
 
         self._tx_service = tx_service
+        self._s3_service = s3_service
 
     @verified_phone_required
     async def check_payable(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -197,7 +200,11 @@ class TelegramPaymentHandlers:
         :param context: context object
         """
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
-        command_data = update.message.text.split(" ")
+        photo = update.message.photo
+        if photo:
+            command_data = update.message.caption.split(" ")
+        else:
+            command_data = update.message.text.split(" ")
 
         if len(command_data) != 3:
             await context.bot.send_message(chat_id=chat_id, text=get_message_for_send_command(command_data[0]))
@@ -241,7 +248,12 @@ class TelegramPaymentHandlers:
             return
 
         try:
-            await self._tx_service.atry_transfer_to(sending_payment_account, recipient_payment_account, value)
+            image_file = None
+            if photo:
+                image_file : ImageFile = await self._s3_service.asave_telegram_photo_to_bucket(update, context)
+
+            await self._tx_service.\
+                atry_transfer_to(sending_payment_account, recipient_payment_account, value, image_file)
 
         except InsufficientBalanceException:
             await context.bot.send_message(chat_id=chat_id, text=INSUF_BALANCE)

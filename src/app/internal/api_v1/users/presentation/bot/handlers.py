@@ -10,6 +10,10 @@ from botocore.client import Config
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
 from phonenumbers.phonenumberutil import NumberParseException
+
+from app.internal.api_v1.utils.s3.db.repositories import S3Repository
+from app.internal.api_v1.utils.s3.domain.services import S3Service
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -63,50 +67,39 @@ class TelegramUserHandlers:
         :param update: recieved Update object
         :param context: context object passed to the callback
         """
-        photo = update.message.photo
-
-        if photo:
-                
-            # photo_id = update.message.photo[-1].file_id
-            # photo_file = await context.bot.get_file(photo_id)
-
-            # memory_file = BytesIO()
-            # await photo_file.download_to_memory(memory_file)
-
-
-            # image = ImageFile(BytesIO(memory_file.getvalue()), name=f'{photo_id}.jpg')
-            # image_url = f'{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/telegram/{photo_id}.jpg'
-            
-            # await RemoteImage.objects.acreate(remote_url=image_url, content=image)
-
-            # await context.bot.send_message(chat_id=update.effective_chat.id, text=image_url)
-            # return
-
-            session = boto3.Session(
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                region_name="ru-central1",
-            )
-
-            s3 = session.client(
-                "s3", endpoint_url=settings.AWS_S3_ENDPOINT_URL, config=Config(signature_version="s3v4")
-            )
-
-            presigned_url = s3.generate_presigned_url(
-                'get_object',
-                Params={
-                    "Bucket": f"{settings.AWS_STORAGE_BUCKET_NAME}", 
-                    "Key": "telegram/AgACAgIAAxkBAAIQXWRkb4y7JTdNC8d-OIiuC79lbVzAAALPxDEbzY8pS9lW_G2slje6AQADAgADeQADLwQ.jpg"
-                },
-                ExpiresIn=100,
-            )
-
-            print(presigned_url)
-
-
-
-
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
+
+
+        # photo = update.message.photo
+
+        # if photo:
+                
+        #     # Reads photo from message
+        #     s3_repo = S3Repository()
+        #     s3_service = S3Service(s3_repo=s3_repo)
+
+        #     
+
+
+            # Creates pre-signed url
+            # f = await RemoteImage.objects.afirst()
+
+            # presigned_url = f.content.storage.bucket.meta.client.\
+            #     generate_presigned_url(
+            #     'get_object', 
+            #     Params={
+            #         'Bucket': f'{settings.AWS_STORAGE_BUCKET_NAME}', 
+            #         "Key": f"telegram/{f.content.name}"
+            #     }
+            # )
+
+            # print(presigned_url)
+
+
+            # Sends photo to Telegram:
+            # f = await RemoteImage.objects.afirst()
+            # await context.bot.send_photo(chat_id=update.effective_chat.id, photo=f.content.read())
+
 
     async def set_phone(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """

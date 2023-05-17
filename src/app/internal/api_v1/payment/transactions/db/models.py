@@ -1,6 +1,7 @@
 from django.db import models
 
 from app.internal.api_v1.payment.accounts.db.models import Account
+from app.internal.api_v1.utils.s3.db.models import RemoteImage
 
 
 class Transaction(models.Model):
@@ -14,6 +15,8 @@ class Transaction(models.Model):
     tx_sender = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sender")
     tx_recip = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="recip")
     tx_value = models.DecimalField(max_digits=19, decimal_places=2)
+
+    tx_image = models.OneToOneField(RemoteImage, default=None, null=True, on_delete=models.SET_NULL, related_name='transaction') 
 
     class Meta:
         """
