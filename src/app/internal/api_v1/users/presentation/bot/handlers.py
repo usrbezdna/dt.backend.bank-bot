@@ -1,10 +1,15 @@
 import logging
 
+from io import BytesIO
+from django.core.files.base import ContentFile
+
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
 from phonenumbers.phonenumberutil import NumberParseException
 from telegram import Update
 from telegram.ext import ContextTypes
+
+from app.internal.api_v1.utils.s3.db.models import RemoteImage
 
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
@@ -21,7 +26,8 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     get_success_phone_msg,
     get_unique_start_msg,
 )
-from app.internal.api_v1.utils.domain.services import verified_phone_required
+from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
+
 
 logger = logging.getLogger("django.server")
 
@@ -53,6 +59,23 @@ class TelegramUserHandlers:
         :param update: recieved Update object
         :param context: context object passed to the callback
         """
+        photo = update.message.photo
+
+        if photo:
+           
+            photo_id = update.message.photo[-1].file_id
+            photo_file = await context.bot.get_file(photo_id)
+            await photo_file.download_to_drive('temp.jpg')
+
+            with open('temp.jpg', "rb") as f:
+                content = f.read()
+                await RemoteImage.objects.acreate(content=ContentFile(content))
+
+                # # image_url = upload.file.url
+                # print(image_url)
+            # await context.bot.send_message(chat_id=update.effective_chat.id, text=f'Uploaded on {image_url}')
+
+
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
 
     async def set_phone(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

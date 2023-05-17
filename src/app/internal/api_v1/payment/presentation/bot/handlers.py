@@ -38,7 +38,8 @@ from app.internal.api_v1.payment.transactions.domain.services import Transaction
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
-from app.internal.api_v1.utils.domain.services import verified_phone_required
+from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
+
 
 logger = logging.getLogger("django.server")
 
