@@ -139,7 +139,7 @@ class TransactionRepository(ITransactionRepository):
 
         tx_ids = list(
             Transaction.objects.filter(
-                Q(already_shown_flag=False) & Q(tx_sender__owner__tlg_id=user_id)
+                Q(already_shown_flag=False) & Q(tx_recip__owner__tlg_id=user_id)
             )
             .values_list('tx_id', flat=True)
         )

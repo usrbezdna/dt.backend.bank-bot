@@ -21,6 +21,7 @@ from app.internal.api_v1.payment.presentation.bot.telegram_messages import (
     INCR_TX_VALUE,
     INSUF_BALANCE,
     NO_INTERACTED_USERS,
+    NO_LATEST_TXS,
     NO_TXS_FOR_LAST_MONTH,
     RSP_NOT_FOUND,
     RSP_RESTRICTION,
@@ -194,11 +195,11 @@ class TelegramPaymentHandlers:
 
                 if tx_data['tx_image'] is not None:
                     image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data['tx_image'])
-                    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image.content.read())
+                    await context.bot.send_photo(chat_id=chat_id, photo=image.content.read())
 
-                await context.bot.send_message(chat_id=update.effective_chat.id, text=res_msg)
+                await context.bot.send_message(chat_id=chat_id, text=res_msg)
             return
-        await context.bot.send_message(chat_id=update.effective_chat.id, text='You have already seen all latest transactions')
+        await context.bot.send_message(chat_id=chat_id, text=NO_LATEST_TXS)
         
 
 
