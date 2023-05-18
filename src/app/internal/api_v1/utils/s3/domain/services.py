@@ -12,7 +12,11 @@ from django.core.files.images import ImageFile
 class IS3Repository(ABC):
 
     @abstractmethod
-    async def save_image_to_s3_bucket(self, image : ImageFile):
+    async def get_image_from_s3_bucket(self, image_id : int):
+        pass
+
+    @abstractmethod
+    async def get_presigned_url_for_image(self, image_id : int):
         pass
 
 class S3Service():
@@ -21,10 +25,9 @@ class S3Service():
         self._s3_repo = s3_repo
 
 
-    async def asave_telegram_photo_to_bucket(self, update : Update, context : ContextTypes.DEFAULT_TYPE) -> ImageFile:
+    async def aconvert_telegram_photo_to_image(self, update : Update, context : ContextTypes.DEFAULT_TYPE) -> ImageFile:
         """
-        Recieves Telegram Update object, extracts photo 
-        and sends it to internal repo for saving to object storage  
+        Recieves Telegram Update object, extracts photo and creates ImageFile 
         """
 
         photo_id = update.message.photo[-1].file_id
@@ -33,12 +36,18 @@ class S3Service():
         memory_file = BytesIO()
         await photo_file.download_to_memory(memory_file)
 
-        image = ImageFile(BytesIO(memory_file.getvalue()), name=f'{photo_id}.jpg')
+        image_name = f'{photo_id}.jpg'
+        image_file = ImageFile(BytesIO(memory_file.getvalue()), name=image_name)
 
-        await self._s3_repo.save_image_to_s3_bucket(image=image)
-        return image
+        return image_file
 
 
-    # async def get_pre_signed_url(self, )
+    async def aget_presigned_url_for_image(self, image_id : int):
+        return await self._s3_repo.get_presigned_url_for_image(image_id=image_id)
+    
+    async def aget_image_from_s3_bucket(self, image_id : int):
+        return await self._s3_repo.get_image_from_s3_bucket(image_id=image_id)
+
+
 
 

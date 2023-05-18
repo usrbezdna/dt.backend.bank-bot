@@ -17,8 +17,25 @@ class YandexCloudStorage(S3Boto3Storage):
 
 class S3Repository(IS3Repository):
 
-    async def save_image_to_s3_bucket(self, image : ImageFile):
+    async def get_image_from_s3_bucket(self, image_id : int):
         """
-        Saves image file to object storage.
+        Returns image from object storage.
         """
-        await RemoteImage.objects.acreate(content=image)
+        return await RemoteImage.objects.aget(pk=image_id)
+    
+    async def get_presigned_url_for_image(self, image_id : int):
+        """
+        Returns presigned_url for image
+        """
+        image = await RemoteImage.objects.aget(pk=image_id)
+
+        presigned_url = image.content.storage.bucket.meta.client.\
+            generate_presigned_url(
+            'get_object', 
+            Params={
+                'Bucket': f'{settings.AWS_STORAGE_BUCKET_NAME}', 
+                "Key": f"telegram/{image.content.name}"
+            }
+        )
+
+        return presigned_url

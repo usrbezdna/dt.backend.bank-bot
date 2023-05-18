@@ -168,6 +168,40 @@ class TelegramPaymentHandlers:
             owner_id = obj_option.owner.tlg_id
             await self.send_result_message_for_transaction_state(context, chat_id, owner_id)
 
+
+    @verified_phone_required
+    async def list_latest(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Handler for /list_latest command.
+        Returns latest unseen transactions with attached images.
+        ----------
+
+        :param update: recieved Update object
+        :param context: context object  
+        """
+        user_id, chat_id = update.effective_user.id, update.effective_chat.id
+
+        tx_list = await self._tx_service.aget_list_of_latest_unseen_transactions(user_id=user_id)
+        if tx_list:
+            for tx_data in tx_list:
+                res_msg = ''
+                res_msg += (
+                    f"TX ID: {tx_data['tx_id']}, "
+                + f"Sender: {tx_data['sender_name']}, "
+                + f"Recipient: {tx_data['recip_name']}, "
+                + f"Value: {tx_data['tx_value']}\n"
+                )
+
+                if tx_data['tx_image'] is not None:
+                    image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data['tx_image'])
+                    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image.content.read())
+
+                await context.bot.send_message(chat_id=update.effective_chat.id, text=res_msg)
+            return
+        await context.bot.send_message(chat_id=update.effective_chat.id, text='You have already seen all latest transactions')
+        
+
+
     @verified_phone_required
     async def list_inter(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
@@ -250,7 +284,7 @@ class TelegramPaymentHandlers:
         try:
             image_file = None
             if photo:
-                image_file : ImageFile = await self._s3_service.asave_telegram_photo_to_bucket(update, context)
+                image_file : ImageFile = await self._s3_service.aconvert_telegram_photo_to_image(update, context)
 
             await self._tx_service.\
                 atry_transfer_to(sending_payment_account, recipient_payment_account, value, image_file)
@@ -284,9 +318,21 @@ class TelegramPaymentHandlers:
         transactions = await self._tx_service.aget_list_of_transactions_for_the_last_month(user_id)
 
         if transactions:
-            await context.bot.send_message(chat_id=chat_id, text=get_result_message_for_transaction_state(transactions))
-            return
+            for tx_data in transactions:
+                res_msg = ""
+                res_msg += (f"TX ID: {tx_data['tx_id']}, "
+                    + f"Date: {tx_data['date']}, "
+                    + f"Sender: {tx_data['sender_name']}, "
+                    + f"Recipient: {tx_data['recip_name']}, "
+                    + f"Value: {tx_data['tx_value']}\n"
+                )
+         
+                if tx_data['tx_image'] is not None:
+                    presigned_url = await self._s3_service.aget_presigned_url_for_image(tx_data['tx_image'])
+                    res_msg += f'Url : {presigned_url}'
 
+                await context.bot.send_message(chat_id=chat_id, text=res_msg)
+            return
         await context.bot.send_message(chat_id=chat_id, text=NO_TXS_FOR_LAST_MONTH)
 
     async def handle_case_with_send_to_user(

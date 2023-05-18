@@ -16,3 +16,5 @@ class TransactionSchema(Schema):
     tx_value: float
     tx_image : RemoteImageSchema
 
+    already_shown_flag: bool
+

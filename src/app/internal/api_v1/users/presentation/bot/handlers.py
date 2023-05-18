@@ -70,37 +70,6 @@ class TelegramUserHandlers:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
 
 
-        # photo = update.message.photo
-
-        # if photo:
-                
-        #     # Reads photo from message
-        #     s3_repo = S3Repository()
-        #     s3_service = S3Service(s3_repo=s3_repo)
-
-        #     
-
-
-            # Creates pre-signed url
-            # f = await RemoteImage.objects.afirst()
-
-            # presigned_url = f.content.storage.bucket.meta.client.\
-            #     generate_presigned_url(
-            #     'get_object', 
-            #     Params={
-            #         'Bucket': f'{settings.AWS_STORAGE_BUCKET_NAME}', 
-            #         "Key": f"telegram/{f.content.name}"
-            #     }
-            # )
-
-            # print(presigned_url)
-
-
-            # Sends photo to Telegram:
-            # f = await RemoteImage.objects.afirst()
-            # await context.bot.send_photo(chat_id=update.effective_chat.id, photo=f.content.read())
-
-
     async def set_phone(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
         Handler for /set_phone command.

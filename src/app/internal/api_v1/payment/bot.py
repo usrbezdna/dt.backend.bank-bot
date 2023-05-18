@@ -64,6 +64,9 @@ def register_telegram_payment_handlers(application: Application) -> None:
     
 
     application.add_handler(CommandHandler("list_inter", payment_handlers.list_inter))
+    application.add_handler(CommandHandler("list_latest", payment_handlers.list_latest))
+
 
     application.add_handler(CommandHandler("state_card", payment_handlers.state_payable))
     application.add_handler(CommandHandler("state_account", payment_handlers.state_payable))
+    
