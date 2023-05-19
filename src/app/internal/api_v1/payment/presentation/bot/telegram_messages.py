@@ -47,6 +47,7 @@ STATE_NOT_FOUND = "Unable to find state for this card / account"
 NO_INTERACTED_USERS = "There is no users you have interacted with"
 NO_TXS_FOR_LAST_MONTH = "You don't have any payment transactions for the last month"
 
+NO_LATEST_TXS = 'You have already seen all latest transactions'
 
 def get_message_with_balance(account: AccountSchema) -> str:
     """

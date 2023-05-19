@@ -15,12 +15,16 @@ from app.internal.api_v1.payment.transactions.db.models import Transaction
 from app.internal.api_v1.payment.transactions.domain.services import ITransactionRepository
 from app.internal.api_v1.users.db.models import User
 
+from app.internal.api_v1.utils.s3.db.models import RemoteImage
+from django.core.files.images import ImageFile
+
+
 logger = logging.getLogger("django.server")
 
 
 class TransactionRepository(ITransactionRepository):
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
     ) -> None:
         """
         Tries to transfer value from first_payment_account to second_payment_account.
@@ -47,8 +51,13 @@ class TransactionRepository(ITransactionRepository):
                     sender_acc_model.save()
                     recipient_acc_model.save()
 
+                    tx_image = None
+
+                    if image_file:
+                        tx_image = RemoteImage.objects.create(content=image_file)
+                    
                     Transaction.objects.create(
-                        tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value
+                        tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value, tx_image=tx_image
                     )
 
                 else:
@@ -115,7 +124,39 @@ class TransactionRepository(ITransactionRepository):
                     "tx_recip__owner__first_name", Value(" "), "tx_recip__owner__last_name", output_field=CharField()
                 ),
             )
-            .values("tx_id", "tx_value", "sender_name", "recip_name", "date")
+            .values("tx_id", "tx_value", "sender_name", "recip_name", "date", "tx_image")
         )
 
         return tx_list
+    
+
+    def get_list_of_latest_unseen_transactions(self, user_id: int) -> List[Dict[str, Any]]:
+        """
+        Returns list of the latest unseen transactions.
+        """
+
+        # Change tx_sender to tx_recip
+
+        tx_ids = list(
+            Transaction.objects.filter(
+                Q(already_shown_flag=False) & Q(tx_recip__owner__tlg_id=user_id)
+            )
+            .values_list('tx_id', flat=True)
+        )
+
+        Transaction.objects.filter(tx_id__in=tx_ids).update(already_shown_flag=True)
+
+        res_tx_list = list(
+            Transaction.objects.filter(tx_id__in=tx_ids)
+            .annotate(
+                sender_name=Concat(
+                        "tx_sender__owner__first_name", Value(" "), "tx_sender__owner__last_name", output_field=CharField()
+                    ),
+                recip_name=Concat(
+                    "tx_recip__owner__first_name", Value(" "), "tx_recip__owner__last_name", output_field=CharField()
+                ),
+            )
+            .values("tx_id", "tx_value", "sender_name", "recip_name", "tx_image")
+        )
+
+        return res_tx_list

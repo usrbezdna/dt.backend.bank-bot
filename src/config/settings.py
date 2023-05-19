@@ -50,6 +50,18 @@ for host in ALLOWED_HOSTS:
     CSRF_TRUSTED_ORIGINS.extend([f"http://{host}", f"https://{host}"])
 
 
+
+AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
+
+AWS_STORAGE_BUCKET_NAME  = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
+AWS_S3_CUSTOM_DOMAIN = 'storage.yandexcloud.net'
+
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}'
+
+DEFAULT_FILE_STORAGE = 'app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -67,6 +79,7 @@ INSTALLED_APPS = [
     "ninja_extra",
     "ninja_jwt.token_blacklist",
     "corsheaders",
+    "storages",
     "app",
 ]
 
