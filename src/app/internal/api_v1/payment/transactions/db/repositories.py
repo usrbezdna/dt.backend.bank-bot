@@ -135,8 +135,6 @@ class TransactionRepository(ITransactionRepository):
         Returns list of the latest unseen transactions.
         """
 
-        # Change tx_sender to tx_recip
-
         tx_ids = list(
             Transaction.objects.filter(
                 Q(already_shown_flag=False) & Q(tx_recip__owner__tlg_id=user_id)

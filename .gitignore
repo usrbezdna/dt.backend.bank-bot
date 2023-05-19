@@ -13,5 +13,5 @@ __pycache__
 
 .env.runner
 .idea
-yc-terraform-testserver/.terraform
-yc-terraform-gitlab-runner/.terraform
+*.terraform
+*.tfstate
