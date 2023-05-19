@@ -18,6 +18,5 @@ def register_telegram_user_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("help", user_handlers.get_help))
 
     application.add_handler(CommandHandler("me", user_handlers.me))
-
     application.add_handler(CommandHandler("set_phone", user_handlers.set_phone))
     application.add_handler(CommandHandler("set_password", user_handlers.set_password))

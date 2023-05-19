@@ -32,6 +32,9 @@ django-ninja = "~=0.21.0"
 django-ninja-jwt = "~=5.2.5"
 six = "~=1.16.0"
 django-cors-headers = "~=3.14.0"
+django-storages = "~=1.13.2"
+boto3 = "~=1.26.135"
+pillow = "~=9.5.0"
 
 [requires]
 python_version = "3.10"

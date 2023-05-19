@@ -5,6 +5,7 @@ from app.internal.api_v1.payment.accounts.presentation.admin import PaymentAccou
 from app.internal.api_v1.payment.cards.presentation.admin import PaymentCardAdmin
 from app.internal.api_v1.payment.transactions.presentation.admin import TransactionAdmin
 from app.internal.api_v1.users.presentation.admin import TelegramUserAdmin
+from app.internal.api_v1.utils.s3.presentation.admin import RemoteImageAdmin
 
 admin.site.site_title = "Backend course"
 admin.site.site_header = "Backend course"
