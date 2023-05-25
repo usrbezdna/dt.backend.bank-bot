@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List, Optional
 
+from prometheus_client import Counter
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -25,11 +26,10 @@ from app.internal.api_v1.favourites.presentation.bot.telegram_messages import (
 )
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
+from app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
-from prometheus_client import Summary
 
 logger = logging.getLogger("django_stdout")
-REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
 
 
 class TelegramFavouritesHandlers:
@@ -37,7 +37,6 @@ class TelegramFavouritesHandlers:
         self._favourite_service = favourite_service
 
     @verified_phone_required
-    @REQUEST_TIME.time()
     async def list_fav(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
         Handler for /list_fav command.
@@ -47,6 +46,8 @@ class TelegramFavouritesHandlers:
         :param update: recieved Update object
         :param context: context object passed to the callback
         """
+
+        PrometheusMetrics.inc_fav_counter()
 
         favs_limit = 5
         user_id, chat_id = update.effective_user.id, update.effective_chat.id

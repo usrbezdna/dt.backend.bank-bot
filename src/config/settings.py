@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import logging
 import os
 import sys
 from datetime import timedelta
@@ -171,7 +172,7 @@ LOGGING = {
             "formatter": "django_stdout",
         },
         "telegram_logs": {
-            "class": "app.internal.api_v1.utils.logging.presentation.handlers.TelegramLogsHandler",
+            "class": "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.TelegramLogsHandler",
             "logs_chat_id": TLG_LOGS_CHAT_ID,
             "logs_bot_token": TLG_LOGS_BOT_TOKEN,
         },
@@ -189,6 +190,9 @@ LOGGING = {
         # },
     },
 }
+
+if "pytest" in sys.argv[0]:
+    logging.disable(logging.INFO)
 
 
 # Password validation

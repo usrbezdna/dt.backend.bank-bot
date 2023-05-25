@@ -9,12 +9,15 @@ from telegram import Bot
 class TelegramLogsHandler(Handler):
     def __init__(self, logs_bot_token: str, logs_chat_id: str):
         super().__init__()
+
         self._token = logs_bot_token
         self._chat_id = logs_chat_id
 
         self._logs_bot = None
         self._updates_queue = Queue()
-        self._event_loop = asyncio.get_event_loop()
+
+        loop_opt = asyncio.get_event_loop()
+        self._event_loop = loop_opt if loop_opt else asyncio.new_event_loop()
 
         self.create_bot()
 
