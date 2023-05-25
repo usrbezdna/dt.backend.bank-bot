@@ -56,7 +56,7 @@ TLG_LOGS_BOT_TOKEN = env("TLG_LOGS_BOT_TOKEN")
 AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
 
-AWS_STORAGE_BUCKET_NAME  = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
+AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
 AWS_S3_CUSTOM_DOMAIN = 'storage.yandexcloud.net'
 
 AWS_QUERYSTRING_AUTH = False
@@ -170,8 +170,8 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "django_stdout",
         },
-        
-        "telegram_logs" : {
+
+        "telegram_logs": {
             'class': 'app.internal.api_v1.utils.logging.presentation.handlers.TelegramLogsHandler',
             'logs_chat_id': TLG_LOGS_CHAT_ID,
             'logs_bot_token': TLG_LOGS_BOT_TOKEN,

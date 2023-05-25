@@ -4,5 +4,5 @@ from datetime import datetime
 
 
 class RemoteImageSchema(Schema):
-    uploaded_at : datetime
-    content : str
+    uploaded_at: datetime
+    content: str

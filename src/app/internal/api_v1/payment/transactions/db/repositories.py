@@ -24,7 +24,7 @@ logger = logging.getLogger("django_stdout")
 
 class TransactionRepository(ITransactionRepository):
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
         """
         Tries to transfer value from first_payment_account to second_payment_account.
@@ -58,10 +58,12 @@ class TransactionRepository(ITransactionRepository):
 
                     if image_file:
                         tx_image = RemoteImage.objects.create(content=image_file)
-                    
+
                     saved_tx = Transaction.objects.create(
-                        tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value, tx_image=tx_image
-                    )
+                        tx_sender=sender_acc_model,
+                        tx_recip=recipient_acc_model,
+                        tx_value=transferring_value,
+                        tx_image=tx_image)
 
                     logger.info(f'OK! Payment transaction was successfully saved with ID {saved_tx.tx_id}')
 
@@ -133,7 +135,6 @@ class TransactionRepository(ITransactionRepository):
         )
 
         return tx_list
-    
 
     def get_list_of_latest_unseen_transactions(self, user_id: int) -> List[Dict[str, Any]]:
         """
@@ -153,8 +154,8 @@ class TransactionRepository(ITransactionRepository):
             Transaction.objects.filter(tx_id__in=tx_ids)
             .annotate(
                 sender_name=Concat(
-                        "tx_sender__owner__first_name", Value(" "), "tx_sender__owner__last_name", output_field=CharField()
-                    ),
+                    "tx_sender__owner__first_name", Value(" "), "tx_sender__owner__last_name", output_field=CharField()
+                ),
                 recip_name=Concat(
                     "tx_recip__owner__first_name", Value(" "), "tx_recip__owner__last_name", output_field=CharField()
                 ),

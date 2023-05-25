@@ -7,6 +7,7 @@ from django.core.files.images import ImageFile
 from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 
+
 class YandexCloudStorage(S3Boto3Storage):
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
     location = 'telegram'
@@ -17,13 +18,13 @@ class YandexCloudStorage(S3Boto3Storage):
 
 class S3Repository(IS3Repository):
 
-    async def get_image_from_s3_bucket(self, image_id : int):
+    async def get_image_from_s3_bucket(self, image_id: int):
         """
         Returns image from object storage.
         """
         return await RemoteImage.objects.aget(pk=image_id)
-    
-    async def get_presigned_url_for_image(self, image_id : int):
+
+    async def get_presigned_url_for_image(self, image_id: int):
         """
         Returns presigned_url for image
         """
@@ -31,11 +32,11 @@ class S3Repository(IS3Repository):
 
         presigned_url = image.content.storage.bucket.meta.client.\
             generate_presigned_url(
-            'get_object', 
-            Params={
-                'Bucket': f'{settings.AWS_STORAGE_BUCKET_NAME}', 
-                "Key": f"telegram/{image.content.name}"
-            }
-        )
+                'get_object',
+                Params={
+                    'Bucket': f'{settings.AWS_STORAGE_BUCKET_NAME}',
+                    "Key": f"telegram/{image.content.name}"
+                }
+            )
 
         return presigned_url

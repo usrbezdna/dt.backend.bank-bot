@@ -57,16 +57,13 @@ def register_telegram_payment_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("check_account", payment_handlers.check_payable))
 
     application.add_handler(MessageHandler(
-        filters.Regex(r'send_to_user') | filters.CaptionRegex(r"/send_to_user") |
-        filters.Regex(r'send_to_account') | filters.CaptionRegex(r"/send_to_account") |
-        filters.Regex(r'send_to_card') | filters.CaptionRegex(r"/send_to_card"), 
+        filters.Regex(r'send_to_user') | filters.CaptionRegex(r"/send_to_user")
+        | filters.Regex(r'send_to_account') | filters.CaptionRegex(r"/send_to_account")
+        | filters.Regex(r'send_to_card') | filters.CaptionRegex(r"/send_to_card"),
         payment_handlers.send_to))
-    
 
     application.add_handler(CommandHandler("list_inter", payment_handlers.list_inter))
     application.add_handler(CommandHandler("list_latest", payment_handlers.list_latest))
 
-
     application.add_handler(CommandHandler("state_card", payment_handlers.state_payable))
     application.add_handler(CommandHandler("state_account", payment_handlers.state_payable))
-    

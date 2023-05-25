@@ -8,26 +8,25 @@ from telegram.ext import ContextTypes
 from django.core.files.images import ImageFile
 
 
-
 class IS3Repository(ABC):
 
     @abstractmethod
-    async def get_image_from_s3_bucket(self, image_id : int):
+    async def get_image_from_s3_bucket(self, image_id: int):
         pass
 
     @abstractmethod
-    async def get_presigned_url_for_image(self, image_id : int):
+    async def get_presigned_url_for_image(self, image_id: int):
         pass
+
 
 class S3Service():
 
-    def __init__(self, s3_repo : IS3Repository):
+    def __init__(self, s3_repo: IS3Repository):
         self._s3_repo = s3_repo
 
-
-    async def aconvert_telegram_photo_to_image(self, update : Update, context : ContextTypes.DEFAULT_TYPE) -> ImageFile:
+    async def aconvert_telegram_photo_to_image(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> ImageFile:
         """
-        Recieves Telegram Update object, extracts photo and creates ImageFile 
+        Recieves Telegram Update object, extracts photo and creates ImageFile
         """
 
         photo_id = update.message.photo[-1].file_id
@@ -41,13 +40,8 @@ class S3Service():
 
         return image_file
 
-
-    async def aget_presigned_url_for_image(self, image_id : int):
+    async def aget_presigned_url_for_image(self, image_id: int):
         return await self._s3_repo.get_presigned_url_for_image(image_id=image_id)
-    
-    async def aget_image_from_s3_bucket(self, image_id : int):
+
+    async def aget_image_from_s3_bucket(self, image_id: int):
         return await self._s3_repo.get_image_from_s3_bucket(image_id=image_id)
-
-
-
-

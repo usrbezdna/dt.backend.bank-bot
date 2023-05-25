@@ -50,7 +50,7 @@ resource "yandex_storage_bucket" "s3_bucket" {
   acl                   = "private"
   default_storage_class = "STANDARD"
 
-  force_destroy         = true
+  force_destroy = true
 }
 
 output "key_id" {
@@ -59,7 +59,7 @@ output "key_id" {
 
 # This value is sensitive, you should run `tf output secret_key` to see the actual one
 output "secret_key" {
-  value = yandex_iam_service_account_static_access_key.s3-sa-static-key.secret_key
+  value     = yandex_iam_service_account_static_access_key.s3-sa-static-key.secret_key
   sensitive = true
 }
 

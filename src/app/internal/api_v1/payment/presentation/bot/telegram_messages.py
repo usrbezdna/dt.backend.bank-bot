@@ -49,6 +49,7 @@ NO_TXS_FOR_LAST_MONTH = "You don't have any payment transactions for the last mo
 
 NO_LATEST_TXS = 'You have already seen all latest transactions'
 
+
 def get_message_with_balance(account: AccountSchema) -> str:
     """
     Returns message with account value

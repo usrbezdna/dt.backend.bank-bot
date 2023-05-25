@@ -1,7 +1,7 @@
 import logging
 
 from io import BytesIO
-from django.conf import settings 
+from django.conf import settings
 from django.core.files.images import ImageFile
 
 import boto3
@@ -68,7 +68,6 @@ class TelegramUserHandlers:
         :param context: context object passed to the callback
         """
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
-
 
     async def set_phone(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """

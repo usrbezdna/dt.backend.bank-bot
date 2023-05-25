@@ -1,10 +1,11 @@
 
 import asyncio
 from logging import Handler, LogRecord
-from queue import Queue 
+from queue import Queue
 from threading import Thread
 
 from telegram import Bot
+
 
 class TelegramLogsHandler(Handler):
 
@@ -19,7 +20,6 @@ class TelegramLogsHandler(Handler):
 
         self.create_bot()
 
-
     def create_bot(self):
         th = Thread(daemon=True, target=self.telegram_logs_manager)
         th.start()
@@ -32,11 +32,11 @@ class TelegramLogsHandler(Handler):
             if update:
                 asyncio.run_coroutine_threadsafe(
                     coro=self._logs_bot.send_message(
-                            chat_id=self._chat_id,
-                            text=self.format(update)
-                        ), 
+                        chat_id=self._chat_id,
+                        text=self.format(update)
+                    ),
                     loop=self._event_loop
-                )  
+                )
 
     def emit(self, record: LogRecord):
-       self._updates_queue.put(record)
+        self._updates_queue.put(record)

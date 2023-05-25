@@ -10,7 +10,7 @@ from django.core.files.images import ImageFile
 class ITransactionRepository(ABC):
     @abstractmethod
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
         pass
 
@@ -33,18 +33,22 @@ class TransactionService:
 
     @sync_to_async
     def atry_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
         self.try_transfer_to(
-            sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value, image_file=image_file
-        )
+            sender_acc=sender_acc,
+            recipient_acc=recipient_acc,
+            transferring_value=transferring_value,
+            image_file=image_file)
 
     def try_transfer_to(
-        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file : ImageFile
+        self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
         self._tx_repo.try_transfer_to(
-            sender_acc=sender_acc, recipient_acc=recipient_acc, transferring_value=transferring_value, image_file=image_file
-        )
+            sender_acc=sender_acc,
+            recipient_acc=recipient_acc,
+            transferring_value=transferring_value,
+            image_file=image_file)
 
     @sync_to_async
     def aget_list_of_inter_usernames(self, user_id: int) -> List[str]:
@@ -59,7 +63,6 @@ class TransactionService:
 
     def get_list_of_transactions_for_the_last_month(self, user_id: int) -> List[Dict[str, Any]]:
         return self._tx_repo.get_list_of_transactions_for_the_last_month(user_id=user_id)
-    
 
     @sync_to_async
     def aget_list_of_latest_unseen_transactions(self, user_id: int) -> List[Dict[str, Any]]:
