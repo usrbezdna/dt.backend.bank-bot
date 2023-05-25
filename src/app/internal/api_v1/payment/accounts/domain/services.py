@@ -15,6 +15,10 @@ class IAccountRepository(ABC):
     def get_full_owner_name_from_account_by_id(self, uniq_id: int) -> str:
         pass
 
+    @abstractmethod
+    def get_current_number_of_accounts(self) -> int:
+        pass
+
 
 class AccountService:
     def __init__(self, account_repo: IAccountRepository):
@@ -33,3 +37,7 @@ class AccountService:
 
     def get_full_owner_name_from_account_by_id(self, uniq_id: int) -> str:
         return self._account_repo.get_full_owner_name_from_account_by_id(uniq_id=uniq_id)
+    
+    @sync_to_async
+    def aget_current_number_of_accounts(self) -> int:
+        return self._account_repo.get_current_number_of_accounts()

@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from django.core.files.images import ImageFile
+from src.app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -250,6 +251,11 @@ class TelegramPaymentHandlers:
 
         value = int(arg_value)
 
+        PrometheusMetrics.tx_values_gauge(value)
+        
+        PrometheusMetrics.cards_number_gauge(await self._card_service.aget_current_number_of_cards())
+        PrometheusMetrics.accounts_number_gauge(await self._account_service.aget_current_number_of_accounts())
+
         try:
             sender_card_with_acc_opt: CardSchema = (
                 await self._card_service.aget_card_with_related_account_by_account_owner_id(tlg_id=user_id)
@@ -261,12 +267,15 @@ class TelegramPaymentHandlers:
 
         match arg_command:
             case "/send_to_user":
+                PrometheusMetrics.inc_send_to_user_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_user(context, chat_id, arg_user_or_id)
 
             case "/send_to_account":
+                PrometheusMetrics.inc_send_to_account_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_account(context, chat_id, arg_user_or_id)
 
             case "/send_to_card":
+                PrometheusMetrics.inc_send_to_card_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_card(context, chat_id, arg_user_or_id)
 
         if recip_card_with_acc_opt is None:

@@ -19,6 +19,10 @@ class ICardRepository(ABC):
     def get_card_with_related_account_by_account_id(self, uniq_id: int) -> CardSchema:
         pass
 
+    @abstractmethod
+    def get_current_number_of_cards(self) -> int:
+        pass
+
 
 class CardService:
     def __init__(self, card_repo: ICardRepository):
@@ -44,3 +48,7 @@ class CardService:
 
     def get_card_with_related_account_by_account_id(self, uniq_id: int) -> CardSchema:
         return self._card_repo.get_card_with_related_account_by_account_id(uniq_id=uniq_id)
+    
+    @sync_to_async
+    def aget_current_number_of_cards(self) -> int:
+        return self._card_repo.get_current_number_of_cards()

@@ -47,8 +47,6 @@ class TelegramFavouritesHandlers:
         :param context: context object passed to the callback
         """
 
-        PrometheusMetrics.inc_fav_counter()
-
         favs_limit = 5
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
 

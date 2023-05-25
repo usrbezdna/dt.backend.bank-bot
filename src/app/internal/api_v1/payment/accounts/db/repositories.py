@@ -35,3 +35,10 @@ class AccountRepository(IAccountRepository):
             raise AccountNotFoundException()
 
         return " ".join(name_as_tuple_option)
+
+    def get_current_number_of_accounts(self) -> int:
+        """
+        Returns current number of Cards in DB
+        """
+        return Account.objects.count()
+        
