@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from django.core.files.images import ImageFile
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -41,7 +42,6 @@ from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
 from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
-from django.core.files.images import ImageFile
 
 logger = logging.getLogger("django_stdout")
 
@@ -54,7 +54,7 @@ class TelegramPaymentHandlers:
         account_service: AccountService,
         card_service: CardService,
         tx_service: TransactionService,
-        s3_service: S3Service
+        s3_service: S3Service,
     ):
         self._user_service = user_service
         self._fav_service = fav_service
@@ -184,7 +184,7 @@ class TelegramPaymentHandlers:
         tx_list = await self._tx_service.aget_list_of_latest_unseen_transactions(user_id=user_id)
         if tx_list:
             for tx_data in tx_list:
-                res_msg = ''
+                res_msg = ""
                 res_msg += (
                     f"TX ID: {tx_data['tx_id']}, "
                     + f"Sender: {tx_data['sender_name']}, "
@@ -192,8 +192,8 @@ class TelegramPaymentHandlers:
                     + f"Value: {tx_data['tx_value']}\n"
                 )
 
-                if tx_data['tx_image'] is not None:
-                    image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data['tx_image'])
+                if tx_data["tx_image"] is not None:
+                    image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data["tx_image"])
                     await context.bot.send_photo(chat_id=chat_id, photo=image.content.read())
 
                 await context.bot.send_message(chat_id=chat_id, text=res_msg)
@@ -284,8 +284,9 @@ class TelegramPaymentHandlers:
             if photo:
                 image_file: ImageFile = await self._s3_service.aconvert_telegram_photo_to_image(update, context)
 
-            await self._tx_service.\
-                atry_transfer_to(sending_payment_account, recipient_payment_account, value, image_file)
+            await self._tx_service.atry_transfer_to(
+                sending_payment_account, recipient_payment_account, value, image_file
+            )
 
         except InsufficientBalanceException:
             await context.bot.send_message(chat_id=chat_id, text=INSUF_BALANCE)
@@ -318,16 +319,17 @@ class TelegramPaymentHandlers:
         if transactions:
             for tx_data in transactions:
                 res_msg = ""
-                res_msg += (f"TX ID: {tx_data['tx_id']}, "
-                            + f"Date: {tx_data['date']}, "
-                            + f"Sender: {tx_data['sender_name']}, "
-                            + f"Recipient: {tx_data['recip_name']}, "
-                            + f"Value: {tx_data['tx_value']}\n"
-                            )
+                res_msg += (
+                    f"TX ID: {tx_data['tx_id']}, "
+                    + f"Date: {tx_data['date']}, "
+                    + f"Sender: {tx_data['sender_name']}, "
+                    + f"Recipient: {tx_data['recip_name']}, "
+                    + f"Value: {tx_data['tx_value']}\n"
+                )
 
-                if tx_data['tx_image'] is not None:
-                    presigned_url = await self._s3_service.aget_presigned_url_for_image(tx_data['tx_image'])
-                    res_msg += f'Url : {presigned_url}'
+                if tx_data["tx_image"] is not None:
+                    presigned_url = await self._s3_service.aget_presigned_url_for_image(tx_data["tx_image"])
+                    res_msg += f"Url : {presigned_url}"
 
                 await context.bot.send_message(chat_id=chat_id, text=res_msg)
             return

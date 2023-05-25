@@ -17,11 +17,8 @@ class Transaction(models.Model):
     tx_value = models.DecimalField(max_digits=19, decimal_places=2)
 
     tx_image = models.OneToOneField(
-        RemoteImage,
-        default=None,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='transaction')
+        RemoteImage, default=None, null=True, on_delete=models.SET_NULL, related_name="transaction"
+    )
     already_shown_flag = models.BooleanField(default=False)
 
     class Meta:

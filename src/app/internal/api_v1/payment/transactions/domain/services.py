@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
 from asgiref.sync import sync_to_async
+from django.core.files.images import ImageFile
 
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
-from django.core.files.images import ImageFile
 
 
 class ITransactionRepository(ABC):
@@ -39,7 +39,8 @@ class TransactionService:
             sender_acc=sender_acc,
             recipient_acc=recipient_acc,
             transferring_value=transferring_value,
-            image_file=image_file)
+            image_file=image_file,
+        )
 
     def try_transfer_to(
         self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
@@ -48,7 +49,8 @@ class TransactionService:
             sender_acc=sender_acc,
             recipient_acc=recipient_acc,
             transferring_value=transferring_value,
-            image_file=image_file)
+            image_file=image_file,
+        )
 
     @sync_to_async
     def aget_list_of_inter_usernames(self, user_id: int) -> List[str]:

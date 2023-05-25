@@ -1,15 +1,13 @@
-
-from io import BytesIO
 from abc import ABC, abstractmethod
-from asgiref.sync import sync_to_async
+from io import BytesIO
 
+from asgiref.sync import sync_to_async
+from django.core.files.images import ImageFile
 from telegram import Update
 from telegram.ext import ContextTypes
-from django.core.files.images import ImageFile
 
 
 class IS3Repository(ABC):
-
     @abstractmethod
     async def get_image_from_s3_bucket(self, image_id: int):
         pass
@@ -19,8 +17,7 @@ class IS3Repository(ABC):
         pass
 
 
-class S3Service():
-
+class S3Service:
     def __init__(self, s3_repo: IS3Repository):
         self._s3_repo = s3_repo
 
@@ -35,7 +32,7 @@ class S3Service():
         memory_file = BytesIO()
         await photo_file.download_to_memory(memory_file)
 
-        image_name = f'{photo_id}.jpg'
+        image_name = f"{photo_id}.jpg"
         image_file = ImageFile(BytesIO(memory_file.getvalue()), name=image_name)
 
         return image_file

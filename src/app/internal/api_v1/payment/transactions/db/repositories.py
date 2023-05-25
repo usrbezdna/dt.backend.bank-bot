@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from typing import Any, Dict, List
 
+from django.core.files.images import ImageFile
 from django.db import DatabaseError, transaction
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat, ExtractDay, ExtractMonth, ExtractYear
@@ -14,10 +15,7 @@ from app.internal.api_v1.payment.transactions.db.exceptions import InsufficientB
 from app.internal.api_v1.payment.transactions.db.models import Transaction
 from app.internal.api_v1.payment.transactions.domain.services import ITransactionRepository
 from app.internal.api_v1.users.db.models import User
-
 from app.internal.api_v1.utils.s3.db.models import RemoteImage
-from django.core.files.images import ImageFile
-
 
 logger = logging.getLogger("django_stdout")
 
@@ -40,11 +38,13 @@ class TransactionRepository(ITransactionRepository):
         sender_acc_model = Account.objects.get(pk=sender_acc.uniq_id)
         recipient_acc_model = Account.objects.get(pk=recipient_acc.uniq_id)
 
-        logger.info(f'Started Payment transaction from {sender_acc_model.uniq_id} \
-                    to {recipient_acc_model.uniq_id} with value {transferring_value}...')
+        logger.info(
+            f"Started Payment transaction from {sender_acc_model.uniq_id} \
+                    to {recipient_acc_model.uniq_id} with value {transferring_value}..."
+        )
         try:
             Account.objects.select_for_update().filter(uniq_id__in=[sender_acc_model.uniq_id, sender_acc_model.uniq_id])
-            logger.info(f'Lock Acquired')
+            logger.info("Lock Acquired")
 
             with transaction.atomic():
                 if sender_acc_model.value - transferring_value >= 0:
@@ -63,9 +63,10 @@ class TransactionRepository(ITransactionRepository):
                         tx_sender=sender_acc_model,
                         tx_recip=recipient_acc_model,
                         tx_value=transferring_value,
-                        tx_image=tx_image)
+                        tx_image=tx_image,
+                    )
 
-                    logger.info(f'OK! Payment transaction was successfully saved with ID {saved_tx.tx_id}')
+                    logger.info(f"OK! Payment transaction was successfully saved with ID {saved_tx.tx_id}")
 
                 else:
                     logger.info(f"Balance of {sender_acc.uniq_id} was not sufficient for payment transaction")
@@ -142,10 +143,9 @@ class TransactionRepository(ITransactionRepository):
         """
 
         tx_ids = list(
-            Transaction.objects.filter(
-                Q(already_shown_flag=False) & Q(tx_recip__owner__tlg_id=user_id)
+            Transaction.objects.filter(Q(already_shown_flag=False) & Q(tx_recip__owner__tlg_id=user_id)).values_list(
+                "tx_id", flat=True
             )
-            .values_list('tx_id', flat=True)
         )
 
         Transaction.objects.filter(tx_id__in=tx_ids).update(already_shown_flag=True)
