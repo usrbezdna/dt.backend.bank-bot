@@ -6,6 +6,7 @@ from telegram.ext import AIORateLimiter, Application, ApplicationBuilder
 from app.internal.api_v1.favourites.bot import register_telegram_favourite_handlers
 from app.internal.api_v1.payment.bot import register_telegram_payment_handlers
 from app.internal.api_v1.users.bot import register_telegram_user_handlers
+from prometheus_client import start_http_server
 
 from .ngrok_parser import parse_ngrok_url
 
@@ -34,6 +35,8 @@ def start_polling_bot():
     application: Application = get_bot_application()
 
     logger.info("Started")
+    
+    start_http_server(8888)
     application.run_polling()
 
 

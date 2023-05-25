@@ -26,8 +26,10 @@ from app.internal.api_v1.favourites.presentation.bot.telegram_messages import (
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
+from prometheus_client import Summary
 
 logger = logging.getLogger("django_stdout")
+REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
 
 
 class TelegramFavouritesHandlers:
@@ -35,6 +37,7 @@ class TelegramFavouritesHandlers:
         self._favourite_service = favourite_service
 
     @verified_phone_required
+    @REQUEST_TIME.time()
     async def list_fav(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
         Handler for /list_fav command.
