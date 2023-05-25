@@ -43,7 +43,7 @@ from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 from django.core.files.images import ImageFile
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class TelegramPaymentHandlers:

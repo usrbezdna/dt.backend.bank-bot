@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from app.internal.bot import start_webhook_bot
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class Command(BaseCommand):

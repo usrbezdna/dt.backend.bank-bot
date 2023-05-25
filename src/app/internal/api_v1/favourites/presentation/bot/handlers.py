@@ -27,7 +27,7 @@ from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class TelegramFavouritesHandlers:

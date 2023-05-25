@@ -37,7 +37,7 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class TelegramUserHandlers:

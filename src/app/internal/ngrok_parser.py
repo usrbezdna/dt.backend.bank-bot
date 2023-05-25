@@ -3,7 +3,7 @@ import sys
 
 import requests
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 def parse_ngrok_url():

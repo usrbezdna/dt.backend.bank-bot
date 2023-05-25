@@ -33,6 +33,7 @@ TLG_TOKEN = env("TLG_TOKEN")
 # Setting up debug mode
 DEBUG = env("DEBUG")
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -49,7 +50,8 @@ CSRF_TRUSTED_ORIGINS = []
 for host in ALLOWED_HOSTS:
     CSRF_TRUSTED_ORIGINS.extend([f"http://{host}", f"https://{host}"])
 
-
+TLG_LOGS_CHAT_ID = env("TLG_LOGS_CHAT_ID")
+TLG_LOGS_BOT_TOKEN = env("TLG_LOGS_BOT_TOKEN")
 
 AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
@@ -156,25 +158,32 @@ LOGGING = {
         },
     },
     "formatters": {
-        "django.server": {
+        "django_stdout": {
             "()": "django.utils.log.ServerFormatter",
             "format": "[{server_time}] {message}",
             "style": "{",
         }
     },
     "handlers": {
-        "django.server": {
+        "django_stdout": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "django.server",
+            "formatter": "django_stdout",
         },
+        
+        "telegram_logs" : {
+            'class': 'app.internal.api_v1.utils.logging.presentation.handlers.TelegramLogsHandler',
+            'logs_chat_id': TLG_LOGS_CHAT_ID,
+            'logs_bot_token': TLG_LOGS_BOT_TOKEN,
+        },
+
         "sql.console": {"class": "logging.StreamHandler"},
     },
     "loggers": {
-        "django.server": {
-            "handlers": ["django.server"],
+        "django_stdout": {
+            "handlers": ["django_stdout", "telegram_logs"],
             "level": "INFO",
-            "propagate": False,
+            "propagate": True,
         },
         # "django.db.backends": {
         #     "handlers": ["sql.console"],

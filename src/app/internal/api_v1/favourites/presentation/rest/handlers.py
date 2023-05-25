@@ -23,7 +23,7 @@ from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import MessageResponseSchema, UserSchema
 from app.internal.api_v1.users.domain.services import UserService
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class RestFavouritesHandlers:

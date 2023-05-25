@@ -9,7 +9,7 @@ from app.internal.api_v1.users.bot import register_telegram_user_handlers
 
 from .ngrok_parser import parse_ngrok_url
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 def get_bot_application() -> Application:

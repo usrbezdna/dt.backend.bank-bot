@@ -19,7 +19,7 @@ from app.internal.api_v1.utils.s3.db.models import RemoteImage
 from django.core.files.images import ImageFile
 
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("django_stdout")
 
 
 class TransactionRepository(ITransactionRepository):
@@ -40,8 +40,11 @@ class TransactionRepository(ITransactionRepository):
         sender_acc_model = Account.objects.get(pk=sender_acc.uniq_id)
         recipient_acc_model = Account.objects.get(pk=recipient_acc.uniq_id)
 
+        logger.info(f'Started Payment transaction from {sender_acc_model.uniq_id} \
+                    to {recipient_acc_model.uniq_id} with value {transferring_value}...')
         try:
             Account.objects.select_for_update().filter(uniq_id__in=[sender_acc_model.uniq_id, sender_acc_model.uniq_id])
+            logger.info(f'Lock Acquired')
 
             with transaction.atomic():
                 if sender_acc_model.value - transferring_value >= 0:
@@ -56,9 +59,11 @@ class TransactionRepository(ITransactionRepository):
                     if image_file:
                         tx_image = RemoteImage.objects.create(content=image_file)
                     
-                    Transaction.objects.create(
+                    saved_tx = Transaction.objects.create(
                         tx_sender=sender_acc_model, tx_recip=recipient_acc_model, tx_value=transferring_value, tx_image=tx_image
                     )
+
+                    logger.info(f'OK! Payment transaction was successfully saved with ID {saved_tx.tx_id}')
 
                 else:
                     logger.info(f"Balance of {sender_acc.uniq_id} was not sufficient for payment transaction")
