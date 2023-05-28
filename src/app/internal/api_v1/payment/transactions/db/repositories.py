@@ -1,13 +1,14 @@
 import calendar
 import logging
 from datetime import timedelta
+from django.utils import timezone
+
 from typing import Any, Dict, List
 
 from django.core.files.images import ImageFile
 from django.db import DatabaseError, transaction
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat, ExtractDay, ExtractMonth, ExtractYear
-from django.utils import timezone
 
 from app.internal.api_v1.payment.accounts.db.models import Account
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
@@ -104,7 +105,7 @@ class TransactionRepository(ITransactionRepository):
         :param user_id: Telegram ID of specified user
         """
 
-        today = timezone.now().date()
+        today = timezone.now()
 
         number_of_days_in_month = calendar.monthrange(today.year, today.month)[1]
         some_day_a_month_ago = today - timedelta(days=number_of_days_in_month)

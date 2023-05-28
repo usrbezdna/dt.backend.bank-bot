@@ -63,7 +63,10 @@ AWS_S3_CUSTOM_DOMAIN = "storage.yandexcloud.net"
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 
-DEFAULT_FILE_STORAGE = "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage"
+STORAGES = {"default": {"BACKEND": "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage"}}
+
+
+
 
 METRICS_PORT = int(env("METRICS_PORT"))
 
