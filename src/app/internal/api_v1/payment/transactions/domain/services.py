@@ -5,6 +5,7 @@ from asgiref.sync import sync_to_async
 from django.core.files.images import ImageFile
 
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
+from app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 
 
 class ITransactionRepository(ABC):
@@ -35,6 +36,7 @@ class TransactionService:
     def atry_transfer_to(
         self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
+    
         self.try_transfer_to(
             sender_acc=sender_acc,
             recipient_acc=recipient_acc,
@@ -45,6 +47,9 @@ class TransactionService:
     def try_transfer_to(
         self, sender_acc: AccountSchema, recipient_acc: AccountSchema, transferring_value: float, image_file: ImageFile
     ) -> None:
+        
+        PrometheusMetrics.set_tx_values_gauge(transferring_value)
+
         self._tx_repo.try_transfer_to(
             sender_acc=sender_acc,
             recipient_acc=recipient_acc,

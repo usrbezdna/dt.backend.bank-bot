@@ -44,7 +44,6 @@ class TransactionRepository(ITransactionRepository):
         )
         try:
             Account.objects.select_for_update().filter(uniq_id__in=[sender_acc_model.uniq_id, sender_acc_model.uniq_id])
-            logger.info("Lock Acquired")
 
             with transaction.atomic():
                 if sender_acc_model.value - transferring_value >= 0:

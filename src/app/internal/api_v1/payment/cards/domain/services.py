@@ -4,6 +4,7 @@ from typing import Any, Optional, Tuple
 from asgiref.sync import sync_to_async
 
 from app.internal.api_v1.payment.cards.domain.entities import CardSchema
+from app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 
 
 class ICardRepository(ABC):
@@ -50,5 +51,5 @@ class CardService:
         return self._card_repo.get_card_with_related_account_by_account_id(uniq_id=uniq_id)
     
     @sync_to_async
-    def aget_current_number_of_cards(self) -> int:
-        return self._card_repo.get_current_number_of_cards()
+    def aset_current_number_of_cards_metric(self) -> int:
+        PrometheusMetrics.set_cards_number_gauge(self._card_repo.get_current_number_of_cards())
