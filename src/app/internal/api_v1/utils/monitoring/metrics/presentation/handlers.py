@@ -2,7 +2,6 @@ from prometheus_client import Counter, Gauge
 
 class PrometheusMetrics:
 
-
     send_to_user_counter = Counter("counter_for_send_to_user", "Shows number of /send_to_user calls")
     @classmethod
     def inc_send_to_user_counter(cls):
@@ -32,7 +31,7 @@ class PrometheusMetrics:
 
     accounts_number_gauge = Gauge("gauge_for_current_number_of_accounts", "Returns current number of payment Accounts in DB")
     @classmethod
-    def set_cards_number_gauge(cls, current_account_number):
+    def set_accounts_number_gauge(cls, current_account_number):
         cls.accounts_number_gauge.set(current_account_number)
         
     

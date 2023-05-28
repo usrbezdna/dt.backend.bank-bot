@@ -10,7 +10,7 @@ from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.db.repositories import UserRepository
 from app.internal.api_v1.users.presentation.bot.telegram_messages import NO_VERIFIED_PN, USER_NOT_FOUND_MSG
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 def verified_phone_required(func: Callable):

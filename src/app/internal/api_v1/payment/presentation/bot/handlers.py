@@ -2,9 +2,10 @@ import logging
 from typing import Optional
 
 from django.core.files.images import ImageFile
-from src.app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
+from app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 from telegram import Update
 from telegram.ext import ContextTypes
+
 
 from app.internal.api_v1.favourites.db.exceptions import InvalidIDArgumentException
 from app.internal.api_v1.favourites.domain.services import FavouriteService
@@ -44,8 +45,7 @@ from app.internal.api_v1.users.domain.services import UserService
 from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 
-logger = logging.getLogger("django_stdout")
-
+logger = logging.getLogger("stdout_with_tlg")
 
 class TelegramPaymentHandlers:
     def __init__(
@@ -251,10 +251,10 @@ class TelegramPaymentHandlers:
 
         value = int(arg_value)
 
-        PrometheusMetrics.tx_values_gauge(value)
+        PrometheusMetrics.set_tx_values_gauge(value)
         
-        PrometheusMetrics.cards_number_gauge(await self._card_service.aget_current_number_of_cards())
-        PrometheusMetrics.accounts_number_gauge(await self._account_service.aget_current_number_of_accounts())
+        PrometheusMetrics.set_cards_number_gauge(await self._card_service.aget_current_number_of_cards())
+        PrometheusMetrics.set_accounts_number_gauge(await self._account_service.aget_current_number_of_accounts())
 
         try:
             sender_card_with_acc_opt: CardSchema = (

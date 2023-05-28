@@ -65,6 +65,8 @@ AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 
 DEFAULT_FILE_STORAGE = "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage"
 
+METRICS_PORT = int(env("METRICS_PORT"))
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -148,8 +150,11 @@ else:
 
 
 LOGGING = {
+    
     "version": 1,
+
     "disable_existing_loggers": False,
+
     "filters": {
         "require_debug_false": {
             "()": "django.utils.log.RequireDebugFalse",
@@ -158,6 +163,7 @@ LOGGING = {
             "()": "django.utils.log.RequireDebugTrue",
         },
     },
+
     "formatters": {
         "django_stdout": {
             "()": "django.utils.log.ServerFormatter",
@@ -165,6 +171,7 @@ LOGGING = {
             "style": "{",
         }
     },
+
     "handlers": {
         "django_stdout": {
             "level": "INFO",
@@ -178,12 +185,20 @@ LOGGING = {
         },
         "sql.console": {"class": "logging.StreamHandler"},
     },
+
     "loggers": {
-        "django_stdout": {
+
+        "stdout_with_tlg": {
             "handlers": ["django_stdout", "telegram_logs"],
             "level": "INFO",
             "propagate": True,
         },
+
+        "stdout": {
+            "handlers": ["django_stdout"],
+            "level": "INFO"
+        }
+
         # "django.db.backends": {
         #     "handlers": ["sql.console"],
         #     "level": "DEBUG",

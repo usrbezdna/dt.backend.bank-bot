@@ -6,7 +6,7 @@ from app.internal.api_v1.payment.accounts.db.models import Account
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
 from app.internal.api_v1.payment.accounts.domain.services import IAccountRepository
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class AccountRepository(IAccountRepository):

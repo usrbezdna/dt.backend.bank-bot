@@ -10,7 +10,7 @@ from app.internal.api_v1.users.domain.services import UserService
 
 from .content_messages import INVALID_PHONE_NUMBER, NOT_VERIFIED, PASSWORD_SUCCESS, PHONE_NUMBER_SUCCESS
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class RestUserHandlers:

@@ -2,8 +2,13 @@ import asyncio
 from logging import Handler, LogRecord
 from queue import Queue
 from threading import Thread
+import requests
+from requests.exceptions import RequestException
 
-from telegram import Bot
+
+import logging
+
+logger = logging.getLogger("stdout")
 
 
 class TelegramLogsHandler(Handler):
@@ -13,28 +18,36 @@ class TelegramLogsHandler(Handler):
         self._token = logs_bot_token
         self._chat_id = logs_chat_id
 
-        self._logs_bot = None
         self._updates_queue = Queue()
+        self.start_logs_bot()
 
-        loop_opt = asyncio.get_event_loop()
-        self._event_loop = loop_opt if loop_opt else asyncio.new_event_loop()
-
-        self.create_bot()
-
-    def create_bot(self):
+    def start_logs_bot(self):
+        """
+        Starts thread with Telegram logs manager function
+        """
         th = Thread(daemon=True, target=self.telegram_logs_manager)
         th.start()
 
+
     def telegram_logs_manager(self):
-        self._logs_bot = Bot(token=self._token)
+        """
+        Recieves logs from queue and sends them to Telegram channel
+        """
+        url = f"https://api.telegram.org/bot{self._token}/sendMessage"
 
         while True:
             update = self._updates_queue.get()
             if update:
-                asyncio.run_coroutine_threadsafe(
-                    coro=self._logs_bot.send_message(chat_id=self._chat_id, text=self.format(update)),
-                    loop=self._event_loop,
-                )
+                params = { 
+                    "chat_id": self._chat_id, 
+                    "text": self.format(update) 
+                }
+                try:
+                    requests.get(url, params=params)
+                except RequestException:
+                    logger.info('Some error occured during sending logs to Telegram!')
+                
 
     def emit(self, record: LogRecord):
         self._updates_queue.put(record)
+

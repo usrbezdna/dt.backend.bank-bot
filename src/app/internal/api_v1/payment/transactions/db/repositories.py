@@ -17,7 +17,7 @@ from app.internal.api_v1.payment.transactions.domain.services import ITransactio
 from app.internal.api_v1.users.db.models import User
 from app.internal.api_v1.utils.s3.db.models import RemoteImage
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class TransactionRepository(ITransactionRepository):
@@ -39,8 +39,7 @@ class TransactionRepository(ITransactionRepository):
         recipient_acc_model = Account.objects.get(pk=recipient_acc.uniq_id)
 
         logger.info(
-            f"Started Payment transaction from {sender_acc_model.uniq_id} \
-                    to {recipient_acc_model.uniq_id} with value {transferring_value}..."
+            f"Started Payment transaction from {sender_acc_model.uniq_id} to {recipient_acc_model.uniq_id} with value {transferring_value}..."
         )
         try:
             Account.objects.select_for_update().filter(uniq_id__in=[sender_acc_model.uniq_id, sender_acc_model.uniq_id])

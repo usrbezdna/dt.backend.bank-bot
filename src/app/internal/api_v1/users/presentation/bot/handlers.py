@@ -31,7 +31,7 @@ from app.internal.api_v1.utils.s3.db.repositories import S3Repository
 from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class TelegramUserHandlers:

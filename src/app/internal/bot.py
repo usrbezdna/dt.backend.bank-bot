@@ -10,7 +10,7 @@ from app.internal.api_v1.users.bot import register_telegram_user_handlers
 
 from .ngrok_parser import parse_ngrok_url
 
-logger = logging.getLogger("django_stdout")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 def get_bot_application() -> Application:
@@ -26,6 +26,12 @@ def get_bot_application() -> Application:
 
     return application
 
+def start_metrics_endpoint():
+    """
+    Starts endpoint for metrics collection.
+    """
+    start_http_server(settings.METRICS_PORT)
+
 
 def start_polling_bot():
     """
@@ -33,9 +39,8 @@ def start_polling_bot():
     Application in polling mode
     """
     application: Application = get_bot_application()
-
+    start_metrics_endpoint()
     logger.info("Started")
-    start_http_server(8888)
     application.run_polling()
 
 

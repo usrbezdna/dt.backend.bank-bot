@@ -11,6 +11,7 @@ services:
     container_name: django-bot-app
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
+      - "${METRICS_PORT}:${METRICS_PORT}"
 
     depends_on:
       db:
