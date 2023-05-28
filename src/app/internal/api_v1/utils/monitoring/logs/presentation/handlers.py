@@ -51,3 +51,19 @@ class TelegramLogsHandler(Handler):
     def emit(self, record: LogRecord):
         self._updates_queue.put(record)
 
+
+class RestLoggingMiddleware:
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        
+        # Decied not to add Body and Headers in log message due to their length
+        logger.info(
+            f'Got new request with METHOD: {request.method} ' + 
+            f'on ENDPOINT: {request.path} from USER: {request.user} '
+        )
+
+        response = self.get_response(request)
+        return response

@@ -63,10 +63,16 @@ AWS_S3_CUSTOM_DOMAIN = "storage.yandexcloud.net"
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 
-STORAGES = {"default": {"BACKEND": "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage"}}
 
 
-
+STORAGES = {
+    "default": {
+        "BACKEND": "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 METRICS_PORT = int(env("METRICS_PORT"))
 
@@ -102,6 +108,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.RestLoggingMiddleware"
 ]
 
 ROOT_URLCONF = "config.urls"
