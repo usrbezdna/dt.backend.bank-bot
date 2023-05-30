@@ -41,4 +41,3 @@ class AccountRepository(IAccountRepository):
         Returns current number of Cards in DB
         """
         return Account.objects.count()
-        

@@ -1,14 +1,13 @@
 import calendar
 import logging
 from datetime import timedelta
-from django.utils import timezone
-
 from typing import Any, Dict, List
 
 from django.core.files.images import ImageFile
 from django.db import DatabaseError, transaction
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat, ExtractDay, ExtractMonth, ExtractYear
+from django.utils import timezone
 
 from app.internal.api_v1.payment.accounts.db.models import Account
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema

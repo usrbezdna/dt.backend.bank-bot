@@ -64,7 +64,6 @@ AWS_QUERYSTRING_AUTH = False
 AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 
 
-
 STORAGES = {
     "default": {
         "BACKEND": "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage",
@@ -108,7 +107,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.RestLoggingMiddleware"
+    "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.RestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -160,11 +159,8 @@ else:
 
 
 LOGGING = {
-    
     "version": 1,
-
     "disable_existing_loggers": False,
-
     "filters": {
         "require_debug_false": {
             "()": "django.utils.log.RequireDebugFalse",
@@ -173,7 +169,6 @@ LOGGING = {
             "()": "django.utils.log.RequireDebugTrue",
         },
     },
-
     "formatters": {
         "django_stdout": {
             "()": "django.utils.log.ServerFormatter",
@@ -181,7 +176,6 @@ LOGGING = {
             "style": "{",
         }
     },
-
     "handlers": {
         "django_stdout": {
             "level": "INFO",
@@ -195,20 +189,13 @@ LOGGING = {
         },
         "sql.console": {"class": "logging.StreamHandler"},
     },
-
     "loggers": {
-
         "stdout_with_tlg": {
             "handlers": ["django_stdout", "telegram_logs"],
             "level": "INFO",
             "propagate": True,
         },
-
-        "stdout": {
-            "handlers": ["django_stdout"],
-            "level": "INFO"
-        }
-
+        "stdout": {"handlers": ["django_stdout"], "level": "INFO"}
         # "django.db.backends": {
         #     "handlers": ["sql.console"],
         #     "level": "DEBUG",

@@ -26,6 +26,7 @@ def get_bot_application() -> Application:
 
     return application
 
+
 def start_metrics_endpoint():
     """
     Starts endpoint for metrics collection.

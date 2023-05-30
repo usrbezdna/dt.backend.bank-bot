@@ -53,7 +53,6 @@ class CardRepository(ICardRepository):
             raise CardNotFoundException()
 
         return CardSchema.from_orm(card_with_acc_option)
-    
 
     def get_current_number_of_cards(self) -> int:
         """
