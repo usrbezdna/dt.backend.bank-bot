@@ -41,34 +41,12 @@ def start_polling_bot():
     """
     application: Application = get_bot_application()
     start_metrics_endpoint()
+
     logger.info("Started")
     application.run_polling()
 
 
 def start_webhook_bot():
-    """
-    This function starts a new instance of
-    Telegram Bot Application with webhook.
-    """
-    application: Application = get_bot_application()
-
-    set_bot_webhook(application)
-
-
-def setup_application_handlers(application: Application):
-    """
-    Creates command handlers for specified Bot Application.
-    Each handler represents a single Telegram command.
-    ----------
-    :param application: Bot Application instance
-    """
-
-    register_telegram_user_handlers(application)
-    register_telegram_favourite_handlers(application)
-    register_telegram_payment_handlers(application)
-
-
-def set_bot_webhook(application: Application):
     """
     Sets a webhook to recieve incoming Telegram updates.
     Tries to use WEBHOOK_URL from .env file.
@@ -78,6 +56,9 @@ def set_bot_webhook(application: Application):
     ----------
     :param application: Bot Application instance
     """
+
+    application: Application = get_bot_application()
+    start_metrics_endpoint()
 
     url = settings.WEBHOOK_URL
     if not url:
@@ -92,3 +73,16 @@ def set_bot_webhook(application: Application):
         close_loop=False,
         drop_pending_updates=True,
     )
+
+
+def setup_application_handlers(application: Application):
+    """
+    Creates command handlers for specified Bot Application.
+    Each handler represents a single Telegram command.
+    ----------
+    :param application: Bot Application instance
+    """
+
+    register_telegram_user_handlers(application)
+    register_telegram_favourite_handlers(application)
+    register_telegram_payment_handlers(application)
