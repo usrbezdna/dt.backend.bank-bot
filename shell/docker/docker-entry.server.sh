@@ -12,6 +12,7 @@ python src/manage.py collectstatic --no-input
 echo -e "\e[1;34mCreating Django superuser...\e[0m"
 python src/manage.py createsuperuser --no-input
 
+
 # Starting Gunicorn 
 echo -e "\e[1;34mStarting Gunicorn Application server...\e[0m"
 gunicorn --bind 0.0.0.0:$DJANGO_PORT --workers=4 --chdir src config.wsgi:application &
