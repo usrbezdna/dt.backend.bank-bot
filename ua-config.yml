@@ -21,26 +21,34 @@
              cloud_meta: {}
 
  routes:
-   - input:
-       plugin: metrics_pull
-       config:
-         url: http://django-app-with-gunicorn:8888
-         format:
-           prometheus: {}
-         namespace: app
-     channel:
-       channel_ref:
-         name: cloud_monitoring
+    - input:
+        plugin: metrics_pull
+        config:
+          url: http://django-app-with-gunicorn:8888
+          format:
+            prometheus: {}
+          namespace: app
+      channel:
+        channel_ref:
+          name: cloud_monitoring
 
-  - input:
-       plugin: agent_metrics
+    - input:
+        plugin: agent_metrics
+        config:
+          namespace: ua
+      channel:
+        pipe:
+          - filter:
+              plugin: filter_metrics
+              config:
+                match: "{scope=health}"
+        channel_ref:
+          name: cloud_monitoring
+
+    - input:
+       plugin: linux_metrics
        config:
-         namespace: ua
+         namespace: sys
      channel:
-       pipe:
-         - filter:
-             plugin: filter_metrics
-             config:
-               match: "{scope=health}"
        channel_ref:
          name: cloud_monitoring
