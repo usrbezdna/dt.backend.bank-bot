@@ -95,7 +95,7 @@ deploy:
     - ping -W 1 -c 1 $IP
     - echo OK! Machine is online
 
-    - - rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" nginx .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
+    - - rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" nginx .env.docker.server Makefile docker-compose-server.yml ua-config.yml gitlab@$IP:/home/gitlab
 
     - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&

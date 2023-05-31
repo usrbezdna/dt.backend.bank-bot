@@ -1,7 +1,8 @@
 version: "3.9"
 
 services:
-  django_app_with_gunicorn:
+
+  django-app-with-gunicorn:
     image: registry.gitlab.com/toobusynow/dt.backend.bank-bot/dev:latest
 
     env_file: 
@@ -20,6 +21,7 @@ services:
       db:
         condition: service_healthy
 
+  # -------------------------------------------------- #
   db:
     image: postgres:15-alpine3.17
     container_name: postgres_db
@@ -41,19 +43,45 @@ services:
       retries: 5
 
     ports:
-      - "5432:5432"
+      - 5432:5432
 
+  # -------------------------------------------------- #
   nginx:
     build: ./nginx
     container_name: nginx
+
     ports:
       - 1337:80
+
     depends_on:
-      - django_app_with_gunicorn
-      
+      - django-app-with-gunicorn
     volumes:
       - static_volume:/backend/static/
-    
+      
+    depends_on:
+      - django-app-with-gunicorn
+
+  # -------------------------------------------------- #
+  unified_agent:
+  
+    image: cr.yandex/yc/unified-agent
+    container_name: unified_agent
+
+    ports:
+      - 16241:16241
+
+    environment:
+      - PROC_DIRECTORY=/ua_proc
+      - FOLDER_ID='b1g8vp06auhfbk8j09np'
+
+    entrypoint: ""
+    uts: host
+    volumes:
+      - /proc:/ua_proc
+      - ./ua-config.yml:/etc/yandex/unified_agent/config.yml
+    depends_on:
+      - django-app-with-gunicorn
+
 volumes:
   postgres_data:
   static_volume:

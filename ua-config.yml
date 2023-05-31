@@ -1,5 +1,3 @@
- status:
-   port: "16241"
 
  storages:
    - name: main
@@ -26,26 +24,10 @@
    - input:
        plugin: metrics_pull
        config:
-         url: http://localhost:8888
+         url: http://django-app-with-gunicorn:8888
          format:
            prometheus: {}
          namespace: app
      channel:
        channel_ref:
          name: cloud_monitoring
-
-   - input:
-       plugin: agent_metrics
-       config:
-         namespace: ua
-     channel:
-       pipe:
-         - filter:
-             plugin: filter_metrics
-             config:
-               match: "{scope=health}"
-       channel_ref:
-         name: cloud_monitoring
-
- import:
-   - /etc/yandex/unified_agent/conf.d/*.yml
