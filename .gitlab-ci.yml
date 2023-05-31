@@ -102,6 +102,7 @@ deploy:
         docker pull $TAG_LATEST &&
 
         make docker_remote_stop | true &&
+        docker rm $(docker ps -qa) &&
         make docker_remote_run
       "
 
