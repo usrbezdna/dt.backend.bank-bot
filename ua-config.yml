@@ -31,3 +31,16 @@
      channel:
        channel_ref:
          name: cloud_monitoring
+
+  - input:
+       plugin: agent_metrics
+       config:
+         namespace: ua
+     channel:
+       pipe:
+         - filter:
+             plugin: filter_metrics
+             config:
+               match: "{scope=health}"
+       channel_ref:
+         name: cloud_monitoring

@@ -53,11 +53,9 @@ services:
     ports:
       - 1337:80
 
-    depends_on:
-      - django-app-with-gunicorn
     volumes:
       - static_volume:/backend/static/
-      
+
     depends_on:
       - django-app-with-gunicorn
 
