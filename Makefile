@@ -119,7 +119,7 @@ docker_remote_stop:
 
 .PHONY: docker_remote_remove
 docker_remote_remove:
-	docker compose --env-file .env.docker.server --file docker-compose-server.yml rm
+	docker compose --env-file .env.docker.server --file docker-compose-server.yml rm -f
 
 
 ############### Terraform Section  ###############
