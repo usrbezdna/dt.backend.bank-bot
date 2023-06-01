@@ -1,23 +1,15 @@
 import logging
-
 from io import BytesIO
-from django.conf import settings 
-from django.core.files.images import ImageFile
 
 import boto3
 from botocore.client import Config
-
+from django.conf import settings
+from django.core.files.images import ImageFile
 from phonenumber_field.phonenumber import PhoneNumber
 from phonenumbers import is_valid_number
 from phonenumbers.phonenumberutil import NumberParseException
-
-from app.internal.api_v1.utils.s3.db.repositories import S3Repository
-from app.internal.api_v1.utils.s3.domain.services import S3Service
-
 from telegram import Update
 from telegram.ext import ContextTypes
-
-from app.internal.api_v1.utils.s3.db.models import RemoteImage
 
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
@@ -34,10 +26,12 @@ from app.internal.api_v1.users.presentation.bot.telegram_messages import (
     get_success_phone_msg,
     get_unique_start_msg,
 )
+from app.internal.api_v1.utils.s3.db.models import RemoteImage
+from app.internal.api_v1.utils.s3.db.repositories import S3Repository
+from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
 
-
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class TelegramUserHandlers:
@@ -68,7 +62,6 @@ class TelegramUserHandlers:
         :param context: context object passed to the callback
         """
         await context.bot.send_message(chat_id=update.effective_chat.id, text=HELP_MSG)
-
 
     async def set_phone(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """

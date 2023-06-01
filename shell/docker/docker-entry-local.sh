@@ -6,7 +6,8 @@ python src/manage.py migrate --no-input
 
 # Creating test admin user
 echo -e "\e[1;34mCreating Django superuser...\e[0m"
-python src/manage.py createsuperuser --no-input
+python src/manage.py createsuperuser --noinput
+
 
 # Starting frontend 
 echo -e "\e[1;34mStarting Django HTTP server...\e[0m"

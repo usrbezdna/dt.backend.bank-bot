@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from django.core.files.images import ImageFile
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -39,11 +40,11 @@ from app.internal.api_v1.payment.transactions.domain.services import Transaction
 from app.internal.api_v1.users.db.exceptions import UserNotFoundException
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import UserService
+from app.internal.api_v1.utils.monitoring.metrics.presentation.handlers import PrometheusMetrics
 from app.internal.api_v1.utils.s3.domain.services import S3Service
 from app.internal.api_v1.utils.telegram.domain.services import verified_phone_required
-from django.core.files.images import ImageFile
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class TelegramPaymentHandlers:
@@ -54,7 +55,7 @@ class TelegramPaymentHandlers:
         account_service: AccountService,
         card_service: CardService,
         tx_service: TransactionService,
-        s3_service : S3Service
+        s3_service: S3Service,
     ):
         self._user_service = user_service
         self._fav_service = fav_service
@@ -169,7 +170,6 @@ class TelegramPaymentHandlers:
             owner_id = obj_option.owner.tlg_id
             await self.send_result_message_for_transaction_state(context, chat_id, owner_id)
 
-
     @verified_phone_required
     async def list_latest(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
@@ -178,30 +178,28 @@ class TelegramPaymentHandlers:
         ----------
 
         :param update: recieved Update object
-        :param context: context object  
+        :param context: context object
         """
         user_id, chat_id = update.effective_user.id, update.effective_chat.id
 
         tx_list = await self._tx_service.aget_list_of_latest_unseen_transactions(user_id=user_id)
         if tx_list:
             for tx_data in tx_list:
-                res_msg = ''
+                res_msg = ""
                 res_msg += (
                     f"TX ID: {tx_data['tx_id']}, "
-                + f"Sender: {tx_data['sender_name']}, "
-                + f"Recipient: {tx_data['recip_name']}, "
-                + f"Value: {tx_data['tx_value']}\n"
+                    + f"Sender: {tx_data['sender_name']}, "
+                    + f"Recipient: {tx_data['recip_name']}, "
+                    + f"Value: {tx_data['tx_value']}\n"
                 )
 
-                if tx_data['tx_image'] is not None:
-                    image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data['tx_image'])
+                if tx_data["tx_image"] is not None:
+                    image = await self._s3_service.aget_image_from_s3_bucket(image_id=tx_data["tx_image"])
                     await context.bot.send_photo(chat_id=chat_id, photo=image.content.read())
 
                 await context.bot.send_message(chat_id=chat_id, text=res_msg)
             return
         await context.bot.send_message(chat_id=chat_id, text=NO_LATEST_TXS)
-        
-
 
     @verified_phone_required
     async def list_inter(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -253,6 +251,9 @@ class TelegramPaymentHandlers:
 
         value = int(arg_value)
 
+        await self._card_service.aset_current_number_of_cards_metric()
+        await self._account_service.aset_current_number_of_accounts_metric()
+
         try:
             sender_card_with_acc_opt: CardSchema = (
                 await self._card_service.aget_card_with_related_account_by_account_owner_id(tlg_id=user_id)
@@ -264,12 +265,15 @@ class TelegramPaymentHandlers:
 
         match arg_command:
             case "/send_to_user":
+                PrometheusMetrics.inc_send_to_user_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_user(context, chat_id, arg_user_or_id)
 
             case "/send_to_account":
+                PrometheusMetrics.inc_send_to_account_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_account(context, chat_id, arg_user_or_id)
 
             case "/send_to_card":
+                PrometheusMetrics.inc_send_to_card_counter()
                 recip_card_with_acc_opt = await self.handle_case_with_send_to_card(context, chat_id, arg_user_or_id)
 
         if recip_card_with_acc_opt is None:
@@ -285,10 +289,11 @@ class TelegramPaymentHandlers:
         try:
             image_file = None
             if photo:
-                image_file : ImageFile = await self._s3_service.aconvert_telegram_photo_to_image(update, context)
+                image_file: ImageFile = await self._s3_service.aconvert_telegram_photo_to_image(update, context)
 
-            await self._tx_service.\
-                atry_transfer_to(sending_payment_account, recipient_payment_account, value, image_file)
+            await self._tx_service.atry_transfer_to(
+                sending_payment_account, recipient_payment_account, value, image_file
+            )
 
         except InsufficientBalanceException:
             await context.bot.send_message(chat_id=chat_id, text=INSUF_BALANCE)
@@ -321,16 +326,17 @@ class TelegramPaymentHandlers:
         if transactions:
             for tx_data in transactions:
                 res_msg = ""
-                res_msg += (f"TX ID: {tx_data['tx_id']}, "
+                res_msg += (
+                    f"TX ID: {tx_data['tx_id']}, "
                     + f"Date: {tx_data['date']}, "
                     + f"Sender: {tx_data['sender_name']}, "
                     + f"Recipient: {tx_data['recip_name']}, "
                     + f"Value: {tx_data['tx_value']}\n"
                 )
-         
-                if tx_data['tx_image'] is not None:
-                    presigned_url = await self._s3_service.aget_presigned_url_for_image(tx_data['tx_image'])
-                    res_msg += f'Url : {presigned_url}'
+
+                if tx_data["tx_image"] is not None:
+                    presigned_url = await self._s3_service.aget_presigned_url_for_image(tx_data["tx_image"])
+                    res_msg += f"Url : {presigned_url}"
 
                 await context.bot.send_message(chat_id=chat_id, text=res_msg)
             return

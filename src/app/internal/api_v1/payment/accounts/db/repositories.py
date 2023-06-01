@@ -6,7 +6,7 @@ from app.internal.api_v1.payment.accounts.db.models import Account
 from app.internal.api_v1.payment.accounts.domain.entities import AccountSchema
 from app.internal.api_v1.payment.accounts.domain.services import IAccountRepository
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class AccountRepository(IAccountRepository):
@@ -35,3 +35,9 @@ class AccountRepository(IAccountRepository):
             raise AccountNotFoundException()
 
         return " ".join(name_as_tuple_option)
+
+    def get_current_number_of_accounts(self) -> int:
+        """
+        Returns current number of Cards in DB
+        """
+        return Account.objects.count()

@@ -17,6 +17,9 @@ infra:
     include: gitlab-templates/deploy-testserver.yml
     strategy: depend
 
+  only:
+    - dev
+
 
 code:
   stage: bridge
@@ -60,9 +63,12 @@ get_ip:
 
 deploy:
   stage: deploy
+
+  only:
+    - dev
+
   tags:
     - deploy
-
 
   variables:
     TAG_LATEST : $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
@@ -95,13 +101,14 @@ deploy:
     - ping -W 1 -c 1 $IP
     - echo OK! Machine is online
 
-    - - rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" nginx .env.docker.server Makefile docker-compose-server.yml gitlab@$IP:/home/gitlab
+    - - rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" nginx .env.docker.server Makefile docker-compose-server.yml ua-config.yml gitlab@$IP:/home/gitlab
 
     - ssh -i $RUNNER_ID_RSA -o StrictHostKeyChecking=no gitlab@$IP "
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
         docker pull $TAG_LATEST &&
 
-        make docker_remote_stop | true &&
+        make docker_remote_stop || true &&
+        make docker_remote_remove || true &&
         make docker_remote_run
       "
 
@@ -112,6 +119,10 @@ deploy:
 
 destroy:
   stage: destroy
+
+  only:
+    - dev
+
   tags:
     - destroy
 

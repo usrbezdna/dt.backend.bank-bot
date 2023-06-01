@@ -14,7 +14,6 @@ class TransactionSchema(Schema):
     tx_recip: AccountSchema
 
     tx_value: float
-    tx_image : RemoteImageSchema
+    tx_image: RemoteImageSchema
 
     already_shown_flag: bool
-

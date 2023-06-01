@@ -8,7 +8,7 @@ from app.internal.api_v1.users.db.models import User
 from app.internal.api_v1.users.domain.entities import UserSchema
 from app.internal.api_v1.users.domain.services import IUserRepository
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class UserRepository(IUserRepository):

@@ -14,7 +14,7 @@ from app.internal.api_v1.users.db.models import User
 from app.internal.api_v1.users.db.repositories import UserRepository
 from app.internal.api_v1.users.domain.entities import UserSchema
 
-logger = logging.getLogger("django.server")
+logger = logging.getLogger("stdout_with_tlg")
 
 
 class FavouriteRepository(IFavouriteRepository):

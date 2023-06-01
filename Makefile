@@ -117,6 +117,10 @@ docker_remote_run:
 docker_remote_stop:
 	docker compose --env-file .env.docker.server --file docker-compose-server.yml stop
 
+.PHONY: docker_remote_remove
+docker_remote_remove:
+	docker compose --env-file .env.docker.server --file docker-compose-server.yml rm -f
+
 
 ############### Terraform Section  ###############
 .PHONY: runner_destroy

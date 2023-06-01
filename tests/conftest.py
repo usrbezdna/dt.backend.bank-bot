@@ -4,12 +4,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 from django.test import AsyncClient, Client
-
 from telegram import Chat, Message, MessageEntity, Update, User
 from telegram.ext import ApplicationBuilder
 
-from src.app.internal.api_v1.utils.s3.db.repositories import S3Repository
-from src.app.internal.api_v1.utils.s3.domain.services import S3Service
 from src.app.internal.api_v1.favourites.db.repositories import FavouriteRepository
 from src.app.internal.api_v1.favourites.domain.services import FavouriteService
 from src.app.internal.api_v1.favourites.presentation.bot.handlers import TelegramFavouritesHandlers
@@ -23,6 +20,8 @@ from src.app.internal.api_v1.payment.transactions.domain.services import Transac
 from src.app.internal.api_v1.users.db.repositories import UserRepository
 from src.app.internal.api_v1.users.domain.services import UserService
 from src.app.internal.api_v1.users.presentation.bot.handlers import TelegramUserHandlers
+from src.app.internal.api_v1.utils.s3.db.repositories import S3Repository
+from src.app.internal.api_v1.utils.s3.domain.services import S3Service
 from src.app.internal.bot import setup_application_handlers
 from src.app.models import User as UserModel
 
@@ -82,7 +81,7 @@ def telegram_payment_handlers():
         account_service=account_service,
         card_service=card_service,
         tx_service=tx_service,
-        s3_service=s3_service
+        s3_service=s3_service,
     )
 
     return payment_handlers

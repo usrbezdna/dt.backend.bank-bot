@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import logging
 import os
 import sys
 from datetime import timedelta
@@ -33,6 +34,7 @@ TLG_TOKEN = env("TLG_TOKEN")
 # Setting up debug mode
 DEBUG = env("DEBUG")
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -49,18 +51,29 @@ CSRF_TRUSTED_ORIGINS = []
 for host in ALLOWED_HOSTS:
     CSRF_TRUSTED_ORIGINS.extend([f"http://{host}", f"https://{host}"])
 
-
+TLG_LOGS_CHAT_ID = env("TLG_LOGS_CHAT_ID")
+TLG_LOGS_BOT_TOKEN = env("TLG_LOGS_BOT_TOKEN")
 
 AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
 
-AWS_STORAGE_BUCKET_NAME  = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
-AWS_S3_CUSTOM_DOMAIN = 'storage.yandexcloud.net'
+AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
+AWS_S3_CUSTOM_DOMAIN = "storage.yandexcloud.net"
 
 AWS_QUERYSTRING_AUTH = False
-AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}'
+AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 
-DEFAULT_FILE_STORAGE = 'app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "app.internal.api_v1.utils.s3.db.repositories.YandexCloudStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+METRICS_PORT = int(env("METRICS_PORT"))
 
 # Application definition
 
@@ -94,6 +107,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.RestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -156,32 +170,41 @@ LOGGING = {
         },
     },
     "formatters": {
-        "django.server": {
+        "django_stdout": {
             "()": "django.utils.log.ServerFormatter",
             "format": "[{server_time}] {message}",
             "style": "{",
         }
     },
     "handlers": {
-        "django.server": {
+        "django_stdout": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "django.server",
+            "formatter": "django_stdout",
+        },
+        "telegram_logs": {
+            "class": "app.internal.api_v1.utils.monitoring.logs.presentation.handlers.TelegramLogsHandler",
+            "logs_chat_id": TLG_LOGS_CHAT_ID,
+            "logs_bot_token": TLG_LOGS_BOT_TOKEN,
         },
         "sql.console": {"class": "logging.StreamHandler"},
     },
     "loggers": {
-        "django.server": {
-            "handlers": ["django.server"],
+        "stdout_with_tlg": {
+            "handlers": ["django_stdout", "telegram_logs"],
             "level": "INFO",
-            "propagate": False,
+            "propagate": True,
         },
+        "stdout": {"handlers": ["django_stdout"], "level": "INFO"}
         # "django.db.backends": {
         #     "handlers": ["sql.console"],
         #     "level": "DEBUG",
         # },
     },
 }
+
+if "pytest" in sys.argv[0]:
+    logging.disable(logging.INFO)
 
 
 # Password validation
