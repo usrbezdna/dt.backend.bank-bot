@@ -17,6 +17,9 @@ infra:
     include: gitlab-templates/deploy-testserver.yml
     strategy: depend
 
+  only:
+    - dev
+
 
 code:
   stage: bridge
@@ -60,9 +63,12 @@ get_ip:
 
 deploy:
   stage: deploy
+
+  only:
+    - dev
+
   tags:
     - deploy
-
 
   variables:
     TAG_LATEST : $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
@@ -113,6 +119,10 @@ deploy:
 
 destroy:
   stage: destroy
+
+  only:
+    - dev
+
   tags:
     - destroy
 
